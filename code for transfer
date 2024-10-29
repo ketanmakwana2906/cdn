@@ -1,0 +1,4737 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "trainman Whitelabel API",
+        "description": "WLS APIs doc for integration.",
+        "version": "1.0"
+    },
+    "servers": [
+        {
+            "url": "https://cleartrip-uat.trainman.in/api/trainmanwhitelabelapi"
+        }
+    ],
+    "paths": {
+        "/services/account/authenticate": {
+            "post": {
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Authenticate",
+                "description": "Authenticate",
+                "operationId": "post-services-account-authenticate",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "grant_type",
+                                    "client_id",
+                                    "client_secret",
+                                    "client_token"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "grant_type": {
+                                        "type": "string",
+                                        "example": "password"
+                                    },
+                                    "client_id": {
+                                        "type": "string"
+                                    },
+                                    "client_secret": {
+                                        "type": "string"
+                                    },
+                                    "client_token": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "grant_type": "password",
+                                "client_id": "string",
+                                "client_secret": "string",
+                                "client_token": "string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/account/account-details": {
+            "get": {
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Account Details",
+                "description": "Account Details",
+                "operationId": "get-services-account-account-details",
+                "responses": {
+                    "200": {
+                        "description": "successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/services/account/account-user-details": {
+            "get": {
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Account User Details",
+                "description": "Account User Details",
+                "operationId": "get-services-account-account-user-details",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/account/client-user-details": {
+            "post": {
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Client User Details",
+                "description": "Client User Details",
+                "operationId": "post-services-account-client-user-details",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "force",
+                                    "task_id",
+                                    "client_user_token"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "force": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "task_id": {
+                                        "type": "string",
+                                        "example": "c5edc389-749c-48d5-bad4-dc0cdef1b936"
+                                    },
+                                    "client_user_token": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "force": true,
+                                "task_id": "c5edc389-749c-48d5-bad4-dc0cdef1b936",
+                                "client_user_token": "string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/payment-verify": {
+            "post": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Payment Verification",
+                "description": "Payment Verification",
+                "operationId": "post-wls_alter-payment-verify",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "razorpay_order_id",
+                                    "razorpay_payment_id",
+                                    "razorpay_signature"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "razorpay_order_id": {
+                                        "type": "string"
+                                    },
+                                    "razorpay_payment_id": {
+                                        "type": "string"
+                                    },
+                                    "razorpay_signature": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "razorpay_order_id": "string",
+                                "razorpay_payment_id": "string",
+                                "razorpay_signature": "string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/tatktservices/changeBoardingPoint": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Change Boarding Point",
+                "description": "Change Boarding Point",
+                "operationId": "get-wls_alter-train_search-services-irctc-tatktservices-changeboardingpoint",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/authenticationservice/checkUserAvailability": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Check User Availability",
+                "description": "Check User Availability",
+                "operationId": "get-wls_alter-train_search-services-irctc-authenticationservice-checkuserava",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "userId",
+                        "in": "query",
+                        "description": "Format - int32.",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "example": 12345
+                        }
+                    },
+                    {
+                        "name": "timestamp",
+                        "in": "query",
+                        "description": "Format - int64.",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "example": "123123423354.0"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/taenqservices/avlFareenquiry/{train_number}/{date}/{origin}/{destination}/{class}/{quota}/N": {
+            "post": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "N call",
+                "description": "N call",
+                "operationId": "post-wls_alter-train_search-services-irctc-taenqservices-avlfareenquiry-trai",
+                "parameters": [
+                    {
+                        "name": "train_number",
+                        "in": "path",
+                        "description": "Format - int64. Train Number",
+                        "required": true,
+                        "schema": {
+                            "type": "number",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "date",
+                        "in": "path",
+                        "description": "Searched Date (YYYYMMDD)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "origin",
+                        "in": "path",
+                        "description": "Searched Origin",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "destination",
+                        "in": "path",
+                        "description": "Searched Destination",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "class",
+                        "in": "path",
+                        "description": "Searched Class",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "quota",
+                        "in": "path",
+                        "description": "Searched Quota (GN/TQ etc.)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "timestamp",
+                        "in": "query",
+                        "description": "TimeStamp greq",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "reservationMode": {
+                                        "type": "string",
+                                        "example": "MOBILE_ANDROID"
+                                    },
+                                    "moreThanOneDay": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "platform": {
+                                        "type": "string",
+                                        "example": "web"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "reservationMode": "MOBILE_ANDROID",
+                                "moreThanOneDay": true,
+                                "platform": "web"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Token Invalid"
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/taenqservices/avlFareenquiry/{train_number}/{date}/{origin}/{destination}/{class}/{quota}/Y": {
+            "post": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Y call",
+                "description": "Y call",
+                "operationId": "post-wls_alter-train_search-services-irctc-taenqservices-avlfareenquiry-trai-1",
+                "parameters": [
+                    {
+                        "name": "train_number",
+                        "in": "path",
+                        "description": "Format - int64. Train Number",
+                        "required": true,
+                        "schema": {
+                            "type": "number",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "date",
+                        "in": "path",
+                        "description": "Searched Date (YYYYMMDD)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "origin",
+                        "in": "path",
+                        "description": "Searched Origin",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "destination",
+                        "in": "path",
+                        "description": "Searched Destination",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "class",
+                        "in": "path",
+                        "description": "Searched Class",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "quota",
+                        "in": "path",
+                        "description": "Searched Quota (GN/TQ etc.)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "use_reward_cash",
+                        "in": "query",
+                        "description": "Use loyalty Cash or not",
+                        "schema": {
+                            "type": "boolean",
+                            "default": true
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "ticketType": {
+                                        "type": "string",
+                                        "example": "E"
+                                    },
+                                    "clusterFlag": {
+                                        "type": "string",
+                                        "example": "N"
+                                    },
+                                    "cod": {
+                                        "type": "string",
+                                        "example": "false"
+                                    },
+                                    "ssQuotaSplitCoach": {
+                                        "type": "string",
+                                        "example": "N"
+                                    },
+                                    "gnToCkOpted": {
+                                        "type": "string",
+                                        "example": "false"
+                                    },
+                                    "wsUserLogin": {
+                                        "type": "string",
+                                        "example": "MohitG"
+                                    },
+                                    "passengerList": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "passengerIcardFlag": {
+                                                    "type": "string",
+                                                    "example": "false"
+                                                },
+                                                "passengerCardType": {
+                                                    "type": "string",
+                                                    "example": "NULL_IDCARD"
+                                                },
+                                                "passengerCardNumber": {
+                                                    "type": "string",
+                                                    "example": ""
+                                                },
+                                                "passengerSerialNumber": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "passengerAge": {
+                                                    "type": "string",
+                                                    "example": "22"
+                                                },
+                                                "passengerName": {
+                                                    "type": "string",
+                                                    "example": "Shiavanshu Bajpai"
+                                                },
+                                                "passengerGender": {
+                                                    "type": "string",
+                                                    "example": "M"
+                                                },
+                                                "passengerBerthChoice": {
+                                                    "type": "string",
+                                                    "example": "LB"
+                                                },
+                                                "passengerFoodChoice": {
+                                                    "type": "boolean",
+                                                    "example": null
+                                                },
+                                                "passengerBedrollChoice": {
+                                                    "type": "string",
+                                                    "example": "false"
+                                                },
+                                                "concessionOpted": {
+                                                    "type": "string",
+                                                    "example": "false"
+                                                },
+                                                "passengerConcession": {
+                                                    "type": "string",
+                                                    "example": "NOCONC"
+                                                },
+                                                "childBerthFlag": {
+                                                    "type": "string",
+                                                    "example": "false"
+                                                },
+                                                "passengerNationality": {
+                                                    "type": "string",
+                                                    "example": "IN"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "travelInsuranceOpted": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "enquiryType": {
+                                        "type": "string",
+                                        "example": "3"
+                                    },
+                                    "autoUpgradationSelected": {
+                                        "type": "string",
+                                        "example": "false"
+                                    },
+                                    "moreThanOneDay": {
+                                        "type": "string",
+                                        "example": "false"
+                                    },
+                                    "ignoreChoiceIfWl": {
+                                        "type": "string",
+                                        "example": "true"
+                                    },
+                                    "boardingStation": {
+                                        "type": "string",
+                                        "example": "NZM"
+                                    },
+                                    "reservationUptoStation": {
+                                        "type": "string",
+                                        "example": "MMCT"
+                                    },
+                                    "mobileNumber": {
+                                        "type": "string",
+                                        "example": "9999999999"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "shivanshu@trainman.in"
+                                    },
+                                    "versionCode": {
+                                        "type": "string",
+                                        "example": "9.0.0"
+                                    },
+                                    "boardingStationFull": {
+                                        "type": "string",
+                                        "example": "Delhi H Nizamuddin"
+                                    },
+                                    "reservationUptoStationFull": {
+                                        "type": "string",
+                                        "example": "mumbai central"
+                                    },
+                                    "reservationChoice": {
+                                        "type": "string",
+                                        "example": "99"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": ""
+                                    },
+                                    "localTimeStamp": {
+                                        "type": "integer",
+                                        "example": 0
+                                    },
+                                    "reservationMode": {
+                                        "type": "string",
+                                        "example": "MOBILE_ANDROID"
+                                    },
+                                    "platform": {
+                                        "type": "string",
+                                        "example": "web"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "ticketType": "E",
+                                "clusterFlag": "N",
+                                "cod": "false",
+                                "ssQuotaSplitCoach": "N",
+                                "gnToCkOpted": "false",
+                                "wsUserLogin": "MohitG",
+                                "passengerList": [
+                                    {
+                                        "passengerIcardFlag": "false",
+                                        "passengerCardType": "NULL_IDCARD",
+                                        "passengerCardNumber": "",
+                                        "passengerSerialNumber": 1,
+                                        "passengerAge": "22",
+                                        "passengerName": "Shiavanshu Bajpai",
+                                        "passengerGender": "M",
+                                        "passengerBerthChoice": "LB",
+                                        "passengerFoodChoice": null,
+                                        "passengerBedrollChoice": "false",
+                                        "concessionOpted": "false",
+                                        "passengerConcession": "NOCONC",
+                                        "childBerthFlag": "false",
+                                        "passengerNationality": "IN"
+                                    }
+                                ],
+                                "travelInsuranceOpted": true,
+                                "enquiryType": "3",
+                                "autoUpgradationSelected": "false",
+                                "moreThanOneDay": "false",
+                                "ignoreChoiceIfWl": "true",
+                                "boardingStation": "NZM",
+                                "reservationUptoStation": "MMCT",
+                                "mobileNumber": "9999999999",
+                                "email": "shivanshu@trainman.in",
+                                "versionCode": "9.0.0",
+                                "boardingStationFull": "Delhi H Nizamuddin",
+                                "reservationUptoStationFull": "mumbai central",
+                                "reservationChoice": "99",
+                                "address": "",
+                                "localTimeStamp": 0,
+                                "reservationMode": "MOBILE_ANDROID",
+                                "platform": "web"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Token Invalid"
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/static/pnrApp/js/trains.json": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "train json",
+                "description": "train json",
+                "operationId": "get-wls_alter-train_search-static-pnrapp-js-trains-json",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/static/irctc_refund_rules.pdf": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "refund rules",
+                "description": "refund rules",
+                "operationId": "get-wls_alter-train_search-static-irctc_refund_rules-pdf",
+                "responses": {
+                    "200": {
+                        "description": "successful",
+                        "content": {
+                            "application/pdf": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "byte"
+                                },
+                                "examples": {
+                                    "default": {
+                                        "value": null
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/static/InsuranceTermCondition.pdf": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "insurance tnc",
+                "description": "insurance tnc",
+                "operationId": "get-static-insurancetermcondition-pdf",
+                "responses": {
+                    "200": {
+                        "description": "successful",
+                        "content": {
+                            "application/pdf": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "byte"
+                                },
+                                "examples": {
+                                    "default": {
+                                        "value": null
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/userregistrationservice/register": {
+            "post": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "register",
+                "description": "register",
+                "operationId": "post-wls_alter-train_search-services-irctc-userregistrationservice-register",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "userName": {
+                                        "type": "string"
+                                    },
+                                    "userId": {
+                                        "type": "string"
+                                    },
+                                    "securityQuestion": {
+                                        "type": "string"
+                                    },
+                                    "securityAns": {
+                                        "type": "string"
+                                    },
+                                    "prefLanguage": {
+                                        "type": "string"
+                                    },
+                                    "firstName": {
+                                        "type": "string"
+                                    },
+                                    "middleName": {
+                                        "type": "string"
+                                    },
+                                    "LastName": {
+                                        "type": "string"
+                                    },
+                                    "gender": {
+                                        "type": "string"
+                                    },
+                                    "martialStatus": {
+                                        "type": "string"
+                                    },
+                                    "dob": {
+                                        "type": "string"
+                                    },
+                                    "occupation": {
+                                        "type": "string"
+                                    },
+                                    "uidNumber": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "mobile": {
+                                        "type": "string"
+                                    },
+                                    "nationalityId": {
+                                        "type": "string"
+                                    },
+                                    "address": {
+                                        "type": "string"
+                                    },
+                                    "street": {
+                                        "type": "string"
+                                    },
+                                    "countryId": {
+                                        "type": "string"
+                                    },
+                                    "otherCountry": {
+                                        "type": "string"
+                                    },
+                                    "otherState": {
+                                        "type": "string"
+                                    },
+                                    "otherCity": {
+                                        "type": "string"
+                                    },
+                                    "pinCode": {
+                                        "type": "string"
+                                    },
+                                    "state": {
+                                        "type": "string"
+                                    },
+                                    "city": {
+                                        "type": "string"
+                                    },
+                                    "landlineNumber": {
+                                        "type": "string"
+                                    },
+                                    "copyAddressResToOff": {
+                                        "type": "string"
+                                    },
+                                    "off_Address": {
+                                        "type": "string"
+                                    },
+                                    "off_Street": {
+                                        "type": "string"
+                                    },
+                                    "off_CountryId": {
+                                        "type": "string"
+                                    },
+                                    "off_otherCountry": {
+                                        "type": "string"
+                                    },
+                                    "off_otherState": {
+                                        "type": "string"
+                                    },
+                                    "off_otherCity": {
+                                        "type": "string"
+                                    },
+                                    "off_PinCode": {
+                                        "type": "string"
+                                    },
+                                    "off_State": {
+                                        "type": "string"
+                                    },
+                                    "off_City": {
+                                        "type": "string"
+                                    },
+                                    "off_PostOffice": {
+                                        "type": "string"
+                                    },
+                                    "off_LandlineNumber": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "userName": "string",
+                                "userId": "string",
+                                "securityQuestion": "string",
+                                "securityAns": "string",
+                                "prefLanguage": "string",
+                                "firstName": "string",
+                                "middleName": "string",
+                                "LastName": "string",
+                                "gender": "string",
+                                "martialStatus": "string",
+                                "dob": "string",
+                                "occupation": "string",
+                                "uidNumber": "string",
+                                "email": "string",
+                                "mobile": "string",
+                                "nationalityId": "string",
+                                "address": "string",
+                                "street": "string",
+                                "countryId": "string",
+                                "otherCountry": "string",
+                                "otherState": "string",
+                                "otherCity": "string",
+                                "pinCode": "string",
+                                "state": "string",
+                                "city": "string",
+                                "landlineNumber": "string",
+                                "copyAddressResToOff": "string",
+                                "off_Address": "string",
+                                "off_Street": "string",
+                                "off_CountryId": "string",
+                                "off_otherCountry": "string",
+                                "off_otherState": "string",
+                                "off_otherCity": "string",
+                                "off_PinCode": "string",
+                                "off_State": "string",
+                                "off_City": "string",
+                                "off_PostOffice": "string",
+                                "off_LandlineNumber": "string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/taprofileservices/getSMSeMailOTP/{userLoginId}/{otpType}": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "get otp on sms or mail",
+                "description": "get otp on sms or mail",
+                "operationId": "get-wls_alter-train_search-services-irctc-taprofileservices-getsmsemailotp-u",
+                "parameters": [
+                    {
+                        "name": "userLoginId",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "otpType",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/taprofileservices/verifySMSeMailOTP/{user_id}/E": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Verify IRCTC Email OTP",
+                "description": "Verify IRCTC Email OTP",
+                "operationId": "get-wls_alter-train_search-services-irctc-taprofileservices-verifysmsemailot",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "IRCTC User ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "emailCode",
+                        "in": "query",
+                        "description": "OTP Sent on Email",
+                        "schema": {
+                            "type": "integer",
+                            "default": 11111
+                        }
+                    },
+                    {
+                        "name": "smsCode",
+                        "in": "query",
+                        "description": "OTP Sent in Mobile",
+                        "schema": {
+                            "type": "integer",
+                            "default": 0
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Token Invalid"
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/taprofileservices/verifySMSeMailOTP/{user_id}/M": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Verify IRCTC SMS OTP",
+                "description": "Verify IRCTC SMS OTP",
+                "operationId": "get-wls_alter-train_search-services-irctc-taprofileservices-verifysmsemailot-1",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "IRCTC User ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "emailCode",
+                        "in": "query",
+                        "description": "OTP Sent on Email",
+                        "schema": {
+                            "type": "integer",
+                            "default": 11111
+                        }
+                    },
+                    {
+                        "name": "smsCode",
+                        "in": "query",
+                        "description": "OTP Sent in Mobile",
+                        "schema": {
+                            "type": "integer",
+                            "default": 0
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Token Invalid"
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/getPredictPnr": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "get predict pnr",
+                "description": "get predict pnr",
+                "operationId": "get-wls_alter-train_search-services-getpredictpnr",
+                "parameters": [
+                    {
+                        "name": "pnr",
+                        "in": "query",
+                        "description": "PNR",
+                        "schema": {
+                            "type": "string",
+                            "default": "1234567890"
+                        }
+                    },
+                    {
+                        "name": "device_id",
+                        "in": "query",
+                        "description": "device id",
+                        "schema": {
+                            "type": "string",
+                            "default": "1"
+                        }
+                    },
+                    {
+                        "name": "version",
+                        "in": "query",
+                        "description": "version",
+                        "schema": {
+                            "type": "string",
+                            "default": "2"
+                        }
+                    },
+                    {
+                        "name": "HTTP_SPECIAL_APP_SERVER",
+                        "in": "header",
+                        "description": "",
+                        "schema": {
+                            "type": "string",
+                            "default": "WLS"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful"
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/static/pnrApp/js/stations.json": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "station json",
+                "description": "station json",
+                "operationId": "get-wls_alter-train_search-static-pnrapp-js-stations-json",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/cached-avl": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "cached availability",
+                "description": "cached availability",
+                "operationId": "get-wls_alter-train_search-services-cached-avl",
+                "parameters": [
+                    {
+                        "name": "ocode",
+                        "in": "query",
+                        "description": "origin code",
+                        "schema": {
+                            "type": "string",
+                            "default": "NDLS"
+                        }
+                    },
+                    {
+                        "name": "dcode",
+                        "in": "query",
+                        "description": "destination code",
+                        "schema": {
+                            "type": "string",
+                            "default": "MMCT"
+                        }
+                    },
+                    {
+                        "name": "quota",
+                        "in": "query",
+                        "description": "quota",
+                        "schema": {
+                            "type": "string",
+                            "default": "SL"
+                        }
+                    },
+                    {
+                        "name": "date",
+                        "in": "query",
+                        "description": "date",
+                        "schema": {
+                            "type": "string",
+                            "default": "20230102"
+                        }
+                    },
+                    {
+                        "name": "sortType",
+                        "in": "query",
+                        "description": "sort type",
+                        "schema": {
+                            "type": "string",
+                            "default": "depart"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful"
+                    }
+                }
+            }
+        },
+        "/services/adl/booking-details": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "Ticket Details",
+                "description": "Ticket Details",
+                "operationId": "post-services-adl-booking-details",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "user_id": {
+                                        "type": "string"
+                                    },
+                                    "booking_id":{
+                                        "type":"string"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "user_id": "string",
+                                "booking_id": "string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/adl/payment": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "Ticket Details",
+                "description": "Ticket Details",
+                "operationId": "post-services-adl-booking-details",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "user_id": {
+                                        "type": "string"
+                                    },
+                                    "booking_id":{
+                                        "type":"string"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "user_id": "string",
+                                "booking_id": "string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/adl/get-all-stations": {
+            "get": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "get all stations",
+                "description": "get all stations",
+                "operationId": "get-services-adl-get-all-stations",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/adl/get-pnr-details": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "get pnr details",
+                "description": "get pnr details",
+                "operationId": "post-services-adl-get-pnr-details",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "pnr": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "pnr": "string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/adl/get-ers": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "get ers",
+                "description": "get ers",
+                "operationId": "post-services-adl-get-ers",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "booking_id": {
+                                        "type": "string"
+                                    },
+                                    "user_id": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "booking_id": "string",
+                                "user_id": "string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/adl/get-invoice": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "get invoice details",
+                "description": "get invoice details",
+                "operationId": "post-services-adl-get-invoice",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "booking_id": {
+                                        "type": "string"
+                                    },
+                                    "user_id": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "booking_id": "string",
+                                "user_id": "string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/get-booking": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Booking Details",
+                "description": "Booking Details",
+                "operationId": "get-wls_alter-train_search-services-irctc-get-booking",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "tm_booking_id",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string",
+                            "example": "TM12341234123"
+                        }
+                    },
+                    {
+                        "name": "timestamp",
+                        "in": "query",
+                        "description": "Format - int64.",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "example": "1673953373598.0"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/cancel-retry-booking": {
+            "post": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Cancel Retry Booking",
+                "description": "Cancel Retry Booking",
+                "operationId": "post-wls_alter-train_search-services-irctc-cancel-retry-booking",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "tm_booking_id"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "tm_booking_id": {
+                                        "type": "string",
+                                        "example": "TM123445678"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "tm_booking_id": "TM123445678"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/cancel-booking": {
+            "post": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Cancel Booking",
+                "description": "Cancel Booking",
+                "operationId": "post-wls_alter-train_search-services-irctc-cancel-booking",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "tm_booking_id",
+                                    "passenger_string"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "tm_booking_id": {
+                                        "type": "string"
+                                    },
+                                    "passenger_string": {
+                                        "type": "string",
+                                        "example": "NNNNNN"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "tm_booking_id": "string",
+                                "passenger_string": "NNNNNN"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/manually-cancel": {
+            "post": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Cancel Booking",
+                "description": "Cancel Booking",
+                "operationId": "post-wls_alter-train_search-services-irctc-manually-cancel",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "tm_booking_id"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "tm_booking_id": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "tm_booking_id": "string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/taenqservices/boardingstationenq": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Boarding Station Enquiry",
+                "description": "Boarding Station Enquiry",
+                "operationId": "get-wls_alter-train_search-services-irctc-taenqservices-boardingstationenq",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/passengers": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Get Passengers",
+                "description": "Get Passengers",
+                "operationId": "get-wls_alter-train_search-services-irctc-passengers",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Add Passenger",
+                "description": "Add Passenger",
+                "operationId": "post-wls_alter-train_search-services-irctc-passengers",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "age": {
+                                        "type": "integer"
+                                    },
+                                    "bedroll_choice": {
+                                        "type": "boolean"
+                                    },
+                                    "berth_choice": {
+                                        "type": "string"
+                                    },
+                                    "food_choice": {
+                                        "type": "string"
+                                    },
+                                    "gender": {
+                                        "type": "string"
+                                    },
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "nationality": {
+                                        "type": "string"
+                                    },
+                                    "opted_berth": {
+                                        "type": "boolean"
+                                    },
+                                    "opted_ss_concession": {
+                                        "type": "boolean"
+                                    },
+                                    "passport_number": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "age": 0,
+                                "bedroll_choice": true,
+                                "berth_choice": "string",
+                                "food_choice": "string",
+                                "gender": "string",
+                                "name": "string",
+                                "nationality": "string",
+                                "opted_berth": true,
+                                "opted_ss_concession": true,
+                                "passport_number": "string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/refunds": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Refunds",
+                "description": "Refunds",
+                "operationId": "get-wls_alter-train_search-services-irctc-refunds",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/razorpay-create-order": {
+            "post": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Razorpay Create Order",
+                "description": "Razorpay Create Order",
+                "operationId": "post-wls_alter-train_search-services-irctc-razorpay-create-order",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "tm_booking_id",
+                                    "payment_option"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "tm_booking_id": {
+                                        "type": "string",
+                                        "example": "TM1234567890"
+                                    },
+                                    "payment_option": {
+                                        "type": "string",
+                                        "example": "\"NETBANKING\""
+                                    }
+                                }
+                            },
+                            "example": {
+                                "tm_booking_id": "TM1234567890",
+                                "payment_option": "\"NETBANKING\""
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/razorpay-capture-payment": {
+            "post": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Razorpay Capture Payment",
+                "description": "Razorpay Capture Payment",
+                "operationId": "post-wls_alter-train_search-services-irctc-razorpay-capture-payment",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "razorpay_payment_id",
+                                    "razorpay_order_id",
+                                    "razorpay_signature"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "razorpay_payment_id": {
+                                        "type": "string"
+                                    },
+                                    "razorpay_order_id": {
+                                        "type": "string"
+                                    },
+                                    "razorpay_signature": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "razorpay_payment_id": "string",
+                                "razorpay_order_id": "string",
+                                "razorpay_signature": "string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/check-booking-payment-validity": {
+            "post": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Check Payment Validity",
+                "description": "Check Payment Validity",
+                "operationId": "post-wls_alter-train_search-services-irctc-check-booking-payment-validity",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "tm_booking_id"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "tm_booking_id": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "tm_booking_id": "string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/my-bookings": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "My Bookings",
+                "description": "My Bookings",
+                "operationId": "get-wls_alter-train_search-services-irctc-my-bookings",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "trainman-access-token",
+                        "in": "header",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/userregistrationservice/country": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Countries List",
+                "description": "Countries List",
+                "operationId": "get-wls_alter-train_search-services-irctc-userregistrationservice-country",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/taprofileservices/forgotDetails": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Recover IRCTC ID",
+                "description": "Recover IRCTC ID",
+                "operationId": "get-wls_alter-train_search-services-irctc-taprofileservices-forgotdetails",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string",
+                            "example": "077e230d-4351-4a84-b87a-7ef4e854ca59"
+                        }
+                    },
+                    {
+                        "name": "timestamp",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string",
+                            "example": "124123423"
+                        }
+                    },
+                    {
+                        "name": "dob",
+                        "in": "query",
+                        "description": "Format - int32.",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "example": 19980912
+                        }
+                    },
+                    {
+                        "name": "mobile",
+                        "in": "query",
+                        "description": "Format - int32.",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "example": 1234567890
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/getStations": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "get station",
+                "description": "get station",
+                "operationId": "get-wls_alter-train_search-services-getstations",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/trains/{origin}/{dest}": {
+            "get": {
+                "tags": [
+                    "Trains"
+                ],
+                "summary": "search between station",
+                "description": "To fetch train info list running from origin to destination station.",
+                "operationId": "get-wls_alter-train_search-services-trains-origin-dest",
+                "parameters": [
+                    {
+                        "name": "origin",
+                        "in": "path",
+                        "description": "Origin Station Code",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "dest",
+                        "in": "path",
+                        "description": "Destination Station Code",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date",
+                        "in": "query",
+                        "description": "date of journey",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/predict": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Predict Availability",
+                "description": "Predict Availability",
+                "operationId": "get-wls_alter-train_search-services-predict",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/tdr": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "TDR Info",
+                "description": "TDR Info",
+                "operationId": "get-wls_alter-train_search-services-irctc-tdr",
+                "parameters": [
+                    {
+                        "name": "tm_booking_id",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/train": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "train",
+                "description": "train",
+                "operationId": "get-wls_alter-train_search-services-train",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/get-popular-trains": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "popular train",
+                "description": "popular train",
+                "operationId": "get-wls_alter-train_search-services-get-popular-trains",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/getTrains": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "get trains",
+                "description": "get trains",
+                "operationId": "get-wls_alter-train_search-services-gettrains",
+                "parameters": [
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/get-popular-stations": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "popular station",
+                "description": "popular station",
+                "operationId": "get-wls_alter-train_search-services-get-popular-stations",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/submit-booking/{tm_booking_id}/{platform}/{app}/{server_type}": {
+            "post": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "submit booking (for wls app usage)",
+                "description": "submit booking (Called by irctc after user enters password and captcha)",
+                "operationId": "post-wls_alter-train_search-services-submit-booking-tm_booking_id-platform-a",
+                "parameters": [
+                    {
+                        "name": "tm_booking_id",
+                        "in": "path",
+                        "description": "TM Booking ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "platform",
+                        "in": "path",
+                        "description": "platform",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "app",
+                        "in": "path",
+                        "description": "app",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "server_type",
+                        "in": "path",
+                        "description": "server_type",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "data": {
+                                        "type": "object",
+                                        "example": {
+                                            "name": "demo",
+                                            "value": {
+                                                "clientTransactionId": "TM23090017106",
+                                                "pnrNumber": "2835869521"
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "example": {
+                                "data": {
+                                    "name": "demo",
+                                    "value": {
+                                        "clientTransactionId": "TM23090017106",
+                                        "pnrNumber": "2835869521"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Token Invalid"
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "submit booking (for wls app usage)",
+                "description": "submit booking (Called by irctc after user enters password and captcha while CancelButton=Y for cancel, CancelButton=F for forgot-password)",
+                "operationId": "get-wls_alter-train_search-services-submit-booking-tm_booking_id-platform-ap",
+                "parameters": [
+                    {
+                        "name": "tm_booking_id",
+                        "in": "path",
+                        "description": "TM Booking ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "platform",
+                        "in": "path",
+                        "description": "platform",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "app",
+                        "in": "path",
+                        "description": "app",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "server_type",
+                        "in": "path",
+                        "description": "server_type",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "CancelButton",
+                        "in": "query",
+                        "description": "CancelButton=Y for cancel, CancelButton=F for forgot-password",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/submit-booking/{tm_booking_id}/{platform}": {
+            "post": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "submit booking",
+                "description": "submit booking (Called by irctc after user enters password and captcha)",
+                "operationId": "post-wls_alter-train_search-services-submit-booking-tm_booking_id-platform",
+                "parameters": [
+                    {
+                        "name": "tm_booking_id",
+                        "in": "path",
+                        "description": "TM Booking ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "platform",
+                        "in": "path",
+                        "description": "platform",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "data": {
+                                        "type": "object",
+                                        "example": {
+                                            "name": "demo",
+                                            "value": {
+                                                "clientTransactionId": "TM23090017106",
+                                                "pnrNumber": "2835869521"
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "example": {
+                                "data": {
+                                    "name": "demo",
+                                    "value": {
+                                        "clientTransactionId": "TM23090017106",
+                                        "pnrNumber": "2835869521"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "submit booking",
+                "description": "submit booking (Called by irctc after user enters password and captcha while CancelButton=Y for cancel, CancelButton=F for forgot-password)",
+                "operationId": "get-wls_alter-train_search-services-submit-booking-tm_booking_id-platform",
+                "parameters": [
+                    {
+                        "name": "tm_booking_id",
+                        "in": "path",
+                        "description": "TM Booking ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "platform",
+                        "in": "path",
+                        "description": "platform",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "CancelButton",
+                        "in": "query",
+                        "description": "CancelButton=Y for cancel, CancelButton=F for forgot-password",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/submit-booking/{tm_booking_id}": {
+            "post": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "submit booking",
+                "description": "submit booking (Called by irctc after user enters password and captcha)",
+                "operationId": "post-wls_alter-train_search-services-submit-booking-tm_booking_id",
+                "parameters": [
+                    {
+                        "name": "tm_booking_id",
+                        "in": "path",
+                        "description": "TM Booking ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "data": {
+                                        "type": "object"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "name": "demo",
+                                "value": {
+                                    "clientTransactionId": "TM23090017106",
+                                    "pnrNumber": 2835869521
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "submit booking",
+                "description": "submit booking (Called by irctc after user enters password and captcha while CancelButton=Y for cancel, CancelButton=F for forgot-password)",
+                "operationId": "get-wls_alter-train_search-services-submit-booking-tm_booking_id",
+                "parameters": [
+                    {
+                        "name": "tm_booking_id",
+                        "in": "path",
+                        "description": "TM Booking ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "CancelButton",
+                        "in": "query",
+                        "description": "CancelButton=Y for cancel, CancelButton=F for forgot-password",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/ers": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Get Booking ERS From IRCTC",
+                "description": "Get Booking ERS From IRCTC",
+                "operationId": "get-wls_alter-train_search-services-irctc-ers",
+                "parameters": [
+                    {
+                        "name": "tm_booking_id",
+                        "in": "query",
+                        "description": "TM ID for which ERS required",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful",
+                        "content": {
+                            "application/pdf": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "byte"
+                                },
+                                "examples": {
+                                    "default": {
+                                        "value": null
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Token Invalid"
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/info": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "service info",
+                "description": "service info",
+                "operationId": "get-wls_alter-train_search-services-info",
+                "parameters": [
+                    {
+                        "name": "platform",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string",
+                            "example": "android"
+                        }
+                    },
+                    {
+                        "name": "version",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string",
+                            "example": "10.0.9.3"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/file_tdr_api": {
+            "post": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "File TDR",
+                "description": "File TDR",
+                "operationId": "post-wls_alter-train_search-services-irctc-file_tdr_api",
+                "parameters": [
+                    {
+                        "name": "reason_type",
+                        "in": "query",
+                        "description": "Reason For Filing TDR",
+                        "schema": {
+                            "type": "string",
+                            "default": "new"
+                        }
+                    },
+                    {
+                        "name": "timestamp",
+                        "in": "query",
+                        "description": "TimeStamp greq",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "psgnToken": {
+                                        "type": "string",
+                                        "example": "YNNNNN"
+                                    },
+                                    "rsnIndex": {
+                                        "type": "string",
+                                        "example": "4"
+                                    },
+                                    "eftFlag": {
+                                        "type": "string",
+                                        "example": "1"
+                                    },
+                                    "eftAmount": {
+                                        "type": "string",
+                                        "example": "123"
+                                    },
+                                    "eftNumber": {
+                                        "type": "string",
+                                        "example": "123"
+                                    },
+                                    "eftDate": {
+                                        "type": "string",
+                                        "example": "21092022"
+                                    },
+                                    "transactionId": {
+                                        "type": "string",
+                                        "example": "TM23090017107"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "psgnToken": "YNNNNN",
+                                "rsnIndex": "4",
+                                "eftFlag": "1",
+                                "eftAmount": "123",
+                                "eftNumber": "123",
+                                "eftDate": "21092022",
+                                "transactionId": "TM23090017107"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Token Invalid"
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/get_tdr_reason_list": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "TDR Reasons List",
+                "description": "TDR Reasons List",
+                "operationId": "get-wls_alter-train_search-services-irctc-get_tdr_reason_list",
+                "parameters": [
+                    {
+                        "name": "transactionId",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string",
+                            "example": "TM21234234"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/adl/my-bookings": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "get all bookings",
+                "description": "get all bookings",
+                "operationId": "post-services-adl-my-bookings",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "user_id": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "user_id": "string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/taprofileservices/getUserStatus/{irctc_id}": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "User Status",
+                "description": "User Status",
+                "operationId": "get-wls_alter-train_search-services-irctc-taprofileservices-getuserstatus-ir",
+                "parameters": [
+                    {
+                        "name": "irctc_id",
+                        "in": "path",
+                        "description": "IRCTC User ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/tatktservices/bookingdetails/{tm_booking_id}": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Ticket Details",
+                "description": "Ticket Details",
+                "operationId": "get-wls_alter-train_search-services-irctc-tatktservices-bookingdetails-tm_bo",
+                "parameters": [
+                    {
+                        "name": "tm_booking_id",
+                        "in": "path",
+                        "description": "TM Booking ID For Booking Details",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "timestamp",
+                        "in": "query",
+                        "description": "Format - int64.",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "example": "1673953373598.0"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/taenqservices/pnrenquiry/{pnr}": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "PNR Details",
+                "description": "PNR Details",
+                "operationId": "get-wls_alter-train_search-services-irctc-taenqservices-pnrenquiry-pnr",
+                "parameters": [
+                    {
+                        "name": "pnr",
+                        "in": "path",
+                        "description": "Format - int64. Booked PNR For which Boarding station should be changed",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/adl/loyalty/percentage-earn": {
+            "get": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "ADL Loyalty API's",
+                "description": "ADL Loyalty API's",
+                "operationId": "get-services-adl-loyalty-percentage-earn",
+                "responses": {
+                    "200": {
+                        "description": "successful"
+                    }
+                }
+            }
+        },
+        "/services/adl/loyalty/loyalty-earning": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "ADL Loyalty earnings",
+                "description": "ADL Loyalty earnings",
+                "operationId": "post-services-adl-loyalty-loyalty-earning",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "original_ticket_fare",
+                                    "loyalty_used"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "original_ticket_fare": {
+                                        "type": "integer"
+                                    },
+                                    "loyalty_used": {
+                                        "type": "integer"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "original_ticket_fare": 0,
+                                "loyalty_used": 0
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/set-reward-points-used": {
+            "post": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "/wls_alter/train_search/services/irctc/set-reward-points-used - POST",
+                "description": "/wls_alter/train_search/services/irctc/set-reward-points-used - POST",
+                "operationId": "post-wls_alter-train_search-services-irctc-set-reward-points-used",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "tm_booking_id": {
+                                        "type": "string",
+                                        "description": "base 64 encoded",
+                                        "example": ""
+                                    },
+                                    "payment_option": {
+                                        "type": "string",
+                                        "description": "base 64 encoded",
+                                        "example": ""
+                                    },
+                                    "reward_points_used": {
+                                        "type": "integer",
+                                        "description": "base 64 encoded",
+                                        "example": 20
+                                    },
+                                    "total_amount": {
+                                        "type": "integer",
+                                        "description": "base 64 encoded",
+                                        "example": 200
+                                    },
+                                    "loyalty_earnings": {
+                                        "type": "integer",
+                                        "description": "base 64 encoded",
+                                        "example": 20
+                                    },
+                                    "use_reward_points": {
+                                        "type": "boolean",
+                                        "description": "base 64 encoded",
+                                        "example": true
+                                    },
+                                    "platform": {
+                                        "type": "string",
+                                        "example": "android"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "tm_booking_id": "",
+                                "payment_option": "",
+                                "reward_points_used": 20,
+                                "total_amount": 200,
+                                "loyalty_earnings": 20,
+                                "use_reward_points": true,
+                                "platform": "android"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/payment-options": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "payment options",
+                "description": "payment options",
+                "operationId": "get-wls_alter-train_search-services-irctc-payment-options-tm_booking_id-tm_b",
+                "parameters": [
+                    {
+                        "name": "tm_booking_id",
+                        "in": "query",
+                        "description": "TM23090017107",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "platform",
+                        "in": "query",
+                        "description": "either pass in headers or here",
+                        "schema": {
+                            "type": "string",
+                            "default": "android"
+                        }
+                    },
+                    {
+                        "name": "use_reward_cash",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string",
+                            "default": "android"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/ers_pdf": {
+            "post": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Get Booking ERS From IRCTC",
+                "description": "Get Booking ERS From IRCTC",
+                "operationId": "post-wls_alter-train_search-services-irctc-ers_pdf",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "tm_booking_id": {
+                                        "type": "string",
+                                        "example": "TM23090017107"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "tm_booking_id": "TM23090017107"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "successful",
+                        "content": {
+                            "application/pdf": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "byte"
+                                },
+                                "examples": {
+                                    "default": {
+                                        "value": null
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Token Invalid"
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/invoice_pdf": {
+            "post": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Get Booking Invoice",
+                "description": "Get Booking Invoice",
+                "operationId": "post-wls_alter-train_search-services-invoice_pdf",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "tm_booking_id": {
+                                        "type": "string",
+                                        "example": "TM23090017107"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "tm_booking_id": "TM23090017107"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "successful",
+                        "content": {
+                            "application/pdf": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "byte"
+                                },
+                                "examples": {
+                                    "default": {
+                                        "value": null
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Token Invalid"
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/fcs/cancellation-refund-policy-data": {
+            "post": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "get refund-policy-data",
+                "description": "get refund-policy-data",
+                "operationId": "post-wls_alter-train_search-services-fcs-cancellation-refund-policy-data",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "page": {
+                                        "type": "string"
+                                    },
+                                    "base_fare_per_passenger": {
+                                        "type": "number"
+                                    },
+                                    "travel_class": {
+                                        "type": "string"
+                                    },
+                                    "doj": {
+                                        "type": "string"
+                                    },
+                                    "departure_time": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "page": "string",
+                                "base_fare_per_passenger": 0,
+                                "travel_class": "string",
+                                "doj": "string",
+                                "departure_time": "string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/taenqservices/boardingstationenq/{train_number}/{jrnyDate}/{frmStation}/{toStation}/{jrnClass}": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "boarding station enquiry",
+                "description": "boarding station enquiry",
+                "operationId": "get-wls_alter-train_search-services-irctc-taenqservices-boardingstationenq-t",
+                "parameters": [
+                    {
+                        "name": "train_number",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "jrnyDate",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "frmStation",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "toStation",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "jrnClass",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/tatktservices/changeBoardingPoint/{pnr}/{station_code}": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Change User's boarding station",
+                "description": "Change User's boarding station",
+                "operationId": "get-wls_alter-train_search-services-irctc-tatktservices-changeboardingpoint-1",
+                "parameters": [
+                    {
+                        "name": "pnr",
+                        "in": "path",
+                        "description": "Format - int64. Booked PNR For which Boarding station should be changed",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "station_code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Token Invalid"
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/train/{train_code}": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "fetch train schedule",
+                "description": "To fetch a train schedule whose code has been passed as path parameter. API key is required.",
+                "operationId": "get-wls_alter-train_search-services-train-train_code",
+                "parameters": [
+                    {
+                        "name": "train_code",
+                        "in": "path",
+                        "description": "Format - int64. Train Code",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "int",
+                        "in": "query",
+                        "description": "if one, include intermediate stations else doesn't include",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/passengers/{id}": {
+            "patch": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "edit traveller details",
+                "description": "To edit a traveller details whose id has been passed as path parameter.",
+                "operationId": "patch-wls_alter-train_search-services-irctc-passengers-id",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Format - int64. Passenger ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "specify fields to be changed",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "xyz"
+                                    },
+                                    "age": {
+                                        "type": "integer",
+                                        "format": "int64",
+                                        "example": "20.0"
+                                    },
+                                    "berth_choice": {
+                                        "type": "string",
+                                        "example": "LB"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "name": "xyz",
+                                "age": 20,
+                                "berth_choice": "LB"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Ticket Details"
+                ],
+                "summary": "Remove passenger",
+                "description": "Remove passenger",
+                "operationId": "delete-wls_alter-train_search-services-irctc-passengers-id",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Format - int64. Passenger ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/submit-booking/{tm_booking_id}/{platform}/{app}/{server_type}": {
+            "post": {
+                "tags": [
+                    "IRCTC"
+                ],
+                "summary": "submit booking (for wls app usage)",
+                "description": "submit booking (Called by irctc after user enters password and captcha)",
+                "operationId": "post-wls_alter-train_search-services-irctc-submit-booking-tm_booking_id-plat",
+                "parameters": [
+                    {
+                        "name": "tm_booking_id",
+                        "in": "path",
+                        "description": "TM Booking ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "platform",
+                        "in": "path",
+                        "description": "platform",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "app",
+                        "in": "path",
+                        "description": "app",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "server_type",
+                        "in": "path",
+                        "description": "server_type",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "data": {
+                                        "type": "object",
+                                        "example": {
+                                            "name": "demo",
+                                            "value": {
+                                                "clientTransactionId": "TM23090017106",
+                                                "pnrNumber": "2835869521"
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "example": {
+                                "data": {
+                                    "name": "demo",
+                                    "value": {
+                                        "clientTransactionId": "TM23090017106",
+                                        "pnrNumber": "2835869521"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Token Invalid"
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "IRCTC"
+                ],
+                "summary": "submit booking (for wls app usage)",
+                "description": "submit booking (Called by irctc after user enters password and captcha while CancelButton=Y for cancel, CancelButton=F for forgot-password)",
+                "operationId": "get-wls_alter-train_search-services-irctc-submit-booking-tm_booking_id-platf",
+                "parameters": [
+                    {
+                        "name": "tm_booking_id",
+                        "in": "path",
+                        "description": "TM Booking ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "platform",
+                        "in": "path",
+                        "description": "platform",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "app",
+                        "in": "path",
+                        "description": "app",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "server_type",
+                        "in": "path",
+                        "description": "server_type",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "CancelButton",
+                        "in": "query",
+                        "description": "CancelButton=Y for cancel, CancelButton=F for forgot-password",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/refunds/{tm_booking_id}": {
+            "get": {
+                "tags": [
+                    "Ticket Details"
+                ],
+                "summary": "Get refunds for a tm_booking_id",
+                "description": "Get refunds for a tm_booking_id",
+                "operationId": "get-wls_alter-train_search-services-irctc-refunds-tm_booking_id",
+                "parameters": [
+                    {
+                        "name": "tm_booking_id",
+                        "in": "path",
+                        "description": "TM Booking ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/user/update": {
+            "post": {
+                "tags": [
+                    "User Details"
+                ],
+                "summary": "Update User Details",
+                "description": "This API will update user details",
+                "operationId": "post-wls_alter-train_search-services-user-update",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "test@test.com"
+                                    },
+                                    "phone": {
+                                        "type": "integer",
+                                        "example": "9999999999"
+                                    },
+                                    "dob": {
+                                        "type": "string",
+                                        "example": "DD-MM-YYYY"
+                                    },
+                                    "gender": {
+                                        "type": "string",
+                                        "example": "M"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "name": "string",
+                                "email": "test@test.com",
+                                "phone": "9999999999",
+                                "dob": "DD-MM-YYYY",
+                                "gender": "M"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated Successfully"
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/faq": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Sample API",
+                "description": "Sample API",
+                "operationId": "get-wls_alter-train_search-services-faq",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/taprofileservices/forgotDetails/{type}": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "forgot details",
+                "description": "forgot details",
+                "operationId": "get-wls_alter-train_search-services-irctc-taprofileservices-forgotdetails-ty",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "description": "U - for user details, P - for password",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "userLoginId",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "email",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "mobile",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "otpType",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "dob",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/userregistrationservice/pin/{pin_code}": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Check Pincode is valid or not",
+                "description": "Check Pincode is valid or not",
+                "operationId": "get-wls_alter-train_search-services-irctc-userregistrationservice-pin-pin_co",
+                "parameters": [
+                    {
+                        "name": "pin_code",
+                        "in": "path",
+                        "description": "PinCode For which user performing a registration",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Token Invalid"
+                    }
+                }
+            }
+        },
+        "/services/adl/health-check": {
+            "get": {
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Account User Details",
+                "description": "Health check",
+                "operationId": "get-services-adl-health-check",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/v2/cached-avl": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Cached Avl",
+                "description": "Cached Avl",
+                "operationId": "get-wls_alter-train_search-services-v2-cached-avl",
+                "parameters": [
+                    {
+                        "name": "client",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string",
+                            "example": "WLS"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/v2/cached-avl-one-train": {
+            "get": {
+                "tags": [
+                    "Redirection"
+                ],
+                "summary": "Cached Avl One Train",
+                "description": "Cached Avl One Train",
+                "operationId": "get-wls_alter-train_search-services-v2-cached-avl-one-train",
+                "parameters": [
+                    {
+                        "name": "tcode",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ocode",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "dcode",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "class",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "quota",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "days",
+                        "in": "query",
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/irctc/trainman-user": {
+            "get": {
+                "tags": [
+                    "UserDetails"
+                ],
+                "summary": "Migrate users",
+                "description": "Migrate users",
+                "operationId": "get-wls_alter-train_search-services-irctc-user-migrate",
+                "parameters": [
+                    {
+                        "name": "created_at",
+                        "in": "query",
+                        "description": "Migrate users",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Migrate users",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Token Invalid"
+                    }
+                }
+            }
+        },
+
+        "/services/adl/cancel-booking":{
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "booking cancel",
+                "description": "booking cancel",
+                "operationId": "post-services-adl-cancel-booking",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "user_id": {
+                                        "type": "string"
+                                    },
+                                    "booking_id":{
+                                        "type":"string"
+                                    },
+                                    "passenger_string":{
+                                        "type":"string"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "user_id": "string",
+                                "booking_id":"string",
+                                "passenger_string":"string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/adl/manually-cancel": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "manual cancel booking",
+                "description": "manual cancel booking",
+                "operationId": "post-services-adl-manually-cancel",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "user_id": {
+                                        "type": "string"
+                                    },
+                                    "booking_id":{
+                                        "type":"string"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "user_id": "string",
+                                "booking_id":"string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/adl/cancel-retry-booking": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "cancel retry booking",
+                "description": "cancel retry booking",
+                "operationId": "post-services-adl-cancel-retry-booking",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "user_id": {
+                                        "type": "string"
+                                    },
+                                    "booking_id":{
+                                        "type":"string"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "user_id": "string",
+                                "booking_id":"string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/adl/refund": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "refund detail booking",
+                "description": "refund detail booking",
+                "operationId": "post-services-adl-refund",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "user_id": {
+                                        "type": "string"
+                                    },
+                                    "booking_id":{
+                                        "type":"string"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "user_id": "string",
+                                "booking_id":"string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/adl/get-booking": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "get booking detail",
+                "description": "get booking detail",
+                "operationId": "post-services-adl-get-booking",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "user_id": {
+                                        "type": "string"
+                                    },
+                                    "booking_id":{
+                                        "type":"string"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "user_id": "string",
+                                "booking_id":"string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/adl/train": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "train schedule",
+                "description": "train schedule",
+                "operationId": "post-services-adl-train",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "user_id": {
+                                        "type": "string"
+                                    },
+                                    "train_code":{
+                                        "type":"string"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "user_id": "string",
+                                "train_code":"string"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/wls_alter/train_search/services/fcs/fcs-opted": {
+            "post": {
+                "tags": [
+                    "FCS"
+                ],
+                "summary": "FCS opted Details",
+                "description": "FCS opted Details",
+                "operationId": "post-fcs-opted",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "tm_booking_id": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "tm_booking_id": "TRNb055b10e2d771"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated Successfully"
+                    }
+                }
+            }
+        },
+        "/services/rewards/promo": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "get all promos",
+                "description": "get all promos",
+                "operationId": "post-services-adl-get-promo",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object" 
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/rewards/promo-and-earning": {
+            "get": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "ADL Reward API's",
+                "description": "ADL Reward API's",
+                "operationId": "get-services-adl-reward-promo-and-earning",
+                "responses": {
+                    "200": {
+                        "description": "successful"
+                    }
+                }
+            }
+        },
+        "/services/rewards/promo/discount": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "get offer discount value for a single offer",
+                "description": "get offer discount value for a single offer",
+                "operationId": "post-services-adl-get-promo-discount",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object" 
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/rewards/promo/claim": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "For promo claim",
+                "description": "For promo claim",
+                "operationId": "post-services-adl-get-promo-claim",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object" 
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/rewards/promo/refund": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "For promo refund",
+                "description": "For promo refund",
+                "operationId": "post-services-adl-get-promo-refund",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object" 
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/rewards/promo/cancel": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "For promo cancel",
+                "description": "For promo cancel",
+                "operationId": "post-services-adl-get-promo-cancel",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object" 
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+
+        "/services/rewards/point/earning": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "For potential point earning",
+                "description": "For potential point earning",
+                "operationId": "post-services-adl-get-point-earning",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object" 
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/rewards/point/balance": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "For balance point",
+                "description": "For balance point",
+                "operationId": "post-services-adl-get-balance-point",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object" 
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/rewards/point/refund": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "For point refund",
+                "description": "For point refund",
+                "operationId": "post-services-adl-get-point-refund",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object" 
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/rewards/point/credit": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "For point credit",
+                "description": "For point credit",
+                "operationId": "post-services-adl-get-point-credit",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object" 
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/rewards/point/update-award": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "For update award point",
+                "description": "For update award point",
+                "operationId": "post-services-adl-get-update-award-point",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object" 
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/rewards/point/cancel-award": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "For cancel award point",
+                "description": "For cancel award point",
+                "operationId": "post-services-adl-get-cancel-award",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object" 
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/rewards/point/debit": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "For point debit",
+                "description": "For point debit",
+                "operationId": "post-services-adl-get-point-debit",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object" 
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/rewards/promo-and-point/block": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "For promo and point blocl",
+                "description": "For promo and point block",
+                "operationId": "post-services-adl-promo-and-point-block",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/rewards/promo-and-point/unblock": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "For promo and point unblock",
+                "description": "For promo and point unblock",
+                "operationId": "post-services-adl-promo-and-point-unblock",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/services/rewards/point/award": {
+            "post": {
+                "tags": [
+                    "ADL"
+                ],
+                "summary": "For point award",
+                "description": "For point award",
+                "operationId": "post-services-adl-get-point-award",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object" 
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "apiKeyHeader": {
+                "type": "apiKey",
+                "name": "Ocp-Apim-Subscription-Key",
+                "in": "header"
+            },
+            "apiKeyQuery": {
+                "type": "apiKey",
+                "name": "subscription-key",
+                "in": "query"
+            }
+        }
+    },
+    "security": [
+        {
+            "apiKeyHeader": []
+        },
+        {
+            "apiKeyQuery": []
+        }
+    ],
+    "tags": [
+        {
+            "name": "Redirection",
+            "description": "Redirection URLs To TM"
+        },
+        {
+            "name": "Account",
+            "description": "Contains user account details"
+        },
+        {
+            "name": "ADL",
+            "description": "ADL APIs"
+        }
+    ]
+}
