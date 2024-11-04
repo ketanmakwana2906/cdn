@@ -1,10 +1,10 @@
 {
     "paths": {
-        "/your-endpoint": {
+        "/trip-assurance/flight": {
             "post": {
-                "summary": "Get Cancellation & Refund Schedule",
-                "description": "Retrieves the cancellation and refund schedule based on the provided parameters.",
-                "operationId": "getCancellationRefundSchedule",
+                "summary": "Get Trip Assurance Flight Details",
+                "description": "Retrieves the flight details based on TM Booking ID, PNR, or Trip Assurance ID.",
+                "operationId": "getTripAssuranceFlight",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -12,31 +12,40 @@
                             "schema": {
                                 "type": "object",
                                 "properties": {
-                                    "base_fare": {
-                                        "type": "number",
-                                        "description": "The base fare for the booking.",
-                                        "example": 1000.00
-                                    },
-                                    "travel_class": {
+                                    "tm_booking_id": {
                                         "type": "string",
-                                        "description": "The class of travel (e.g., economy, business).",
-                                        "example": "Economy"
+                                        "description": "TM Booking ID for the flight.",
+                                        "example": "TM12345678"
                                     },
-                                    "hours_remaining": {
-                                        "type": "number",
-                                        "description": "The remaining hours before the scheduled time.",
-                                        "example": 20
+                                    "pnr": {
+                                        "type": "string",
+                                        "description": "PNR number for the flight booking.",
+                                        "example": "PNR12345"
+                                    },
+                                    "ta_id": {
+                                        "type": "string",
+                                        "description": "Trip Assurance ID for the flight.",
+                                        "example": "TA123456"
                                     }
-                                    // Add other request parameters as needed
                                 },
-                                "required": ["base_fare", "travel_class", "hours_remaining"]
+                                "anyOf": [
+                                    {
+                                        "required": ["tm_booking_id"]
+                                    },
+                                    {
+                                        "required": ["pnr"]
+                                    },
+                                    {
+                                        "required": ["ta_id"]
+                                    }
+                                ]
                             }
                         }
                     }
                 },
                 "responses": {
                     "200": {
-                        "description": "Successful response with cancellation and refund schedule.",
+                        "description": "Successful response with flight details.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -53,137 +62,40 @@
                                         "data": {
                                             "type": "object",
                                             "properties": {
-                                                "table_data": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "cancellation_timing": {
-                                                                "type": "object",
-                                                                "properties": {
-                                                                    "title": {
-                                                                        "type": ["string", "null"],
-                                                                        "example": null
-                                                                    },
-                                                                    "subtitle": {
-                                                                        "type": "object",
-                                                                        "properties": {
-                                                                            "en": {
-                                                                                "type": "string",
-                                                                                "example": "Chart Prepared"
-                                                                            },
-                                                                            "hi": {
-                                                                                "type": "string",
-                                                                                "example": "Chart Prepared"
-                                                                            }
-                                                                        }
-                                                                    },
-                                                                    "text": {
-                                                                        "type": ["string", "null"],
-                                                                        "example": null
-                                                                    }
-                                                                }
-                                                            },
-                                                            "cancellation_charges": {
-                                                                "type": "object",
-                                                                "properties": {
-                                                                    "en": {
-                                                                        "type": "string",
-                                                                        "example": "Non Refundable"
-                                                                    },
-                                                                    "hi": {
-                                                                        "type": "string",
-                                                                        "example": "Non Refundable"
-                                                                    }
-                                                                }
-                                                            },
-                                                            "regular_refund": {
-                                                                "type": "string",
-                                                                "example": "0"
-                                                            },
-                                                            "refund_with_fcs": {
-                                                                "type": "string",
-                                                                "example": "0"
-                                                            }
-                                                        }
-                                                    }
+                                                "tm_booking_id": {
+                                                    "type": "string",
+                                                    "example": "TM12345678"
                                                 },
-                                                "table_headers": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "Header Example"
-                                                    }
+                                                "pnr_number": {
+                                                    "type": "string",
+                                                    "example": "PNR12345"
                                                 },
-                                                "base_fare": {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "text": {
-                                                            "type": "object",
-                                                            "properties": {
-                                                                "en": {
-                                                                    "type": "string",
-                                                                    "example": "Base Fare:"
-                                                                },
-                                                                "hi": {
-                                                                    "type": "string",
-                                                                    "example": "Base Fare:"
-                                                                }
-                                                            }
-                                                        },
-                                                        "value": {
-                                                            "type": "number",
-                                                            "example": 1000.00
-                                                        }
-                                                    }
+                                                "ticket": {
+                                                    "type": "string",
+                                                    "format": "uri",
+                                                    "example": "http://example.com/tickets/Ticket123.pdf"
                                                 },
-                                                "travel_class": {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "text": {
-                                                            "type": "object",
-                                                            "properties": {
-                                                                "en": {
-                                                                    "type": "string",
-                                                                    "example": "Class :"
-                                                                },
-                                                                "hi": {
-                                                                    "type": "string",
-                                                                    "example": "Class :"
-                                                                }
-                                                            }
-                                                        },
-                                                        "value": {
-                                                            "type": "string",
-                                                            "example": "Economy"
-                                                        }
-                                                    }
+                                                "fare": {
+                                                    "type": "number",
+                                                    "example": 5000.00
                                                 },
-                                                "heading": {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "en": {
-                                                            "type": "string",
-                                                            "example": "Cancellation & Refund Schedule"
-                                                        },
-                                                        "hi": {
-                                                            "type": "string",
-                                                            "example": "Cancellation & Refund Schedule"
-                                                        }
-                                                    }
+                                                "origin": {
+                                                    "type": "string",
+                                                    "example": "New York"
                                                 },
-                                                "terms_and_conditions": {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "en": {
-                                                            "type": "string",
-                                                            "example": "Read Cancellation Policy here"
-                                                        },
-                                                        "hi": {
-                                                            "type": "string",
-                                                            "example": "Read Cancellation Policy here"
-                                                        }
-                                                    }
+                                                "dest": {
+                                                    "type": "string",
+                                                    "example": "Los Angeles"
+                                                },
+                                                "destination_arrival_time": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2024-11-10T15:30:00Z"
+                                                },
+                                                "departure_time": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2024-11-10T12:00:00Z"
                                                 }
                                             }
                                         }
@@ -193,53 +105,44 @@
                                     "success": true,
                                     "error": "",
                                     "data": {
-                                        "table_data": [
-                                            {
-                                                "cancellation_timing": {
-                                                    "title": null,
-                                                    "subtitle": {
-                                                        "en": "Chart Prepared",
-                                                        "hi": "Chart Prepared"
-                                                    },
-                                                    "text": null
-                                                },
-                                                "cancellation_charges": {
-                                                    "en": "Non Refundable",
-                                                    "hi": "Non Refundable"
-                                                },
-                                                "regular_refund": "0",
-                                                "refund_with_fcs": "0"
-                                            }
-                                        ],
-                                        "table_headers": [
-                                            "Cancellation Timing",
-                                            "Cancellation Charges",
-                                            "Regular Refund",
-                                            "Refund with FCS"
-                                        ],
-                                        "base_fare": {
-                                            "text": {
-                                                "en": "Base Fare:",
-                                                "hi": "Base Fare:"
-                                            },
-                                            "value": 1000.00
+                                        "tm_booking_id": "TM12345678",
+                                        "pnr_number": "PNR12345",
+                                        "ticket": "http://example.com/tickets/Ticket123.pdf",
+                                        "fare": 5000.00,
+                                        "origin": "New York",
+                                        "dest": "Los Angeles",
+                                        "destination_arrival_time": "2024-11-10T15:30:00Z",
+                                        "departure_time": "2024-11-10T12:00:00Z"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters or no flight data found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
                                         },
-                                        "travel_class": {
-                                            "text": {
-                                                "en": "Class :",
-                                                "hi": "Class :"
-                                            },
-                                            "value": "Economy"
+                                        "error": {
+                                            "type": "string",
+                                            "example": "TM Booking ID or PNR or TA-ID is Req."
                                         },
-                                        "heading": {
-                                            "en": "Cancellation & Refund Schedule",
-                                            "hi": "Cancellation & Refund Schedule"
-                                        },
-                                        "terms_and_conditions": {
-                                            "en": "Read Cancellation Policy here",
-                                            "hi": "Read Cancellation Policy here"
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": false
                                         }
                                     }
+                                },
+                                "example": {
+                                    "success": false,
+                                    "error": "TM Booking ID or PNR or TA-ID is Req.",
+                                    "data": {}
                                 }
                             }
                         }
