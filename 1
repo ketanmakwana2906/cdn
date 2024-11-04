@@ -9,7 +9,7 @@
     "/trip-assurance/status": {
       "post": {
         "summary": "Get Trip Assurance Status",
-        "description": "Fetches the Trip Assurance status for a booking based on either TM Booking ID or PNR. This includes confirmation or waitlist details and various other trip assurance statuses.",
+        "description": "Fetches the Trip Assurance status for a booking based on either TM Booking ID or PNR.",
         "tags": ["Trip Assurance"],
         "requestBody": {
           "required": true,
@@ -18,26 +18,10 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "tm_booking_id": {
-                    "type": "string",
-                    "description": "TM Booking ID of the booking.",
-                    "example": "TM123456"
-                  },
-                  "pnr": {
-                    "type": "string",
-                    "description": "PNR number of the booking.",
-                    "example": "PNR123456"
-                  },
-                  "status": {
-                    "type": "string",
-                    "description": "Current status of the booking (e.g., 'cnf' for confirmed or 'wl' for waitlisted).",
-                    "example": "cnf"
-                  },
-                  "chart_prepared": {
-                    "type": "boolean",
-                    "description": "Indicates if the chart is prepared for the booking.",
-                    "example": false
-                  }
+                  "tm_booking_id": { "type": "string", "example": "TM123456" },
+                  "pnr": { "type": "string", "example": "PNR123456" },
+                  "status": { "type": "string", "example": "cnf" },
+                  "chart_prepared": { "type": "boolean", "example": false }
                 },
                 "required": ["status"]
               }
@@ -50,7 +34,71 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TripAssuranceResponse"
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "cnf": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "title": { "type": "string" },
+                              "sub-title": { "type": "string" },
+                              "status": { "type": "string", "enum": ["completed", "pending"] }
+                            }
+                          }
+                        },
+                        "wl": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "title": { "type": "string" },
+                              "sub-title": { "type": "string" },
+                              "status": { "type": "string", "enum": ["completed", "pending"] }
+                            }
+                          }
+                        },
+                        "final_status": {
+                          "type": "object",
+                          "properties": {
+                            "cnf": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "title": { "type": "string" },
+                                  "sub-title": { "type": "string" },
+                                  "status": { "type": "string", "enum": ["completed", "pending"] }
+                                }
+                              }
+                            },
+                            "wl": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "title": { "type": "string" },
+                                  "sub-title": { "type": "string" },
+                                  "status": { "type": "string", "enum": ["completed", "pending"] }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "ta_fee": { "type": "number", "example": 120.5 },
+                        "tm_fee_processed": { "type": "boolean" },
+                        "flight_booked": { "type": "boolean" },
+                        "contact-no": { "type": "string", "example": "+919986702216" },
+                        "conclusive": { "type": "string" },
+                        "show_wallet_link": { "type": "boolean" }
+                      }
+                    },
+                    "error": { "type": "string" }
+                  }
                 }
               }
             }
@@ -60,7 +108,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": false },
+                    "error": { "type": "string", "example": "TM Booking ID or PNR is Required." },
+                    "data": { "type": "object" }
+                  }
                 }
               }
             }
@@ -75,118 +128,6 @@
     }
   },
   "components": {
-    "schemas": {
-      "TripAssuranceResponse": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "description": "Indicates if the operation was successful."
-          },
-          "data": {
-            "type": "object",
-            "properties": {
-              "cnf": {
-                "type": "array",
-                "description": "Confirmation details when the ticket is confirmed.",
-                "items": {
-                  "$ref": "#/components/schemas/AssuranceText"
-                }
-              },
-              "wl": {
-                "type": "array",
-                "description": "Waitlist details when the ticket is waitlisted.",
-                "items": {
-                  "$ref": "#/components/schemas/AssuranceText"
-                }
-              },
-              "final_status": {
-                "type": "object",
-                "properties": {
-                  "cnf": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/AssuranceText"
-                    }
-                  },
-                  "wl": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/AssuranceText"
-                    }
-                  }
-                }
-              },
-              "ta_fee": {
-                "type": "number",
-                "description": "The trip assurance charge for the booking.",
-                "example": 120.5
-              },
-              "tm_fee_processed": {
-                "type": "boolean",
-                "description": "Indicates if the TM fee has been processed."
-              },
-              "flight_booked": {
-                "type": "boolean",
-                "description": "Indicates if a flight has been booked for the waitlisted booking."
-              },
-              "contact-no": {
-                "type": "string",
-                "description": "Customer support contact number.",
-                "example": "+919986702216"
-              },
-              "conclusive": {
-                "type": "string",
-                "description": "Final status of trip assurance based on conditions."
-              },
-              "show_wallet_link": {
-                "type": "boolean",
-                "description": "Indicates if a wallet link should be shown."
-              }
-            }
-          },
-          "error": {
-            "type": "string",
-            "description": "Error message if the operation failed."
-          }
-        }
-      },
-      "ErrorResponse": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "example": false
-          },
-          "error": {
-            "type": "string",
-            "example": "TM Booking ID or PNR is Required."
-          },
-          "data": {
-            "type": "object",
-            "example": {}
-          }
-        }
-      },
-      "AssuranceText": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string",
-            "description": "Title message for the assurance status."
-          },
-          "sub-title": {
-            "type": "string",
-            "description": "Sub-title message providing more detail."
-          },
-          "status": {
-            "type": "string",
-            "enum": ["completed", "pending"],
-            "description": "Status of the assurance step, either completed or pending."
-          }
-        }
-      }
-    },
     "securitySchemes": {
       "BearerAuth": {
         "type": "http",
