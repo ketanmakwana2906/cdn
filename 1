@@ -3,14 +3,14 @@
   "info": {
     "title": "Trip Assurance Status API",
     "version": "1.0.0",
-    "description": "API for updating and checking the status of a Trip Assurance booking."
+    "description": "API to retrieve the status of a Trip Assurance booking based on TM Booking ID or PNR."
   },
   "paths": {
     "/trip_assurance_status": {
       "post": {
-        "summary": "Update Trip Assurance Status",
-        "description": "Updates the status of a Trip Assurance booking based on the TM Booking ID or PNR, user status, and chart preparation status.",
-        "operationId": "updateTripAssuranceStatus",
+        "summary": "Retrieve Trip Assurance Status",
+        "description": "Fetches the status of a Trip Assurance booking based on TM Booking ID or PNR.",
+        "operationId": "retrieveTripAssuranceStatus",
         "requestBody": {
           "required": true,
           "content": {
@@ -22,19 +22,19 @@
                     "type": "string",
                     "maxLength": 16,
                     "example": "TM12345",
-                    "description": "The TM booking ID for the Trip Assurance booking."
+                    "description": "TM Booking ID associated with the Trip Assurance booking."
                   },
                   "pnr": {
                     "type": "string",
                     "maxLength": 16,
                     "example": "1234567890",
-                    "description": "The PNR number associated with the Trip Assurance booking."
+                    "description": "PNR number associated with the Trip Assurance booking."
                   },
                   "status": {
                     "type": "string",
                     "enum": ["FAILED", "WRONG", "PENDING", "SUCCESS", "CANCELLED"],
                     "example": "SUCCESS",
-                    "description": "The current status of the prediction result."
+                    "description": "Requested status to check against the booking."
                   },
                   "chart_prepared": {
                     "type": "boolean",
@@ -49,7 +49,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success response",
+            "description": "Successful response with Trip Assurance status data",
             "content": {
               "application/json": {
                 "schema": {
@@ -68,12 +68,10 @@
                       "properties": {
                         "tm_booking_id": {
                           "type": "string",
-                          "maxLength": 16,
                           "example": "TM12345"
                         },
                         "pnr_number": {
                           "type": "string",
-                          "maxLength": 16,
                           "example": "1234567890"
                         },
                         "status": {
@@ -86,7 +84,7 @@
                           "example": true
                         }
                       },
-                      "description": "Details of the updated Trip Assurance status."
+                      "description": "Details of the Trip Assurance status."
                     }
                   }
                 }
@@ -94,7 +92,7 @@
             }
           },
           "400": {
-            "description": "Bad Request response",
+            "description": "Bad request due to missing parameters",
             "content": {
               "application/json": {
                 "schema": {
@@ -118,7 +116,7 @@
             }
           },
           "404": {
-            "description": "Not Found response when Trip Assurance booking does not exist",
+            "description": "Trip Assurance booking not found for the provided ID",
             "content": {
               "application/json": {
                 "schema": {
