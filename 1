@@ -1,0 +1,251 @@
+{
+    "paths": {
+        "/your-endpoint": {
+            "post": {
+                "summary": "Get Cancellation & Refund Schedule",
+                "description": "Retrieves the cancellation and refund schedule based on the provided parameters.",
+                "operationId": "getCancellationRefundSchedule",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "base_fare": {
+                                        "type": "number",
+                                        "description": "The base fare for the booking.",
+                                        "example": 1000.00
+                                    },
+                                    "travel_class": {
+                                        "type": "string",
+                                        "description": "The class of travel (e.g., economy, business).",
+                                        "example": "Economy"
+                                    },
+                                    "hours_remaining": {
+                                        "type": "number",
+                                        "description": "The remaining hours before the scheduled time.",
+                                        "example": 20
+                                    }
+                                    // Add other request parameters as needed
+                                },
+                                "required": ["base_fare", "travel_class", "hours_remaining"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response with cancellation and refund schedule.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": ""
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "table_data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "cancellation_timing": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "title": {
+                                                                        "type": ["string", "null"],
+                                                                        "example": null
+                                                                    },
+                                                                    "subtitle": {
+                                                                        "type": "object",
+                                                                        "properties": {
+                                                                            "en": {
+                                                                                "type": "string",
+                                                                                "example": "Chart Prepared"
+                                                                            },
+                                                                            "hi": {
+                                                                                "type": "string",
+                                                                                "example": "Chart Prepared"
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "text": {
+                                                                        "type": ["string", "null"],
+                                                                        "example": null
+                                                                    }
+                                                                }
+                                                            },
+                                                            "cancellation_charges": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "en": {
+                                                                        "type": "string",
+                                                                        "example": "Non Refundable"
+                                                                    },
+                                                                    "hi": {
+                                                                        "type": "string",
+                                                                        "example": "Non Refundable"
+                                                                    }
+                                                                }
+                                                            },
+                                                            "regular_refund": {
+                                                                "type": "string",
+                                                                "example": "0"
+                                                            },
+                                                            "refund_with_fcs": {
+                                                                "type": "string",
+                                                                "example": "0"
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                "table_headers": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "Header Example"
+                                                    }
+                                                },
+                                                "base_fare": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "text": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "en": {
+                                                                    "type": "string",
+                                                                    "example": "Base Fare:"
+                                                                },
+                                                                "hi": {
+                                                                    "type": "string",
+                                                                    "example": "Base Fare:"
+                                                                }
+                                                            }
+                                                        },
+                                                        "value": {
+                                                            "type": "number",
+                                                            "example": 1000.00
+                                                        }
+                                                    }
+                                                },
+                                                "travel_class": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "text": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "en": {
+                                                                    "type": "string",
+                                                                    "example": "Class :"
+                                                                },
+                                                                "hi": {
+                                                                    "type": "string",
+                                                                    "example": "Class :"
+                                                                }
+                                                            }
+                                                        },
+                                                        "value": {
+                                                            "type": "string",
+                                                            "example": "Economy"
+                                                        }
+                                                    }
+                                                },
+                                                "heading": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "en": {
+                                                            "type": "string",
+                                                            "example": "Cancellation & Refund Schedule"
+                                                        },
+                                                        "hi": {
+                                                            "type": "string",
+                                                            "example": "Cancellation & Refund Schedule"
+                                                        }
+                                                    }
+                                                },
+                                                "terms_and_conditions": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "en": {
+                                                            "type": "string",
+                                                            "example": "Read Cancellation Policy here"
+                                                        },
+                                                        "hi": {
+                                                            "type": "string",
+                                                            "example": "Read Cancellation Policy here"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "example": {
+                                    "success": true,
+                                    "error": "",
+                                    "data": {
+                                        "table_data": [
+                                            {
+                                                "cancellation_timing": {
+                                                    "title": null,
+                                                    "subtitle": {
+                                                        "en": "Chart Prepared",
+                                                        "hi": "Chart Prepared"
+                                                    },
+                                                    "text": null
+                                                },
+                                                "cancellation_charges": {
+                                                    "en": "Non Refundable",
+                                                    "hi": "Non Refundable"
+                                                },
+                                                "regular_refund": "0",
+                                                "refund_with_fcs": "0"
+                                            }
+                                        ],
+                                        "table_headers": [
+                                            "Cancellation Timing",
+                                            "Cancellation Charges",
+                                            "Regular Refund",
+                                            "Refund with FCS"
+                                        ],
+                                        "base_fare": {
+                                            "text": {
+                                                "en": "Base Fare:",
+                                                "hi": "Base Fare:"
+                                            },
+                                            "value": 1000.00
+                                        },
+                                        "travel_class": {
+                                            "text": {
+                                                "en": "Class :",
+                                                "hi": "Class :"
+                                            },
+                                            "value": "Economy"
+                                        },
+                                        "heading": {
+                                            "en": "Cancellation & Refund Schedule",
+                                            "hi": "Cancellation & Refund Schedule"
+                                        },
+                                        "terms_and_conditions": {
+                                            "en": "Read Cancellation Policy here",
+                                            "hi": "Read Cancellation Policy here"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
