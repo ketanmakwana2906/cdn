@@ -1,154 +1,229 @@
-{
-    "paths": {
-        "/trip-assurance/flight": {
-            "post": {
-                "summary": "Get Trip Assurance Flight Details",
-                "description": "Retrieves the flight details based on TM Booking ID, PNR, or Trip Assurance ID.",
-                "operationId": "getTripAssuranceFlight",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "tm_booking_id": {
-                                        "type": "string",
-                                        "description": "TM Booking ID for the flight.",
-                                        "example": "TM12345678"
-                                    },
-                                    "pnr": {
-                                        "type": "string",
-                                        "description": "PNR number for the flight booking.",
-                                        "example": "PNR12345"
-                                    },
-                                    "ta_id": {
-                                        "type": "string",
-                                        "description": "Trip Assurance ID for the flight.",
-                                        "example": "TA123456"
-                                    }
-                                },
-                                "anyOf": [
-                                    {
-                                        "required": ["tm_booking_id"]
-                                    },
-                                    {
-                                        "required": ["pnr"]
-                                    },
-                                    {
-                                        "required": ["ta_id"]
-                                    }
-                                ]
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful response with flight details.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "error": {
-                                            "type": "string",
-                                            "example": ""
-                                        },
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "tm_booking_id": {
-                                                    "type": "string",
-                                                    "example": "TM12345678"
-                                                },
-                                                "pnr_number": {
-                                                    "type": "string",
-                                                    "example": "PNR12345"
-                                                },
-                                                "ticket": {
-                                                    "type": "string",
-                                                    "format": "uri",
-                                                    "example": "http://example.com/tickets/Ticket123.pdf"
-                                                },
-                                                "fare": {
-                                                    "type": "number",
-                                                    "example": 5000.00
-                                                },
-                                                "origin": {
-                                                    "type": "string",
-                                                    "example": "New York"
-                                                },
-                                                "dest": {
-                                                    "type": "string",
-                                                    "example": "Los Angeles"
-                                                },
-                                                "destination_arrival_time": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-11-10T15:30:00Z"
-                                                },
-                                                "departure_time": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2024-11-10T12:00:00Z"
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                "example": {
-                                    "success": true,
-                                    "error": "",
-                                    "data": {
-                                        "tm_booking_id": "TM12345678",
-                                        "pnr_number": "PNR12345",
-                                        "ticket": "http://example.com/tickets/Ticket123.pdf",
-                                        "fare": 5000.00,
-                                        "origin": "New York",
-                                        "dest": "Los Angeles",
-                                        "destination_arrival_time": "2024-11-10T15:30:00Z",
-                                        "departure_time": "2024-11-10T12:00:00Z"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request parameters or no flight data found.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "TM Booking ID or PNR or TA-ID is Req."
-                                        },
-                                        "data": {
-                                            "type": "object",
-                                            "additionalProperties": false
-                                        }
-                                    }
-                                },
-                                "example": {
-                                    "success": false,
-                                    "error": "TM Booking ID or PNR or TA-ID is Req.",
-                                    "data": {}
-                                }
-                            }
-                        }
-                    }
+@api_view(['GET'])
+def update_ta_pnr_data(request, *args, **kwargs):
+    query_params = request.GET
+    minutes = query_params.get("minutes", '')
+    if not minutes:
+        return JsonResponse({"success": False, "error": "Minutes are required in params to run", "data": {}}, status=200)
+
+    now = get_current_time()
+    curr_day = now.day
+    
+    TA_data_till_tomorrow = mysql.select_query(TA_CRON_QUERY_FOR_TODAY_AND_TOMORROW_DATA)
+    
+    today_pnrs_lists = []
+    tomorrow_pnrs_lists = []
+    try:
+        for entry in TA_data_till_tomorrow:
+            tm_booking_id = entry[0]
+            if not tm_booking_id:
+                logger.error("tm_booking_id not present in Booking data")
+                continue
+            booking_obj = Booking.objects.get(tm_booking_id=tm_booking_id)
+            b_date = booking_obj.boarding_date
+            b_time = booking_obj.departure_time
+            boarding_date_departure_time = datetime.datetime.combine(b_date, b_time).replace(tzinfo=IST)
+            journey_day = boarding_date_departure_time.day
+            remaining_minutes = int(((boarding_date_departure_time - now).seconds)/60)
+            if remaining_minutes >= 0:
+                try:
+                    response = requests.get(PNR_URL.format(booking_obj.pnr_number))
+                    response = response.json()
+                    obj = TripAssurance.objects.get(tm_booking_id=booking_obj.tm_booking_id)
+
+                    is_chart_perp = response['pnr_data']['chart_prepared']
+                    if is_chart_perp:
+                        obj.is_chart_prepared = True
+
+                    current_passenger_list = response['pnr_data']['initial_passenger']
+                    current_status_list = [str(status['current_status']) for status in current_passenger_list]
+                    all_tickets_in_wl = check_if_all_statuses_are_in_wl(current_status_list)
+                    all_tickets_in_CAN = check_if_all_statuses_are_in_cancel(current_status_list)
+                    if not all_tickets_in_wl:
+                        obj.prediction_result = "SUCCESS"
+                        obj.final_status = "CNF"
+                        if not all_tickets_in_CAN:
+                            is_TA_data_for_today, pnrs = get_today_or_tomorrow_ta_data(str(booking_obj.pnr_number), current_status_list, is_chart_perp, "SUCCESS", journey_day, curr_day)
+                            today_pnrs_lists.append(pnrs) if is_TA_data_for_today else tomorrow_pnrs_lists.append(pnrs)
+                        else:
+                            is_TA_data_for_today, pnrs = get_today_or_tomorrow_ta_data(str(booking_obj.pnr_number), current_status_list, is_chart_perp, "CANCELLED", journey_day, curr_day)
+                            today_pnrs_lists.append(pnrs) if is_TA_data_for_today else tomorrow_pnrs_lists.append(pnrs)
+                            obj.prediction_result = "CANCELLED"
+                            obj.final_status = "cancelled"
+                            obj.trip_cancelled = True
+                    else:
+                        if not all_tickets_in_CAN:
+                            # set status as failed in case of chart prepared and still tickets are in waitlisted
+                            if is_chart_perp and all_tickets_in_wl:
+                                obj.prediction_result = "FAILED"
+                                obj.final_status = "WL"
+
+                                is_TA_data_for_today, pnrs = get_today_or_tomorrow_ta_data(str(booking_obj.pnr_number), current_status_list, is_chart_perp, "FAILED", journey_day, curr_day)
+                                today_pnrs_lists.append(pnrs) if is_TA_data_for_today else tomorrow_pnrs_lists.append(pnrs)
+
+                            else:
+                                is_TA_data_for_today, pnrs = get_today_or_tomorrow_ta_data(str(booking_obj.pnr_number), current_status_list, is_chart_perp, "--", journey_day, curr_day)
+                                today_pnrs_lists.append(pnrs) if is_TA_data_for_today else tomorrow_pnrs_lists.append(pnrs)
+
+                    obj.save()
+                except Exception as e:
+                    print("Exception in getting details: ",str(e))
+    except Exception as e:
+        return JsonResponse({"success": False, "error":"Something Went Wrong.", "data": {}}, status=400)
+
+    # send Slack Message
+    try:
+        send_slack = False
+        msg = {
+            "blocks" : [{
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": now.strftime("%d-%m-%Y %-I:%M%p")
                 }
-            }
+            },
+            ]
         }
-    }
-}
+
+        msg_header = ["Pnr", "Final Status", "Chart Prepared", "TA Final Status"]
+
+        if len(today_pnrs_lists):
+            send_slack = True
+            today_pnrs = sorted(today_pnrs_lists, key = lambda obj : obj.get('TA_final_status', ''), reverse=True)
+            today_pnrs_rows =  [x.values() for x in today_pnrs]
+            table_today = tabulate(today_pnrs_rows, msg_header, tablefmt='plain', numalign="left")
+            table_msg_today = "```{}```".format(table_today)
+
+            msg_today =  {
+                "type" : "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "Today's Pnrs for Trip Assurance\n{}".format(table_msg_today)
+                },
+            }
+            msg['blocks'].append(msg_today)
+
+        if len(tomorrow_pnrs_lists):
+            send_slack = True
+            tomm_pnrs = sorted(tomorrow_pnrs_lists, key = lambda obj : obj.get('TA_final_status', ''))
+            tomm_pnrs_rows = [x.values() for x in tomm_pnrs]
+            table_tomm = tabulate(tomm_pnrs_rows, msg_header, tablefmt='plain', numalign="left")
+            table_msg_tomm = "```{}```".format(table_tomm)
+            
+            msg_tomm =  {
+                "type" : "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "Tommorrow's Pnrs for Trip Assurance\n{}".format(table_msg_tomm)
+                },
+            }
+            msg['blocks'].append(msg_tomm)
+
+        if send_slack:
+            headers = {"Content-type" : "application/json"}
+            resp = requests.post(SLACK_WEBHOOK_URL, json=msg, headers=headers)
+            resp.raise_for_status()
+    except Exception as e:
+        print("Error In Sending TA Data to SLACK")
+        return JsonResponse({"success": False, "error":str(e), "data": {}}, status=400)
+
+    return JsonResponse({"success": True, "error":"", "data": "Slack Sent for Pnr's"}, status=200)
+
+models used is 
+booking :
+class Booking(models.Model):
+    """
+    Central table in booking
+    """
+    tm_booking_id = models.CharField(max_length=50, null=True)
+    user_id = models.IntegerField()
+    reservation_id = models.CharField(max_length=100, null=True)
+    pnr_number = models.CharField(max_length=100, null=True)
+    train_number = models.CharField(max_length=10)
+    origin = models.CharField(max_length=5)
+    dest = models.CharField(max_length=5)
+    date = models.DateField()
+    boarding_date = models.DateField(null=True)
+    departure_time = models.TimeField(null=True)
+    arrival_date = models.DateField(null=True)
+    arrival_time = models.TimeField(null=True)
+    travel_class = models.CharField(max_length=3)
+    quota = models.CharField(max_length=2)
+    amount = models.FloatField(null=True, blank=True)
+    total_amount = models.FloatField(null=True, blank=True)
+    amount_refunded = models.FloatField(null=True, blank=True)
+    tm_cash_used = models.FloatField(null=True, blank=True)
+    commission = models.FloatField(null=True, blank=True)
+    coupon = models.CharField(max_length=20, null=True)
+    discount = models.FloatField(default=0)
+    boarding = models.CharField(max_length=5)
+    adult_count = models.IntegerField(default=0)
+    child_count = models.IntegerField(default=0)
+    infant_count = models.IntegerField(default=0)
+    availability = models.CharField(max_length=50, blank=True, null=True)
+    status = models.CharField(max_length=50, default="INITIALIZED")
+    irctc_username = models.CharField(max_length=50, null=True, blank=True)
+    version_code = models.CharField(max_length=50, null=True, blank=True)
+    platform = models.CharField(max_length=50, null=True, blank=True)
+    email = models.CharField(max_length=100, null=True)
+    phone = models.CharField(max_length=10, null=True)
+    address = models.CharField(max_length=200, null=True)
+    error = models.CharField(max_length=500, blank=True, null=True)
+    gst_opted = models.BooleanField(default=False)
+    tdr_filed = models.BooleanField(default=False)
+    can_retry = models.BooleanField(default=False)
+    masterid = models.CharField(max_length=50, blank=True, null=True)
+    retry_for = models.CharField(max_length=50, null=True)
+    retry_cancelled = models.BooleanField(default=False)
+    retry_till = models.DateTimeField(null=True)
+    qr_code_string = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        managed = False
+
+
+
+TripAssurance:
+class TripAssurance(models.Model):
+    # This is the main table for Trip Assurance calculations and all
+    prediction_choices = [
+        ("FAILED","FAILED"),
+        ("WRONG", "WRONG"),
+        ("PENDING","PENDING"),
+        ("SUCCESS","SUCCESS"),
+        ("CANCELLED", "CANCELLED")
+    ]
+    user = models.ForeignKey(User, on_delete=models.deletion.CASCADE, blank=True, null=True)
+    tm_booking_id = models.CharField(max_length=16, null=True, blank=True)
+    pnr_number = models.CharField(max_length=16, null=True, blank=True)
+    charge_per_person = models.FloatField(validators=[MinValueValidator(0.0)])
+    number_of_passengers = models.IntegerField(default=1, validators=[MinValueValidator(1)])
+    max_charge_per_person = models.FloatField(default=0.0, validators=[MinValueValidator(0.0)])
+    is_chart_prepared = models.BooleanField(default=False)
+    trip_cancelled = models.BooleanField(default=False)
+    prediction_perc = models.FloatField(null=True, blank=True)
+    prediction_result = models.CharField(choices=prediction_choices, default="PENDING", max_length=50)
+    final_status = models.CharField(max_length=50, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def clean(self):
+        if not self.user:
+            raise ValidationError("user_id is missing")
+
+    class Meta:
+        verbose_name = 'Trip Assurance'
+        db_table = 'trip_assurance'
+
+    @property
+    def ta_charge(self):
+        return round(float(self.charge_per_person*self.number_of_passengers), 2)
+
+    def __unicode__(self):
+        return str(self.tm_booking_id)
+    
+    def __str__(self):
+        return self.tm_booking_id
+
+now analyze above code api and give proper swagger inluding proper requestbody and response and neccessary using analyi=zing above code and its models
