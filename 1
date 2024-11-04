@@ -1,129 +1,63 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "Trip Assurance API",
+    "title": "Blocked User API",
     "version": "1.0.0",
-    "description": "API for checking and updating the status of Trip Assurance based on booking ID or PNR."
+    "description": "API to retrieve details of blocked users for an authenticated user."
   },
   "paths": {
-    "/trip-assurance/status": {
-      "post": {
-        "summary": "Get Trip Assurance Status",
-        "description": "Fetches the Trip Assurance status for a booking based on either TM Booking ID or PNR.",
-        "tags": ["Trip Assurance"],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "tm_booking_id": { "type": "string", "example": "TM123456" },
-                  "pnr": { "type": "string", "example": "PNR123456" },
-                  "status": { "type": "string", "example": "cnf" },
-                  "chart_prepared": { "type": "boolean", "example": false }
-                },
-                "required": ["status"]
-              }
-            }
+    "/blocked-users/": {
+      "get": {
+        "summary": "Retrieve blocked users",
+        "description": "Fetch the list of users blocked by the authenticated user.",
+        "tags": ["Blocked User"],
+        "security": [
+          {
+            "BearerAuth": []
           }
-        },
+        ],
         "responses": {
           "200": {
-            "description": "Trip Assurance status fetched successfully.",
+            "description": "List of blocked users",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": { "type": "boolean" },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "cnf": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "title": { "type": "string" },
-                              "sub-title": { "type": "string" },
-                              "status": { "type": "string", "enum": ["completed", "pending"] }
-                            }
-                          }
-                        },
-                        "wl": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "title": { "type": "string" },
-                              "sub-title": { "type": "string" },
-                              "status": { "type": "string", "enum": ["completed", "pending"] }
-                            }
-                          }
-                        },
-                        "final_status": {
-                          "type": "object",
-                          "properties": {
-                            "cnf": {
-                              "type": "array",
-                              "items": {
-                                "type": "object",
-                                "properties": {
-                                  "title": { "type": "string" },
-                                  "sub-title": { "type": "string" },
-                                  "status": { "type": "string", "enum": ["completed", "pending"] }
-                                }
-                              }
-                            },
-                            "wl": {
-                              "type": "array",
-                              "items": {
-                                "type": "object",
-                                "properties": {
-                                  "title": { "type": "string" },
-                                  "sub-title": { "type": "string" },
-                                  "status": { "type": "string", "enum": ["completed", "pending"] }
-                                }
-                              }
-                            }
-                          }
-                        },
-                        "ta_fee": { "type": "number", "example": 120.5 },
-                        "tm_fee_processed": { "type": "boolean" },
-                        "flight_booked": { "type": "boolean" },
-                        "contact-no": { "type": "string", "example": "+919986702216" },
-                        "conclusive": { "type": "string" },
-                        "show_wallet_link": { "type": "boolean" }
-                      }
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "user": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "integer", "example": 1 },
+                          "email": { "type": "string", "example": "user@example.com" }
+                        }
+                      },
+                      "days": { "type": "integer", "example": 30 },
+                      "created_at": { "type": "string", "format": "date-time", "example": "2023-10-01T12:34:56Z" },
+                      "is_blocked": { "type": "boolean", "example": true },
+                      "unblocked_on": { "type": "string", "format": "date-time", "example": "2023-10-31T12:00:00Z" }
                     },
-                    "error": { "type": "string" }
+                    "required": ["user", "days", "created_at", "is_blocked", "unblocked_on"]
                   }
                 }
               }
             }
           },
-          "400": {
-            "description": "Bad Request - Missing TM Booking ID or PNR",
+          "401": {
+            "description": "Unauthorized - Authentication required",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": { "type": "boolean", "example": false },
-                    "error": { "type": "string", "example": "TM Booking ID or PNR is Required." },
-                    "data": { "type": "object" }
+                    "detail": { "type": "string", "example": "Authentication credentials were not provided." }
                   }
                 }
               }
             }
           }
-        },
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ]
+        }
       }
     }
   },
