@@ -1,66 +1,198 @@
-@classmethod
-    def generate_data(cls, request, ta_obj, status, chart_prepared):
-        try:
-            customer_support = ta_obj.customer_support
-            cnf_text = [
-                {
-                    "title": "Train Ticket is confirmed",
-                    "sub-title": "Premium amount of Rs <b>{} is initiated to your TM wallet</b>, it will be refunded to your wallet in 24 hours.".format(ta_obj.ta_charge),
-                    "status": 'completed' if status.lower()=='cnf' else 'pending'
-                }
-            ]
-            final_cnf_text = [
-                {
-                    "title": "We have processed Rs {} to your TM wallet".format(ta_obj.ta_charge),
-                    "sub-title": "",
-                    "status": 'completed' if customer_support.tm_refunded else 'pending'
-                }
-            ]
-
-            wl_text = [
-                {
-                    "title": "Train Ticket is waitlisted",
-                    "sub-title": "You are eligible for flight ticket , Our customer team will contact you shortly.",
-                    "status": 'completed' if (status.lower()=='wl' and chart_prepared) else 'pending'
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Trip Assurance API",
+    "version": "1.0.0",
+    "description": "API for checking and updating the status of Trip Assurance based on booking ID or PNR."
+  },
+  "paths": {
+    "/trip-assurance/status": {
+      "post": {
+        "summary": "Get Trip Assurance Status",
+        "description": "Fetches the Trip Assurance status for a booking based on either TM Booking ID or PNR. This includes confirmation or waitlist details and various other trip assurance statuses.",
+        "tags": ["Trip Assurance"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tm_booking_id": {
+                    "type": "string",
+                    "description": "TM Booking ID of the booking.",
+                    "example": "TM123456"
+                  },
+                  "pnr": {
+                    "type": "string",
+                    "description": "PNR number of the booking.",
+                    "example": "PNR123456"
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "Current status of the booking (e.g., 'cnf' for confirmed or 'wl' for waitlisted).",
+                    "example": "cnf"
+                  },
+                  "chart_prepared": {
+                    "type": "boolean",
+                    "description": "Indicates if the chart is prepared for the booking.",
+                    "example": false
+                  }
                 },
-                {
-                    "title": "Customer team contacted",
-                    "sub-title": cls.__get_wl_customer_team_contacted_sub_title(ta_obj, customer_support, status, chart_prepared),
-                    "status": 'completed' if customer_support.cs_contacted else 'pending'
-                },
-                {
-                    "title": "Trip assurance is processing",
-                    "sub-title": cls.__get_wl_customer_support_ta_processing_sub_title(ta_obj, customer_support, status, chart_prepared),
-                    "status": cls.__get_wl_customer_support_ta_processing_status(ta_obj, customer_support, status, chart_prepared)
-                },
-            ]
-
-            final_wl_text = [
-                {
-                    "title": cls.__get_wl_final_text(ta_obj, customer_support, status, chart_prepared),
-                    "sub-title": "",
-                    "status": cls.__get_wl_customer_support_ta_processing_status(ta_obj, customer_support, status, chart_prepared)
-                }
-            ]
-
-            data = {
-                "cnf": cnf_text,
-                "wl": wl_text,
-                "final_status": {
-                    "cnf": final_cnf_text,
-                    "wl": final_wl_text
-                },
-                "ta_fee": ta_obj.ta_charge,
-                "tm_fee_processed": customer_support.tm_refunded,
-                "flight_booked": TripAssuranceFlight.objects.filter(tm_booking_id=ta_obj.tm_booking_id).exists(),
-                "contact-no": "+919986702216",
-                "conclusive": cls.__get_conclusive_obj(ta_obj, customer_support, status, chart_prepared),
-                "show_wallet_link": cls.__get_show_wallet_link_status(ta_obj, customer_support, status, chart_prepared)
+                "required": ["status"]
+              }
             }
-            error = ""
-        except Exception as e:
-            data = {}
-            error = str(e)
-
-        return data, error
-
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Trip Assurance status fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TripAssuranceResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Missing TM Booking ID or PNR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "TripAssuranceResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Indicates if the operation was successful."
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "cnf": {
+                "type": "array",
+                "description": "Confirmation details when the ticket is confirmed.",
+                "items": {
+                  "$ref": "#/components/schemas/AssuranceText"
+                }
+              },
+              "wl": {
+                "type": "array",
+                "description": "Waitlist details when the ticket is waitlisted.",
+                "items": {
+                  "$ref": "#/components/schemas/AssuranceText"
+                }
+              },
+              "final_status": {
+                "type": "object",
+                "properties": {
+                  "cnf": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/AssuranceText"
+                    }
+                  },
+                  "wl": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/AssuranceText"
+                    }
+                  }
+                }
+              },
+              "ta_fee": {
+                "type": "number",
+                "description": "The trip assurance charge for the booking.",
+                "example": 120.5
+              },
+              "tm_fee_processed": {
+                "type": "boolean",
+                "description": "Indicates if the TM fee has been processed."
+              },
+              "flight_booked": {
+                "type": "boolean",
+                "description": "Indicates if a flight has been booked for the waitlisted booking."
+              },
+              "contact-no": {
+                "type": "string",
+                "description": "Customer support contact number.",
+                "example": "+919986702216"
+              },
+              "conclusive": {
+                "type": "string",
+                "description": "Final status of trip assurance based on conditions."
+              },
+              "show_wallet_link": {
+                "type": "boolean",
+                "description": "Indicates if a wallet link should be shown."
+              }
+            }
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message if the operation failed."
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "string",
+            "example": "TM Booking ID or PNR is Required."
+          },
+          "data": {
+            "type": "object",
+            "example": {}
+          }
+        }
+      },
+      "AssuranceText": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Title message for the assurance status."
+          },
+          "sub-title": {
+            "type": "string",
+            "description": "Sub-title message providing more detail."
+          },
+          "status": {
+            "type": "string",
+            "enum": ["completed", "pending"],
+            "description": "Status of the assurance step, either completed or pending."
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
