@@ -1,102 +1,82 @@
-{
-  "openapi": "3.0.0",
-  "info": {
-    "title": "Trip Assurance API",
-    "description": "API to update Trip Assurance PNR data and send details to Slack",
-    "version": "1.0.0"
-  },
-  "paths": {
-    "/update_ta_pnr_data": {
-      "get": {
-        "summary": "Update Trip Assurance PNR Data",
-        "description": "Updates the PNR data for Trip Assurance, processes prediction and status, and sends data to Slack.",
-        "parameters": [
-          {
-            "name": "minutes",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "description": "Time window in minutes for which data should be processed."
-            },
-            "description": "Specify the minutes within which to process Trip Assurance PNR data."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success response with data of Slack sent status",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": { "type": "boolean", "example": true },
-                    "error": { "type": "string", "example": "" },
-                    "data": { "type": "string", "example": "Slack Sent for Pnr's" }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Error response when parameters are missing or there is an internal error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": { "type": "boolean", "example": false },
-                    "error": { "type": "string", "example": "Something Went Wrong." },
-                    "data": { "type": "object", "example": {} }
-                  }
-                }
-              }
-            }
-          }
+class TripAssuranceStatusView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        tm_booking_id = request.data.get('tm_booking_id', None)
+        pnr = request.data.get('pnr', None)
+        status = request.data.get('status', None)
+        chart_prepared = request.data.get('chart_prepared', False)
+
+        if not (tm_booking_id or pnr):
+            return JsonResponse({'success': False, "error": "TM Booking ID or PNR is Required.", "data":{}}, status=400)
+
+        filter_mapping = {
+            "tm_booking_id": Q(tm_booking_id=tm_booking_id),
+            "pnr": Q(pnr_number=pnr)
         }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "Booking": {
-        "type": "object",
-        "properties": {
-          "tm_booking_id": { "type": "string", "maxLength": 50, "example": "TM12345" },
-          "user_id": { "type": "integer", "example": 1 },
-          "reservation_id": { "type": "string", "maxLength": 100, "example": "RES123" },
-          "pnr_number": { "type": "string", "maxLength": 100, "example": "1234567890" },
-          "train_number": { "type": "string", "maxLength": 10, "example": "12345" },
-          "origin": { "type": "string", "maxLength": 5, "example": "NDLS" },
-          "dest": { "type": "string", "maxLength": 5, "example": "BCT" },
-          "boarding_date": { "type": "string", "format": "date", "example": "2024-11-05" },
-          "departure_time": { "type": "string", "format": "time", "example": "22:30:00" },
-          "arrival_date": { "type": "string", "format": "date", "example": "2024-11-06" },
-          "arrival_time": { "type": "string", "format": "time", "example": "06:45:00" },
-          "travel_class": { "type": "string", "maxLength": 3, "example": "3A" },
-          "quota": { "type": "string", "maxLength": 2, "example": "GN" },
-          "status": { "type": "string", "default": "INITIALIZED", "example": "CONFIRMED" },
-          "created_at": { "type": "string", "format": "date-time", "example": "2024-11-04T10:15:30" },
-          "updated_at": { "type": "string", "format": "date-time", "example": "2024-11-04T12:00:00" }
-        }
-      },
-      "TripAssurance": {
-        "type": "object",
-        "properties": {
-          "tm_booking_id": { "type": "string", "maxLength": 16, "example": "TM12345" },
-          "pnr_number": { "type": "string", "maxLength": 16, "example": "1234567890" },
-          "charge_per_person": { "type": "number", "format": "float", "example": 120.50 },
-          "number_of_passengers": { "type": "integer", "example": 3 },
-          "max_charge_per_person": { "type": "number", "format": "float", "example": 300.00 },
-          "is_chart_prepared": { "type": "boolean", "example": true },
-          "trip_cancelled": { "type": "boolean", "example": false },
-          "prediction_perc": { "type": "number", "format": "float", "example": 85.75 },
-          "prediction_result": { "type": "string", "enum": ["FAILED", "WRONG", "PENDING", "SUCCESS", "CANCELLED"], "example": "SUCCESS" },
-          "final_status": { "type": "string", "example": "CNF" },
-          "created_at": { "type": "string", "format": "date-time", "example": "2024-11-04T10:15:30" },
-          "updated_at": { "type": "string", "format": "date-time", "example": "2024-11-04T12:00:00" }
-        }
-      }
-    }
-  }
-}
+
+        key = 'tm_booking_id' if tm_booking_id else 'pnr'
+        ta_obj = TripAssurance.objects.filter(Q(user_id=request.user.id) & filter_mapping.get(key))
+        if not ta_obj.exists():
+            return JsonResponse({'success': False, "error": "Trip Assurance not opted for this booking.", "data":{}}, status=400)
+
+        ta_obj = ta_obj.last()
+        data, error = TripAssuranceStatusHelper.generate_data(request, ta_obj, status, chart_prepared)
+
+        if error:
+            status = 400
+            error = error
+            success = False
+        else:
+            status = 200
+            data = data
+            success = True
+
+        return JsonResponse({'success': success, "error": error, "data": data}, status=status)
+
+models used in code :
+
+TripAssurance:
+
+class TripAssurance(models.Model):
+    # This is the main table for Trip Assurance calculations and all
+    prediction_choices = [
+        ("FAILED","FAILED"),
+        ("WRONG", "WRONG"),
+        ("PENDING","PENDING"),
+        ("SUCCESS","SUCCESS"),
+        ("CANCELLED", "CANCELLED")
+    ]
+    user = models.ForeignKey(User, on_delete=models.deletion.CASCADE, blank=True, null=True)
+    tm_booking_id = models.CharField(max_length=16, null=True, blank=True)
+    pnr_number = models.CharField(max_length=16, null=True, blank=True)
+    charge_per_person = models.FloatField(validators=[MinValueValidator(0.0)])
+    number_of_passengers = models.IntegerField(default=1, validators=[MinValueValidator(1)])
+    max_charge_per_person = models.FloatField(default=0.0, validators=[MinValueValidator(0.0)])
+    is_chart_prepared = models.BooleanField(default=False)
+    trip_cancelled = models.BooleanField(default=False)
+    prediction_perc = models.FloatField(null=True, blank=True)
+    prediction_result = models.CharField(choices=prediction_choices, default="PENDING", max_length=50)
+    final_status = models.CharField(max_length=50, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def clean(self):
+        if not self.user:
+            raise ValidationError("user_id is missing")
+
+    class Meta:
+        verbose_name = 'Trip Assurance'
+        db_table = 'trip_assurance'
+
+    @property
+    def ta_charge(self):
+        return round(float(self.charge_per_person*self.number_of_passengers), 2)
+
+    def __unicode__(self):
+        return str(self.tm_booking_id)
+    
+    def __str__(self):
+        return self.tm_booking_id
+
+analyze above api code and models and give proper swagger json including proper requestbody and response as per analze above code and models
