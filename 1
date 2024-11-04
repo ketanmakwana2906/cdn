@@ -1,227 +1,66 @@
-{
-  "openapi": "3.0.0",
-  "info": {
-    "title": "Trip Assurance Status API",
-    "version": "1.0.0",
-    "description": "API to retrieve the status of a Trip Assurance booking based on TM Booking ID or PNR."
-  },
-  "paths": {
-    "/trip_assurance_status": {
-      "post": {
-        "summary": "Retrieve Trip Assurance Status",
-        "description": "Fetches the status of a Trip Assurance booking based on TM Booking ID or PNR.",
-        "operationId": "retrieveTripAssuranceStatus",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "tm_booking_id": {
-                    "type": "string",
-                    "maxLength": 16,
-                    "example": "TM12345",
-                    "description": "TM Booking ID associated with the Trip Assurance booking."
-                  },
-                  "pnr": {
-                    "type": "string",
-                    "maxLength": 16,
-                    "example": "1234567890",
-                    "description": "PNR number associated with the Trip Assurance booking."
-                  },
-                  "status": {
-                    "type": "string",
-                    "enum": ["FAILED", "WRONG", "PENDING", "SUCCESS", "CANCELLED"],
-                    "example": "SUCCESS",
-                    "description": "Requested status to check against the booking."
-                  },
-                  "chart_prepared": {
-                    "type": "boolean",
-                    "example": true,
-                    "description": "Indicates if the chart is prepared for the journey."
-                  }
+@classmethod
+    def generate_data(cls, request, ta_obj, status, chart_prepared):
+        try:
+            customer_support = ta_obj.customer_support
+            cnf_text = [
+                {
+                    "title": "Train Ticket is confirmed",
+                    "sub-title": "Premium amount of Rs <b>{} is initiated to your TM wallet</b>, it will be refunded to your wallet in 24 hours.".format(ta_obj.ta_charge),
+                    "status": 'completed' if status.lower()=='cnf' else 'pending'
+                }
+            ]
+            final_cnf_text = [
+                {
+                    "title": "We have processed Rs {} to your TM wallet".format(ta_obj.ta_charge),
+                    "sub-title": "",
+                    "status": 'completed' if customer_support.tm_refunded else 'pending'
+                }
+            ]
+
+            wl_text = [
+                {
+                    "title": "Train Ticket is waitlisted",
+                    "sub-title": "You are eligible for flight ticket , Our customer team will contact you shortly.",
+                    "status": 'completed' if (status.lower()=='wl' and chart_prepared) else 'pending'
                 },
-                "required": ["status"]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response with Trip Assurance status data",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
-                    },
-                    "error": {
-                      "type": "string",
-                      "example": ""
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "tm_booking_id": {
-                          "type": "string",
-                          "example": "TM12345"
-                        },
-                        "pnr_number": {
-                          "type": "string",
-                          "example": "1234567890"
-                        },
-                        "status": {
-                          "type": "string",
-                          "enum": ["FAILED", "WRONG", "PENDING", "SUCCESS", "CANCELLED"],
-                          "example": "SUCCESS"
-                        },
-                        "is_chart_prepared": {
-                          "type": "boolean",
-                          "example": true
-                        }
-                      },
-                      "description": "Details of the Trip Assurance status."
-                    }
-                  }
+                {
+                    "title": "Customer team contacted",
+                    "sub-title": cls.__get_wl_customer_team_contacted_sub_title(ta_obj, customer_support, status, chart_prepared),
+                    "status": 'completed' if customer_support.cs_contacted else 'pending'
+                },
+                {
+                    "title": "Trip assurance is processing",
+                    "sub-title": cls.__get_wl_customer_support_ta_processing_sub_title(ta_obj, customer_support, status, chart_prepared),
+                    "status": cls.__get_wl_customer_support_ta_processing_status(ta_obj, customer_support, status, chart_prepared)
+                },
+            ]
+
+            final_wl_text = [
+                {
+                    "title": cls.__get_wl_final_text(ta_obj, customer_support, status, chart_prepared),
+                    "sub-title": "",
+                    "status": cls.__get_wl_customer_support_ta_processing_status(ta_obj, customer_support, status, chart_prepared)
                 }
-              }
+            ]
+
+            data = {
+                "cnf": cnf_text,
+                "wl": wl_text,
+                "final_status": {
+                    "cnf": final_cnf_text,
+                    "wl": final_wl_text
+                },
+                "ta_fee": ta_obj.ta_charge,
+                "tm_fee_processed": customer_support.tm_refunded,
+                "flight_booked": TripAssuranceFlight.objects.filter(tm_booking_id=ta_obj.tm_booking_id).exists(),
+                "contact-no": "+919986702216",
+                "conclusive": cls.__get_conclusive_obj(ta_obj, customer_support, status, chart_prepared),
+                "show_wallet_link": cls.__get_show_wallet_link_status(ta_obj, customer_support, status, chart_prepared)
             }
-          },
-          "400": {
-            "description": "Bad request due to missing parameters",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": false
-                    },
-                    "error": {
-                      "type": "string",
-                      "example": "TM Booking ID or PNR is Required."
-                    },
-                    "data": {
-                      "type": "object",
-                      "example": {}
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Trip Assurance booking not found for the provided ID",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": false
-                    },
-                    "error": {
-                      "type": "string",
-                      "example": "Trip Assurance not opted for this booking."
-                    },
-                    "data": {
-                      "type": "object",
-                      "example": {}
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ]
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "TripAssurance": {
-        "type": "object",
-        "properties": {
-          "user": {
-            "type": "integer",
-            "example": 1
-          },
-          "tm_booking_id": {
-            "type": "string",
-            "maxLength": 16,
-            "example": "TM12345"
-          },
-          "pnr_number": {
-            "type": "string",
-            "maxLength": 16,
-            "example": "1234567890"
-          },
-          "charge_per_person": {
-            "type": "number",
-            "format": "float",
-            "example": 120.5
-          },
-          "number_of_passengers": {
-            "type": "integer",
-            "example": 3
-          },
-          "max_charge_per_person": {
-            "type": "number",
-            "format": "float",
-            "example": 300.0
-          },
-          "is_chart_prepared": {
-            "type": "boolean",
-            "example": true
-          },
-          "trip_cancelled": {
-            "type": "boolean",
-            "example": false
-          },
-          "prediction_perc": {
-            "type": "number",
-            "format": "float",
-            "example": 85.75
-          },
-          "prediction_result": {
-            "type": "string",
-            "enum": ["FAILED", "WRONG", "PENDING", "SUCCESS", "CANCELLED"],
-            "example": "SUCCESS"
-          },
-          "final_status": {
-            "type": "string",
-            "example": "CNF"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2024-11-04T10:15:30"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2024-11-04T12:00:00"
-          }
-        }
-      }
-    },
-    "securitySchemes": {
-      "BearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
-      }
-    }
-  }
-}
+            error = ""
+        except Exception as e:
+            data = {}
+            error = str(e)
+
+        return data, error
+
