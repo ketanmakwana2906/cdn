@@ -1,82 +1,229 @@
-class TripAssuranceStatusView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def post(self, request):
-        tm_booking_id = request.data.get('tm_booking_id', None)
-        pnr = request.data.get('pnr', None)
-        status = request.data.get('status', None)
-        chart_prepared = request.data.get('chart_prepared', False)
-
-        if not (tm_booking_id or pnr):
-            return JsonResponse({'success': False, "error": "TM Booking ID or PNR is Required.", "data":{}}, status=400)
-
-        filter_mapping = {
-            "tm_booking_id": Q(tm_booking_id=tm_booking_id),
-            "pnr": Q(pnr_number=pnr)
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Trip Assurance Status API",
+    "version": "1.0.0",
+    "description": "API for updating and checking the status of a Trip Assurance booking."
+  },
+  "paths": {
+    "/trip_assurance_status": {
+      "post": {
+        "summary": "Update Trip Assurance Status",
+        "description": "Updates the status of a Trip Assurance booking based on the TM Booking ID or PNR, user status, and chart preparation status.",
+        "operationId": "updateTripAssuranceStatus",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tm_booking_id": {
+                    "type": "string",
+                    "maxLength": 16,
+                    "example": "TM12345",
+                    "description": "The TM booking ID for the Trip Assurance booking."
+                  },
+                  "pnr": {
+                    "type": "string",
+                    "maxLength": 16,
+                    "example": "1234567890",
+                    "description": "The PNR number associated with the Trip Assurance booking."
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": ["FAILED", "WRONG", "PENDING", "SUCCESS", "CANCELLED"],
+                    "example": "SUCCESS",
+                    "description": "The current status of the prediction result."
+                  },
+                  "chart_prepared": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Indicates if the chart is prepared for the journey."
+                  }
+                },
+                "required": ["status"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": ""
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "tm_booking_id": {
+                          "type": "string",
+                          "maxLength": 16,
+                          "example": "TM12345"
+                        },
+                        "pnr_number": {
+                          "type": "string",
+                          "maxLength": 16,
+                          "example": "1234567890"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": ["FAILED", "WRONG", "PENDING", "SUCCESS", "CANCELLED"],
+                          "example": "SUCCESS"
+                        },
+                        "is_chart_prepared": {
+                          "type": "boolean",
+                          "example": true
+                        }
+                      },
+                      "description": "Details of the updated Trip Assurance status."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "TM Booking ID or PNR is Required."
+                    },
+                    "data": {
+                      "type": "object",
+                      "example": {}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found response when Trip Assurance booking does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Trip Assurance not opted for this booking."
+                    },
+                    "data": {
+                      "type": "object",
+                      "example": {}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "TripAssurance": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "integer",
+            "example": 1
+          },
+          "tm_booking_id": {
+            "type": "string",
+            "maxLength": 16,
+            "example": "TM12345"
+          },
+          "pnr_number": {
+            "type": "string",
+            "maxLength": 16,
+            "example": "1234567890"
+          },
+          "charge_per_person": {
+            "type": "number",
+            "format": "float",
+            "example": 120.5
+          },
+          "number_of_passengers": {
+            "type": "integer",
+            "example": 3
+          },
+          "max_charge_per_person": {
+            "type": "number",
+            "format": "float",
+            "example": 300.0
+          },
+          "is_chart_prepared": {
+            "type": "boolean",
+            "example": true
+          },
+          "trip_cancelled": {
+            "type": "boolean",
+            "example": false
+          },
+          "prediction_perc": {
+            "type": "number",
+            "format": "float",
+            "example": 85.75
+          },
+          "prediction_result": {
+            "type": "string",
+            "enum": ["FAILED", "WRONG", "PENDING", "SUCCESS", "CANCELLED"],
+            "example": "SUCCESS"
+          },
+          "final_status": {
+            "type": "string",
+            "example": "CNF"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-11-04T10:15:30"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-11-04T12:00:00"
+          }
         }
-
-        key = 'tm_booking_id' if tm_booking_id else 'pnr'
-        ta_obj = TripAssurance.objects.filter(Q(user_id=request.user.id) & filter_mapping.get(key))
-        if not ta_obj.exists():
-            return JsonResponse({'success': False, "error": "Trip Assurance not opted for this booking.", "data":{}}, status=400)
-
-        ta_obj = ta_obj.last()
-        data, error = TripAssuranceStatusHelper.generate_data(request, ta_obj, status, chart_prepared)
-
-        if error:
-            status = 400
-            error = error
-            success = False
-        else:
-            status = 200
-            data = data
-            success = True
-
-        return JsonResponse({'success': success, "error": error, "data": data}, status=status)
-
-models used in code :
-
-TripAssurance:
-
-class TripAssurance(models.Model):
-    # This is the main table for Trip Assurance calculations and all
-    prediction_choices = [
-        ("FAILED","FAILED"),
-        ("WRONG", "WRONG"),
-        ("PENDING","PENDING"),
-        ("SUCCESS","SUCCESS"),
-        ("CANCELLED", "CANCELLED")
-    ]
-    user = models.ForeignKey(User, on_delete=models.deletion.CASCADE, blank=True, null=True)
-    tm_booking_id = models.CharField(max_length=16, null=True, blank=True)
-    pnr_number = models.CharField(max_length=16, null=True, blank=True)
-    charge_per_person = models.FloatField(validators=[MinValueValidator(0.0)])
-    number_of_passengers = models.IntegerField(default=1, validators=[MinValueValidator(1)])
-    max_charge_per_person = models.FloatField(default=0.0, validators=[MinValueValidator(0.0)])
-    is_chart_prepared = models.BooleanField(default=False)
-    trip_cancelled = models.BooleanField(default=False)
-    prediction_perc = models.FloatField(null=True, blank=True)
-    prediction_result = models.CharField(choices=prediction_choices, default="PENDING", max_length=50)
-    final_status = models.CharField(max_length=50, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def clean(self):
-        if not self.user:
-            raise ValidationError("user_id is missing")
-
-    class Meta:
-        verbose_name = 'Trip Assurance'
-        db_table = 'trip_assurance'
-
-    @property
-    def ta_charge(self):
-        return round(float(self.charge_per_person*self.number_of_passengers), 2)
-
-    def __unicode__(self):
-        return str(self.tm_booking_id)
-    
-    def __str__(self):
-        return self.tm_booking_id
-
-analyze above api code and models and give proper swagger json including proper requestbody and response as per analze above code and models
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
