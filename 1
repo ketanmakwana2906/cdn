@@ -1,73 +1,75 @@
-{
-  "openapi": "3.0.0",
-  "info": {
-    "title": "Blocked User API",
-    "version": "1.0.0",
-    "description": "API to retrieve details of blocked users for an authenticated user."
-  },
-  "paths": {
-    "/blocked-users/": {
-      "get": {
-        "summary": "Retrieve blocked users",
-        "description": "Fetch the list of users blocked by the authenticated user.",
-        "tags": ["Blocked User"],
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of blocked users",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "user": {
-                        "type": "object",
-                        "properties": {
-                          "id": { "type": "integer", "example": 1 },
-                          "email": { "type": "string", "example": "user@example.com" }
-                        }
-                      },
-                      "days": { "type": "integer", "example": 30 },
-                      "created_at": { "type": "string", "format": "date-time", "example": "2023-10-01T12:34:56Z" },
-                      "is_blocked": { "type": "boolean", "example": true },
-                      "unblocked_on": { "type": "string", "format": "date-time", "example": "2023-10-31T12:00:00Z" }
-                    },
-                    "required": ["user", "days", "created_at", "is_blocked", "unblocked_on"]
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - Authentication required",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "detail": { "type": "string", "example": "Authentication credentials were not provided." }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  "components": {
-    "securitySchemes": {
-      "BearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
-      }
-    }
-  }
-}
+class ExperimentView(APIView):
+    """get experiment details for user."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if not request.user.is_authenticated():
+            return JsonResponse({"success": False, "error": "unauthorized user"}, status=401)
+
+        user_id = request.user.id
+        experiment_unique_key = request.GET.get('experiment', None)
+
+        if not experiment_unique_key:
+            return JsonResponse({"success": False, "error": "no experiment name is provided"}, status=400)
+
+        # get experiment object from db
+        experiment = models.Experiment.objects.filter(unique_key=experiment_unique_key)
+        if not experiment.exists():
+            return JsonResponse({"success": False, "error": "no experiment found with provided name"}, status=400)
+        experiment = experiment.first()
+
+        if not experiment.enabled:
+            return JsonResponse({"success": False, "error": "experiment no longer active"}, status=400)
+
+        try:
+            data = utils.get_experiment_user_details(experiment, user_id)
+        except Exception as e:
+            return Response({"success": False, "error": e}, status=400)
+
+        return Response({"success": True, "data": data}, status=200)
+
+models used:
+
+class Experiment(models.Model):
+    """
+    All experiments
+    """
+
+    name = models.CharField(max_length=80)
+    unique_key = models.CharField(max_length=80, unique=True)
+    enabled = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def clean(self):
+        if not re.match(re.compile('^[\w\d_]+$'), self.unique_key):
+            raise ValidationError("Only characters, numbers and _ are allowed")
+
+    class Meta:
+        db_table = "experiment"
+
+    def __str__(self):
+        return "{}".format(self.name)
+
+    def __unicode__(self):
+        return "{}".format(self.name)
+
+
+additonally used function:
+def get_experiment_user_details(experiment, user_id, create_if_not_exists=True):
+    experiment_user_key = "{}|{}|{}".format(models.EXPERIMENT_USER_PREFIX, experiment.unique_key, user_id)
+    experiment_user = REDIS.get_pickle(experiment_user_key)
+
+    if not experiment_user and create_if_not_exists:
+        experiment_user = models.ExperimentUserMapping.objects.filter(user_id=user_id, experiment_id=experiment.id)
+        if experiment_user.exists():
+            experiment_user = serializers.ExperimentUserMappingSerializer(experiment_user.first()).data
+            REDIS.save_experiment_user(experiment, user_id, experiment_user)
+        else:
+            try:
+                experiment_user = create_experiment_for_user(experiment, user_id)
+            except Exception as e:
+                raise e
+    return experiment_user
+
+analyze above code and models and give swagger json including all fields like requestbody and response
