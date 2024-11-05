@@ -1,134 +1,147 @@
-class OfferView(APIView):
-    permission_classes = [AllowAny]
-
-    def get(self, request):
-        app_version = request.META.get('HTTP_VERSION') or request.query_params.get('version')
-        platform = request.META.get('HTTP_PLATFORM') or request.query_params.get('platform')
-        page = request.query_params.get('page', 'home')
-
-        general_offers = utils.get_general_offers(page, platform)
-
-        if request.user.is_anonymous():
-            return JsonResponse({'success': True, 'data': general_offers, 'error': ''}, safe=False)
-
-        offers = utils.cache_offers(request.user, page, platform, op='get')
-        if offers:
-            return JsonResponse({'success': True, 'data': offers, 'error': ''}, safe=False)
-
-        user_specific_q_obj = utils.get_user_specific_offers_q_obj(request.user, page)
-        experiment_q_obj = utils.get_experiment_offers_q_obj(request.user, page, platform)
-
-        offers = models.Offers.objects.filter(user_specific_q_obj | experiment_q_obj)
-        serializer = serializers.OfferSerializer(offers, many=True)
-
-        all_offers = [obj for obj in chain(general_offers, serializer.data)]
-        all_offers.sort(key=lambda obj: obj.get('sort_order', 0))
-
-        if not app_version or platform == 'ios':
-            all_offers = filter(lambda obj: obj.get('unique_key', None) not in ["link_irctc_account", "carinfo_offer_home"], all_offers)
-        elif platform == 'web':
-            all_offers = filter(lambda obj: obj.get('unique_key', None) not in ["link_irctc_account"], all_offers)
-        elif platform == 'android':
-            app_version = version.parse(app_version)
-            min_version = version.parse('9.2.4.8')
-            if app_version < min_version:
-                all_offers = filter(lambda obj: obj.get('unique_key', None) != "link_irctc_account", all_offers)
-
-        utils.cache_offers(request.user, page, platform, op='set', offers=all_offers)
-        return JsonResponse({'success': True, 'data': all_offers, 'error': ''}, safe=False)
-
-additional function :
-
-def get_general_offers(page, platform):
-    """returns the general offers"""
-
-    platform = "ios" if platform not in ['android', 'web'] else platform
-
-    offers = REDIS.get_pickle(models.GENERAL_OFFERS_CACHE_KEY.format(page, platform))
-    if offers is not None:
-        return offers
-
-    offers = models.Offers.objects.filter(active=True, type='general', page=page)
-    offers = serializers.OfferSerializer(offers, many=True).data
-    offers.sort(key=lambda obj: obj.get('sort_order', 0))
-    
-    if platform == "ios":
-        offers = filter(lambda obj: obj.get('unique_key', None) not in ["link_irctc_account", "carinfo_offer_home", "fcs_offer"], offers)
-        
-    REDIS.save_pickle(models.GENERAL_OFFERS_CACHE_KEY.format(page, platform), offers, ex=OFFERS_TTL_SECONDS)
-    return offers
-
-def get_user_specific_offers_q_obj(user, page):
-    """returns the Q object for user-specific offers"""
-    q = Q(type=None)
-    try:
-        result = IrctcUser.objects.filter(user_id=user.id).exists()
-        q = Q(unique_key="link_irctc_account", active=True, page=page) if not result else q
-    except Exception as e:
-        print("exception in get_user_specific_offers_q_obj, {}".format(str(e)))
-
-    return q
-
-def get_experiment_offers_q_obj(user, page, platform='android'):
-    """returns the Q object for experiment offers"""
-    q = Q(type=None)
-    return q
-
-
-def cache_offers(user, page, platform, op='get', offers=None):
-    if op.lower() == 'get':
-        offers = REDIS.get_pickle(models.ALL_OFFERS_FOR_USER_CACHE_KEY.format(page, user.id, platform))
-        return offers
-
-    if (offers is None) or (op != 'set'):
-        return None
-
-    REDIS.save_pickle(models.ALL_OFFERS_FOR_USER_CACHE_KEY.format(page, user.id, platform), offers, ex=ALL_OFFERS_FOR_USER_TTL_SECONDS)
-
-
-class Offers(models.Model):
-    OFFER_TYPES = [
-        ('general', 'General'),
-        ('user', 'User'),
-        ('experiment', 'Experiment')
-        ]
-    
-    PAGES = [
-        ('home', 'home'),
-        ('listing', 'listing')
-    ]
-    """
-    All offers
-    """
-
-    type = models.CharField(max_length=20, choices=OFFER_TYPES, default='general')
-    page = models.CharField(max_length=20, choices=PAGES, default='home')
-    name = models.CharField(max_length=120)
-    unique_key = models.CharField(max_length=120, unique=True, default='')
-    description = models.TextField()
-    sort_order = models.IntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    content = JSONField(default=offer_default_json)
-    active = models.BooleanField(default=True)
-
-    def clean(self):
-        if not re.match(re.compile('^[\w\d_]+$'), self.unique_key):
-            raise ValidationError("Only characters, numbers and _ are allowed")
-
-    class Meta:
-        db_table = 'offer'
-
-    def __str__(self):
-        return self.name
-
-    def __unicode__(self):
-        return self.name
-
-class OfferSerializer(ModelSerializer):
-    class Meta:
-        model = models.Offers
-        exclude = ('created_at', 'updated_at', 'description',)
-
-
-please analyze all fucntion,metgods,model and serializer and based on analyze give swagger json for that
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Offers API",
+    "version": "1.0.0",
+    "description": "API to retrieve general, user-specific, and experiment-based offers for a user."
+  },
+  "paths": {
+    "/offers/": {
+      "get": {
+        "summary": "Retrieve Offers",
+        "description": "Returns general, user-specific, or experiment offers based on the user's status and platform.",
+        "operationId": "getOffers",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "App version (e.g., '9.2.4.8')"
+            }
+          },
+          {
+            "name": "platform",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Platform name (e.g., 'android', 'ios', 'web')"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "home",
+              "description": "Page context for offers (e.g., 'home', 'listing')"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Offers retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "enum": ["general", "user", "experiment"],
+                            "description": "Type of offer",
+                            "example": "general"
+                          },
+                          "page": {
+                            "type": "string",
+                            "enum": ["home", "listing"],
+                            "description": "Page associated with the offer",
+                            "example": "home"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "Name of the offer",
+                            "example": "Special Discount"
+                          },
+                          "unique_key": {
+                            "type": "string",
+                            "description": "Unique identifier for the offer",
+                            "example": "special_discount_001"
+                          },
+                          "sort_order": {
+                            "type": "integer",
+                            "description": "Display order of the offer",
+                            "example": 1
+                          },
+                          "content": {
+                            "type": "object",
+                            "description": "Offer content in JSON format",
+                            "properties": {
+                              "title": {
+                                "type": "string",
+                                "example": "50% off on your first purchase"
+                              },
+                              "details": {
+                                "type": "string",
+                                "example": "Valid for new users only"
+                              }
+                            }
+                          },
+                          "active": {
+                            "type": "boolean",
+                            "description": "Indicates if the offer is active",
+                            "example": true
+                          }
+                        }
+                      }
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": ""
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "data": {
+                      "type": "null",
+                      "example": null
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Unauthorized user"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
