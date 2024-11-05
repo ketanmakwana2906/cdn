@@ -1,118 +1,134 @@
-{
-  "openapi": "3.0.0",
-  "info": {
-    "title": "Experiment API",
-    "version": "1.0.0",
-    "description": "API to retrieve experiment details for an authenticated user."
-  },
-  "paths": {
-    "/experiment/": {
-      "get": {
-        "summary": "Retrieve experiment details",
-        "description": "Fetch details for a specific experiment identified by its unique key for the authenticated user.",
-        "tags": ["Experiment"],
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "experiment",
-            "in": "query",
-            "required": true,
-            "description": "Unique key identifying the experiment",
-            "schema": {
-              "type": "string",
-              "example": "experiment123"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response with experiment details",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": { "type": "boolean", "example": true },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "experiment_id": { "type": "integer", "example": 1 },
-                        "user_id": { "type": "integer", "example": 10 },
-                        "details": {
-                          "type": "object",
-                          "example": {
-                            "start_date": "2024-01-01T00:00:00Z",
-                            "end_date": "2024-12-31T23:59:59Z",
-                            "participation": "active"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Error responses for various scenarios",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": { "type": "boolean", "example": false },
-                    "error": { "type": "string", "example": "no experiment found with provided name" }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - Authentication required",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": { "type": "boolean", "example": false },
-                    "error": { "type": "string", "example": "unauthorized user" }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  "components": {
-    "securitySchemes": {
-      "BearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
-      }
-    },
-    "schemas": {
-      "ExperimentDetails": {
-        "type": "object",
-        "properties": {
-          "experiment_id": { "type": "integer", "example": 1 },
-          "user_id": { "type": "integer", "example": 10 },
-          "details": {
-            "type": "object",
-            "properties": {
-              "start_date": { "type": "string", "format": "date-time", "example": "2024-01-01T00:00:00Z" },
-              "end_date": { "type": "string", "format": "date-time", "example": "2024-12-31T23:59:59Z" },
-              "participation": { "type": "string", "example": "active" }
-            }
-          }
-        }
-      }
-    }
-  }
-}
+class OfferView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        app_version = request.META.get('HTTP_VERSION') or request.query_params.get('version')
+        platform = request.META.get('HTTP_PLATFORM') or request.query_params.get('platform')
+        page = request.query_params.get('page', 'home')
+
+        general_offers = utils.get_general_offers(page, platform)
+
+        if request.user.is_anonymous():
+            return JsonResponse({'success': True, 'data': general_offers, 'error': ''}, safe=False)
+
+        offers = utils.cache_offers(request.user, page, platform, op='get')
+        if offers:
+            return JsonResponse({'success': True, 'data': offers, 'error': ''}, safe=False)
+
+        user_specific_q_obj = utils.get_user_specific_offers_q_obj(request.user, page)
+        experiment_q_obj = utils.get_experiment_offers_q_obj(request.user, page, platform)
+
+        offers = models.Offers.objects.filter(user_specific_q_obj | experiment_q_obj)
+        serializer = serializers.OfferSerializer(offers, many=True)
+
+        all_offers = [obj for obj in chain(general_offers, serializer.data)]
+        all_offers.sort(key=lambda obj: obj.get('sort_order', 0))
+
+        if not app_version or platform == 'ios':
+            all_offers = filter(lambda obj: obj.get('unique_key', None) not in ["link_irctc_account", "carinfo_offer_home"], all_offers)
+        elif platform == 'web':
+            all_offers = filter(lambda obj: obj.get('unique_key', None) not in ["link_irctc_account"], all_offers)
+        elif platform == 'android':
+            app_version = version.parse(app_version)
+            min_version = version.parse('9.2.4.8')
+            if app_version < min_version:
+                all_offers = filter(lambda obj: obj.get('unique_key', None) != "link_irctc_account", all_offers)
+
+        utils.cache_offers(request.user, page, platform, op='set', offers=all_offers)
+        return JsonResponse({'success': True, 'data': all_offers, 'error': ''}, safe=False)
+
+additional function :
+
+def get_general_offers(page, platform):
+    """returns the general offers"""
+
+    platform = "ios" if platform not in ['android', 'web'] else platform
+
+    offers = REDIS.get_pickle(models.GENERAL_OFFERS_CACHE_KEY.format(page, platform))
+    if offers is not None:
+        return offers
+
+    offers = models.Offers.objects.filter(active=True, type='general', page=page)
+    offers = serializers.OfferSerializer(offers, many=True).data
+    offers.sort(key=lambda obj: obj.get('sort_order', 0))
+    
+    if platform == "ios":
+        offers = filter(lambda obj: obj.get('unique_key', None) not in ["link_irctc_account", "carinfo_offer_home", "fcs_offer"], offers)
+        
+    REDIS.save_pickle(models.GENERAL_OFFERS_CACHE_KEY.format(page, platform), offers, ex=OFFERS_TTL_SECONDS)
+    return offers
+
+def get_user_specific_offers_q_obj(user, page):
+    """returns the Q object for user-specific offers"""
+    q = Q(type=None)
+    try:
+        result = IrctcUser.objects.filter(user_id=user.id).exists()
+        q = Q(unique_key="link_irctc_account", active=True, page=page) if not result else q
+    except Exception as e:
+        print("exception in get_user_specific_offers_q_obj, {}".format(str(e)))
+
+    return q
+
+def get_experiment_offers_q_obj(user, page, platform='android'):
+    """returns the Q object for experiment offers"""
+    q = Q(type=None)
+    return q
+
+
+def cache_offers(user, page, platform, op='get', offers=None):
+    if op.lower() == 'get':
+        offers = REDIS.get_pickle(models.ALL_OFFERS_FOR_USER_CACHE_KEY.format(page, user.id, platform))
+        return offers
+
+    if (offers is None) or (op != 'set'):
+        return None
+
+    REDIS.save_pickle(models.ALL_OFFERS_FOR_USER_CACHE_KEY.format(page, user.id, platform), offers, ex=ALL_OFFERS_FOR_USER_TTL_SECONDS)
+
+
+class Offers(models.Model):
+    OFFER_TYPES = [
+        ('general', 'General'),
+        ('user', 'User'),
+        ('experiment', 'Experiment')
+        ]
+    
+    PAGES = [
+        ('home', 'home'),
+        ('listing', 'listing')
+    ]
+    """
+    All offers
+    """
+
+    type = models.CharField(max_length=20, choices=OFFER_TYPES, default='general')
+    page = models.CharField(max_length=20, choices=PAGES, default='home')
+    name = models.CharField(max_length=120)
+    unique_key = models.CharField(max_length=120, unique=True, default='')
+    description = models.TextField()
+    sort_order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    content = JSONField(default=offer_default_json)
+    active = models.BooleanField(default=True)
+
+    def clean(self):
+        if not re.match(re.compile('^[\w\d_]+$'), self.unique_key):
+            raise ValidationError("Only characters, numbers and _ are allowed")
+
+    class Meta:
+        db_table = 'offer'
+
+    def __str__(self):
+        return self.name
+
+    def __unicode__(self):
+        return self.name
+
+class OfferSerializer(ModelSerializer):
+    class Meta:
+        model = models.Offers
+        exclude = ('created_at', 'updated_at', 'description',)
+
+
+please analyze all fucntion,metgods,model and serializer and based on analyze give swagger json for that
