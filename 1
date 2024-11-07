@@ -1,113 +1,368 @@
-{
-  "paths": {
-    "/transactions/": {
-      "get": {
-        "summary": "Retrieve a list of transactions",
-        "description": "Get a paginated, grouped, and sorted list of transactions for the authenticated user.",
-        "operationId": "getTransactions",
-        "parameters": [
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "example": 1
-            },
-            "description": "Page number for pagination"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "A list of transactions",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "count": {
-                      "type": "integer",
-                      "example": 25
-                    },
-                    "next": {
-                      "type": "string",
-                      "nullable": true,
-                      "example": "/transactions/?page=2"
-                    },
-                    "previous": {
-                      "type": "string",
-                      "nullable": true,
-                      "example": null
-                    },
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "amount": {
-                            "type": "integer",
-                            "example": 1000
-                          },
-                          "transaction_type": {
-                            "type": "string",
-                            "enum": ["CREDIT", "DEBIT", "EXPIRE", "REFUND"],
-                            "example": "CREDIT"
-                          },
-                          "title": {
-                            "type": "string",
-                            "example": "Added for using referral code"
-                          },
-                          "subtitle": {
-                            "type": "string",
-                            "example": "referral_code_used"
-                          },
-                          "created_at": {
-                            "type": "string",
-                            "format": "date-time",
-                            "example": "2024-11-07T10:00:00Z"
-                          },
-                          "text_below_amount": {
-                            "type": "string",
-                            "example": "Expires Sat, Nov 09"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "detail": {
-                      "type": "string",
-                      "example": "Authentication credentials were not provided."
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def balance_breakup(request):
+    tm_cash = TrainmanCash(request.user)
+    response = {
+        'total': tm_cash.balance,
+        'balances': TmCashBalanceSerializer(tm_cash.get_balance_breakup(), many=True).data
     }
-  },
-  "securitySchemes": {
-    "bearerAuth": {
-      "type": "http",
-      "scheme": "bearer",
-      "bearerFormat": "JWT"
-    }
-  }
-}
+    return JsonResponse(response)
+
+class TrainmanCash(TrainmanCashBase):
+    """
+    Trainman Cash
+    """
+
+    @property
+    def balance(self):
+        """
+        Total non-expired balance for the user
+        """
+        balance = 0
+        try:
+            balance = TmCashBalance.objects.filter(
+                user=self.user,
+                balance__gt=0,
+                expiry__gt=datetime.now()
+            ).aggregate(Sum('balance'))['balance__sum']
+        except:
+            pass
+
+        return balance or 0
+
+    def get_balance_breakup(self):
+        """
+        Non zero balances with expiry dates
+        """
+        balances = []
+        try:
+            balances = TmCashBalance.objects.filter(
+                user=self.user,
+                balance__gt=0,
+                expiry__gt=datetime.now()
+            ).order_by('expiry')
+        except:
+            pass
+
+        return balances
+
+    def credit_tm_cash(self, tm_cash_type_name, amount=None, expiry_days=None):
+        """
+        Credit amount in user's tm_cash balance
+        - create an entry in tm_cash_balance with expiry based on type
+        - create an entry in tm_cash_transactions table
+        - update user final balance if separate
+        """
+
+        try:
+            tm_cash_type = self.get_tm_cash_type(tm_cash_type_name)
+
+            if not amount:
+                amount = tm_cash_type.default_amount
+
+            if amount and int(amount) < 1:
+                return False
+
+            if self.balance + amount > MAX_USER_TM_CASH:
+                return False
+
+            if expiry_days is None:
+                expiry_days = tm_cash_type.expiry_days
+
+            with transaction.atomic():
+                tm_cash_balance = TmCashBalance(
+                    user=self.user,
+                    type=tm_cash_type,
+                    balance=amount,
+                    expiry=datetime.now() + timedelta(days=expiry_days)
+                )
+
+                tm_cash_balance.save()
+
+                tm_cash_transaction = TmCashTransaction(
+                    user=self.user,
+                    amount=amount,
+                    transaction_type='CREDIT',
+                    balance_id=tm_cash_balance.id
+                )
+
+                tm_cash_transaction.save()
+                return tm_cash_transaction
+
+        except Exception as e:
+            print "Exception in credit_tm_cash", str(e)
+            return False
+
+    def pay(self, amount, booking):
+        """
+        Debit amount from tm_cash
+        - create entry in tm_cash_payment with status 'CREATED'
+        - check if balance is enough, if not; raise exception/return false
+        - get balances from tm_cash_balance with expiring soon first
+        - reduce from tm_cash_balance as required
+        - create entry in tm_cash_transactions table
+        - if successful, update tm_cash_payment status 'SUCCESS'
+        - return tm_cash_payment details
+        """
+
+        remaining_debit = amount
+
+        try:
+            if amount < 1:
+                return False
+
+            with transaction.atomic():
+
+                tm_cash_payment = TmCashPayment(
+                    user=self.user,
+                    amount=amount,
+                    status='CREATED',
+                    booking=booking
+                )
+
+                tm_cash_payment.save()
+
+                balance = self.balance
+                if balance < amount:
+                    tm_cash_payment.status = 'FAILED'
+                    tm_cash_payment.error = 'Balance ' + \
+                        str(balance) + ' is less than debit amount ' + str(amount)
+                    tm_cash_payment.save()
+                    return False
+
+                balances = self.get_balance_breakup()
+
+                for balance in balances:
+                    if remaining_debit > 0:
+                        balance_debit_amount = min(
+                            [remaining_debit, balance.balance])
+                        balance.balance -= balance_debit_amount
+                        balance.save()
+                        TmCashTransaction.objects.create(
+                            user=self.user,
+                            balance=balance,
+                            payment=tm_cash_payment,
+                            transaction_type='DEBIT',
+                            amount=balance_debit_amount
+                        )
+                        remaining_debit -= balance_debit_amount
+                    else:
+                        continue
+
+                if remaining_debit != 0:
+                    raise Exception
+                else:
+                    tm_cash_payment.status = 'SUCCESS'
+                    tm_cash_payment.save()
+                    return tm_cash_payment
+        except Exception as e:
+            print "Exception in pay. user {} amount {} booking id {}, {}".format(
+                str(self.user), str(amount), str(booking.id), str(e)
+            )
+            return False
+
+    def refund_payment(self, tm_cash_payment, refund_amount):
+        """
+        refund tm_cash based on the balances it was deducted from
+        - create entry in tm_cash_refund with status 'CREATED'
+        - find transactions used in payment from tm_cash_transactions
+        - for each transaction
+            - update balance in tm_cash_balance
+            - create a refund entry in tm_cash_transaction
+        - update tm_cash_refund with status 'SUCCESS'
+        - update tm_cash_payment entry with amount_refunded
+        """
+
+        if refund_amount < 1:
+            return False
+        else:
+            refund_amount = math.ceil(refund_amount)
+
+        try:
+            # Create refund entry
+            tm_cash_refund = TmCashRefund(
+                amount=refund_amount,
+                status='CREATED',
+                payment=tm_cash_payment
+            )
+            tm_cash_refund.save()
+
+            # Check if remaining amount in payment is less than requested refund
+            if (tm_cash_payment.amount - tm_cash_payment.amount_refunded) < refund_amount:
+                tm_cash_refund.status = 'FAILED'
+                tm_cash_refund.error = "Refund amount {} is more than remaining payment amount {}".format(
+                    refund_amount, tm_cash_payment.amount - tm_cash_payment.amount_refunded
+                )
+                tm_cash_refund.save()
+                return False
+
+            # Get transactions involved in this payment
+            tm_cash_transactions = TmCashTransaction.objects.filter(
+                user=self.user,
+                payment=tm_cash_payment,
+                transaction_type='DEBIT'
+            )
+
+            try:
+                with transaction.atomic():
+                    # Refund transaction wise
+                    amount_to_be_refunded = refund_amount
+                    for tm_cash_transaction in tm_cash_transactions:
+                        if amount_to_be_refunded > 0:
+                            transaction_refund = min(
+                                [tm_cash_transaction.amount, amount_to_be_refunded])
+                            tm_cash_transaction.balance.balance += transaction_refund
+                            tm_cash_transaction.balance.save()
+
+                            refund_transaction = TmCashTransaction(
+                                user=self.user,
+                                amount=transaction_refund,
+                                transaction_type='REFUND',
+                                balance=tm_cash_transaction.balance,
+                                refund=tm_cash_refund,
+                                payment=tm_cash_payment
+                            )
+
+                            refund_transaction.save()
+                            amount_to_be_refunded -= transaction_refund
+
+                    if amount_to_be_refunded == 0:
+                        tm_cash_refund.status = 'SUCCESS'
+                        tm_cash_refund.save()
+                        tm_cash_payment.amount_refunded += refund_amount
+                        tm_cash_payment.save()
+                        return tm_cash_refund
+                    else:
+                        error = 'Total refunded {} less than requested {}'.format(
+                            refund_amount - amount_to_be_refunded, refund_amount
+                        )
+                        raise Exception(error)
+            except Exception as e:
+                tm_cash_refund.status = 'FAILED'
+                tm_cash_refund.error = str(e)
+                tm_cash_refund.save()
+                print "Exception in refund payment " + str(e)
+                return tm_cash_refund
+        except Exception as e:
+            print "Exception in refund payment " + str(e)
+            return False
+
+    @staticmethod
+    def expire_tm_cash():
+        """
+        Expire tm cash
+        - reduce tm_cash_balance to 0
+        - create entry in tm_cash_transaction
+        """
+        try:
+            expired_balances = TmCashBalance.objects.filter(
+                balance__gt=0,
+                expiry__lt=datetime.now()
+            )
+
+            for expired_balance in expired_balances:
+                with transaction.atomic():
+                    TmCashTransaction.objects.create(
+                        user=expired_balance.user,
+                        balance=expired_balance,
+                        transaction_type='EXPIRE',
+                        amount=expired_balance.balance
+                    )
+                    expired_balance.balance = 0
+                    expired_balance.save()
+        except Exception as e:
+            return False
+
+        return True
+
+    @staticmethod
+    def send_expiring_soon_notifications(days):
+        try:
+
+            if days:
+                days_after_date = datetime.now() + timedelta(days)
+                q = [Q(expiry__contains=days_after_date.date())].pop()
+
+            else:
+                q = [Q(expiry__lt=datetime.now() + timedelta(days=4),expiry__gt=datetime.now() + timedelta(days=3))].pop()
+
+            expiring_balances = TmCashBalance.objects.filter(q,balance__gt=0)
+            user_balance_mapping = expiring_balances.values('user_id').annotate(tmcash_sum=Sum('balance'))
+
+            for user in user_balance_mapping:
+                TrainmanCash._send_expiring_soon_notification(user['user_id'], user['tmcash_sum'], days)
+
+        except Exception as e:
+            print "send_expiring_soon_notifications exception", str(e)
+            pass
+
+    @classmethod
+    def create_type(cls, name, expiry_days, default_amount):
+        try:
+            tm_cash_type = TmCashType(
+                name=name, expiry_days=expiry_days, default_amount=default_amount)
+            tm_cash_type.save()
+            return True
+        except Exception as e:
+            return False
+
+    def usable_balance_for_booking(self):
+        return min([MAX_USABLE_FOR_BOOKING, self.balance])
+
+    @classmethod
+    def get_tm_cash_type(cls, tm_cash_type_name):
+        tm_cash_type = TmCashType.objects.filter(name=tm_cash_type_name).last()
+        return tm_cash_type
+
+    def send_credit_notification(self, transaction):
+        title = "Rs. {amount} TM Cash credited!".format(
+            amount=int(transaction.amount))
+        serialized = TmCashTransactionSerializer(transaction).data
+        detail_text = "{}{}.".format(serialized['title'], ' ' + serialized['subtitle'] if serialized['subtitle'] else '')
+        # detail_text = ' '.join(
+        #     [serialized['title'], serialized['subtitle']]) + '.'
+        final_balance_text = 'Final balance is Rs.' + str(self.balance)
+
+        data = {
+            'title': title,
+            'detail_text': detail_text,
+            'final_balance_text': final_balance_text,
+            'heading': 'TM Cash credited'
+        }
+
+        self._send_notifications(data)
+
+    def send_refund_notification(self, refund):
+        title = "Rs. {amount} TM Cash refunded!".format(
+            amount=int(refund.amount))
+        detail_text = 'For booking id ' + refund.payment.booking.tm_booking_id + '.'
+        final_balance_text = 'Final balance is Rs. '+str(self.balance)
+
+        text = detail_text + final_balance_text
+
+        data = {
+            'title': title,
+            'detail_text': detail_text,
+            'final_balance_text': final_balance_text,
+            'heading': 'TM Cash refunded'
+        }
+
+        self._send_notifications(data)
+
+models:
+class TmCashBalance(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    type = models.ForeignKey(TmCashType, on_delete=models.CASCADE)
+    balance = models.IntegerField()
+    expiry = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'tm_cash_balance'
+
+class TmCashBalanceSerializer(ModelSerializer):
+    class Meta:
+        model = TmCashBalance
+        fields = ['balance', 'expiry']
