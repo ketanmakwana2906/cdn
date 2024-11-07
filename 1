@@ -1,178 +1,113 @@
-router.register('transactions', TransactionsView, base_name='transactions')
-
-class TransactionsView(ReadOnlyModelViewSet):
-    pagination_class = PageNumberPagination
-    permission_classes = (IsAuthenticated,)
-    serializer_class = TmCashTransactionSerializer
-
-    def group_transactions(self, transaction_objs):
-        first_obj = transaction_objs[0]
-        sum_amount = sum([int(obj.amount) if obj.amount else 0 for obj in transaction_objs])
-        resultant_obj = {
-            'amount' : sum_amount,
-            'created_at' : first_obj.created_at,
-            'payment_id' : first_obj.payment_id,
-            'balance_id' : first_obj.balance_id,
-            'extra_data' : first_obj.extra_data,
-            'refund_id' : first_obj.refund_id,
-            'transaction_type': first_obj.transaction_type
-        }
-        resultant_qs = TmCashTransaction(**resultant_obj)
-        return resultant_qs
-
-    def get_queryset(self):
-        queryset = TmCashTransaction.objects.filter(user=self.request.user)
-        return queryset
-    
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        exp_credit_objs = []
-        refun_debit_objs = []
-
-        for obj in queryset:
-            if str(obj.transaction_type).lower() in ("expire", "credit"):
-                exp_credit_objs.append(obj)
-            else:
-                refun_debit_objs.append(obj)
-
-        payment_id_list = []
-        final_objs = copy.deepcopy(exp_credit_objs)
-        aggregated_refund_and_debit_objs = []
-
-        for obj in refun_debit_objs:
-            payment_id = obj.payment_id
-            if payment_id in payment_id_list:
-                continue
-            payment_id_list.append(int(payment_id))
-
-            debit_transactions = []
-            refund_transactions = []
-            for t in queryset:
-                if t.payment_id!=payment_id:
-                    continue
-                if t.transaction_type=="DEBIT":
-                    debit_transactions.append(t)
-                elif t.transaction_type=="REFUND":
-                    refund_transactions.append(t)
-
-            if len(debit_transactions):
-                aggregated_refund_and_debit_objs.append(self.group_transactions(debit_transactions))
-            if len(refund_transactions):
-                aggregated_refund_and_debit_objs.append(self.group_transactions(refund_transactions))
-
-        final_objs += aggregated_refund_and_debit_objs
-
-        final_objs = sorted(final_objs, key=lambda c:c.created_at, reverse=True)
-        page = self.paginate_queryset(final_objs)
-        serializer = self.get_serializer(page, many=True)
-        return self.get_paginated_response(serializer.data)
-
-class TmCashTransaction(models.Model):
-    id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    amount = models.IntegerField()
-    balance = models.ForeignKey(TmCashBalance, on_delete=models.CASCADE)
-    payment = models.ForeignKey(
-        TmCashPayment, on_delete=models.CASCADE, null=True)
-    refund = models.ForeignKey(
-        TmCashRefund, on_delete=models.CASCADE, null=True)
-    transaction_type = models.CharField(
-        choices=[
-            ('CREDIT', 'CREDIT'),
-            ('DEBIT', 'DEBIT'),
-            ('EXPIRE', 'EXPIRE'),
-            ('REFUND', 'REFUND')
-        ], max_length=100)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    extra_data = models.TextField(blank=True, null=True)
-
-    class Meta:
-        db_table = 'tm_cash_transaction'
-
-class TmCashTransactionSerializer(ModelSerializer):
-    title = SerializerMethodField()
-    subtitle = SerializerMethodField()
-    text_below_amount = SerializerMethodField()
-
-    class Meta:
-        model = TmCashTransaction
-        fields = [
-            'amount',
-            'transaction_type',
-            'title',
-            'subtitle',
-            'created_at',
-            'text_below_amount',
+{
+  "paths": {
+    "/transactions/": {
+      "get": {
+        "summary": "Retrieve a list of transactions",
+        "description": "Get a paginated, grouped, and sorted list of transactions for the authenticated user.",
+        "operationId": "getTransactions",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            },
+            "description": "Page number for pagination"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of transactions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer",
+                      "example": 25
+                    },
+                    "next": {
+                      "type": "string",
+                      "nullable": true,
+                      "example": "/transactions/?page=2"
+                    },
+                    "previous": {
+                      "type": "string",
+                      "nullable": true,
+                      "example": null
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "amount": {
+                            "type": "integer",
+                            "example": 1000
+                          },
+                          "transaction_type": {
+                            "type": "string",
+                            "enum": ["CREDIT", "DEBIT", "EXPIRE", "REFUND"],
+                            "example": "CREDIT"
+                          },
+                          "title": {
+                            "type": "string",
+                            "example": "Added for using referral code"
+                          },
+                          "subtitle": {
+                            "type": "string",
+                            "example": "referral_code_used"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2024-11-07T10:00:00Z"
+                          },
+                          "text_below_amount": {
+                            "type": "string",
+                            "example": "Expires Sat, Nov 09"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string",
+                      "example": "Authentication credentials were not provided."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ]
-
-    def get_title(self, obj):
-        if obj.transaction_type == 'CREDIT':
-            if obj.balance.type.name == REFERRAL_STATIC:
-                promo_code = getattr(obj, 'availreferralstatic', None)
-                referral_static = getattr(promo_code, 'static_referral', None) if promo_code else None
-                referral_static_config = getattr(referral_static, 'referralstaticconfig', None) if referral_static else None
-                title = referral_static_config.config.get('title') if referral_static_config else None
-
-                if title:
-                    return title
-                return 'Added for using referral code'
-            elif obj.balance.type.name == REFERRAL_CHILD:
-                return 'Added for referral by'
-            elif obj.balance.type.name == REFERRAL_PARENT_BEFORE_BOOKING:
-                return 'Added for referring'
-            elif obj.balance.type.name == REFERRAL_PARENT:
-                return 'Added for first booking by'
-            elif obj.balance.type.name == UNOMER_SURVEY:
-                return 'Survey reward'
-            elif obj.balance.type.name == LINK_IRCTC_ACCOUNT:
-                return 'IRCTC Account linked successfully'
-        elif obj.transaction_type == 'DEBIT':
-            return 'Paid for booking'
-        elif obj.transaction_type == 'EXPIRE':
-            return 'Expired on'
-        elif obj.transaction_type == 'REFUND':
-            return 'Refunded for booking'
-
-        return obj.balance.type.name
-
-    def get_subtitle(self, obj):
-        if obj.transaction_type == 'CREDIT':
-            if obj.balance.type.name == REFERRAL_STATIC:
-                promo_code = getattr(obj, 'availreferralstatic', None)
-                referral_static = getattr(promo_code, 'static_referral', None) if promo_code else None
-                referral_static_config = getattr(referral_static, 'referralstaticconfig', None) if referral_static else None
-                sub_title = referral_static_config.config.get('subtitle') if referral_static_config else None
-
-                if sub_title:
-                    return sub_title
-
-                return (promo_code.static_referral.referral_code
-                        if promo_code else obj.user.referral_code.referral_code_used
-                    )
-
-            elif obj.balance.type.name == REFERRAL_CHILD:
-                return obj.referral_as_child.parent.username
-            elif obj.balance.type.name == REFERRAL_PARENT_BEFORE_BOOKING:
-                return obj.extra_data
-            elif obj.balance.type.name == REFERRAL_PARENT:
-                return obj.referral_as_parent.child.username
-            elif obj.balance.type.name == LINK_IRCTC_ACCOUNT:
-                return ''
-        elif obj.transaction_type == 'DEBIT':
-            return obj.payment.booking.tm_booking_id
-        # elif obj.transaction_type == 'EXPIRE':
-        #     return obj.created_at.strftime('%a, %b %d, %H:%m %p')
-        elif obj.transaction_type == 'REFUND':
-            return obj.payment.booking.tm_booking_id
-
-        return ''
-
-    def get_text_below_amount(self, obj):
-        if obj.transaction_type == 'CREDIT':
-            return "Expires " + obj.balance.expiry.strftime('%a, %b %d')
-        elif obj.transaction_type == 'REFUND':
-            return "Expires " + obj.balance.expiry.strftime('%a, %b %d')
-        return ''
-
-analyze above api url , view , model and serializer and give swagger json including requestbody and response after proper analyzing all things
+      }
+    }
+  },
+  "securitySchemes": {
+    "bearerAuth": {
+      "type": "http",
+      "scheme": "bearer",
+      "bearerFormat": "JWT"
+    }
+  }
+}
