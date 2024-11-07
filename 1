@@ -1,16 +1,16 @@
 {
-  "openapi": "3.0.1",
+  "openapi": "3.0.0",
   "info": {
     "title": "Trainman Cash API",
-    "description": "API for managing Trainman Cash balances and transactions",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API for managing Trainman cash transactions and balances."
   },
   "paths": {
     "/balance_breakup": {
       "get": {
-        "tags": ["Trainman Cash"],
-        "summary": "Fetch the balance breakup and total balance for the authenticated user",
+        "summary": "Get balance breakup for authenticated user",
         "operationId": "getBalanceBreakup",
+        "tags": ["Trainman Cash"],
         "security": [
           {
             "BearerAuth": []
@@ -18,22 +18,46 @@
         ],
         "responses": {
           "200": {
-            "description": "Balance breakup and total balance successfully fetched",
+            "description": "Successful response with balance details",
             "content": {
               "application/json": {
+                "example": {
+                  "total": 5000,
+                  "balances": [
+                    {
+                      "balance": 3000,
+                      "expiry": "2024-12-31T23:59:59"
+                    },
+                    {
+                      "balance": 2000,
+                      "expiry": "2025-06-30T23:59:59"
+                    }
+                  ]
+                },
                 "schema": {
                   "type": "object",
                   "properties": {
                     "total": {
                       "type": "integer",
-                      "description": "Total balance available"
+                      "description": "Total balance available for the user"
                     },
                     "balances": {
                       "type": "array",
+                      "description": "Detailed balance breakup for the user",
                       "items": {
-                        "$ref": "#/components/schemas/TmCashBalance"
-                      },
-                      "description": "List of individual balances with expiry dates"
+                        "type": "object",
+                        "properties": {
+                          "balance": {
+                            "type": "integer",
+                            "description": "Individual balance for a specific type"
+                          },
+                          "expiry": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Expiry date and time for this balance"
+                          }
+                        }
+                      }
                     }
                   }
                 }
@@ -41,7 +65,10 @@
             }
           },
           "401": {
-            "description": "Unauthorized - Invalid or missing token"
+            "description": "Unauthorized, invalid or missing authentication"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         }
       }
@@ -53,22 +80,6 @@
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT"
-      }
-    },
-    "schemas": {
-      "TmCashBalance": {
-        "type": "object",
-        "properties": {
-          "balance": {
-            "type": "integer",
-            "description": "The balance amount for a specific cash entry"
-          },
-          "expiry": {
-            "type": "string",
-            "format": "date-time",
-            "description": "The expiry date of the balance"
-          }
-        }
       }
     }
   }
