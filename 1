@@ -1,86 +1,1615 @@
 {
-  "openapi": "3.0.0",
-  "info": {
-    "title": "Trainman Cash API",
-    "version": "1.0.0",
-    "description": "API for managing Trainman cash transactions and balances."
-  },
-  "paths": {
-    "/balance_breakup": {
-      "get": {
-        "summary": "Get balance breakup for authenticated user",
-        "operationId": "getBalanceBreakup",
-        "tags": ["Trainman Cash"],
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response with balance details",
-            "content": {
-              "application/json": {
-                "example": {
-                  "total": 5000,
-                  "balances": [
+    "openapi": "3.0.1",
+    "info": {
+        "title": "trainman Whitelabel API",
+        "description": "WLS APIs doc for integration.",
+        "version": "1.0"
+    },
+    "servers": [
+        {
+            "url": "https://uat.trainman.in/api/trainmanwhitelabelapi"
+        }
+    ],
+    "paths": {
+        "/services/fcs/static-text": {
+            "get": {
+                "tags": [
+                    "fcs"
+                ],
+                "summary": "Get FCS static text",
+                "description": "Get FCS static text",
+                "operationId": "get-services-for-fcs-static-text",
+                "parameters":[
                     {
-                      "balance": 3000,
-                      "expiry": "2024-12-31T23:59:59"
+                        "name":"version",
+                        "in":"query",
+                        "required":true,
+                        "schema":{
+                            "type":"string",
+                            "example":"1.0"
+                        },
+                        "description":"version"
                     },
                     {
-                      "balance": 2000,
-                      "expiry": "2025-06-30T23:59:59"
+                        "name":"platform",
+                        "in":"query",
+                        "required":true,
+                        "schema":{
+                            "type":"string",
+                            "example":"android"
+                        },
+                        "description":"platform"
                     }
-                  ]
+                ],
+                "requestBody": {
+                    "required":false
                 },
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "total": {
-                      "type": "integer",
-                      "description": "Total balance available for the user"
+                "responses": {
+                    "200": {
+                        "description": "return fcs static text from cache using FCS_STATIC_TEXT_KEY"
+                    }
+                }
+            }
+        },
+        "/services/fcs/fcs-opted": {
+            "post": {
+                "tags": [
+                    "fcs"
+                ],
+                "summary": "Get FCS opted or not",
+                "description": "Get FCS opted or not",
+                "operationId": "get-services-for-fcs-opted",
+                "requestBody": {
+                    "required":true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "tm_booking_id",
+                                    "pnr",
+                                    "user_id"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "user_id":{
+                                        "type":"integer"
+                                    },
+                                    "tm_booking_id":{
+                                        "type":"string"
+                                    },
+                                    "pnr":{
+                                        "type":"string"
+                                    }
+                                }
+                                
+                            },
+                            "example": {
+                                "user":{
+                                    "user_id": 54159421
+                                },
+                                "tm_booking_id":"TM11010019107",
+                                "pnr":"2513225209"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "successful response",
+                        "content":{
+                            "application/json":{
+                                "schema":{
+                                    "type":"object",
+                                    "properties":{
+                                        "success":{
+                                            "type":"boolean",
+                                            "example":true
+                                        },
+                                        "error":{
+                                            "type":"string",
+                                            "exaple":""
+                                        },
+                                        "data":{
+                                            "type":"object",
+                                            "properties":{
+                                                "fcs_opted":{
+                                                    "type":"boolean",
+                                                    "example":true
+                                                },
+                                                "cs_contact":{
+                                                    "type":"string",
+                                                    "example":"1234567890"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "example":{
+                                    "success":true,
+                                    "error":"",
+                                    "data":{
+                                        "fcs_opted":true,
+                                        "cs_contact":"1234567890"
+                                    }
+                                }
+                            }
+                        }
                     },
-                    "balances": {
-                      "type": "array",
-                      "description": "Detailed balance breakup for the user",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "balance": {
-                            "type": "integer",
-                            "description": "Individual balance for a specific type"
+                    "400":{
+                        "description":"error in fetching fcs status,proper data not required in request"
+                    }
+                }
+            }
+        },
+        "/services/fcs/fcs-opted/cancellation-refund-policy-data": {
+            "get": {
+                "tags": [
+                    "fcs"
+                ],
+                "summary": "Get Cancellation Refund Data",
+                "description": "Get Cancellation Refund Data",
+                "operationId": "get-services-for-cancellation-refund-data",
+                "requestBody": {
+                    "required":true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_id"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "page":{
+                                        "type":"string"
+                                    },
+                                    "base_fare_per_passenger":{
+                                        "type":"integer"
+                                    },
+                                    "travel_class":{
+                                        "type":"string"
+                                    },
+                                    "doj":{
+                                        "type":"string"
+                                    },
+                                    "departure_time":{
+                                        "type":"string"
+                                    }
+                                }
+                                
+                            },
+                            "example": {
+                                "page":"home",
+                                "base_fare_per_passenger":123,
+                                "travel_class":"1A",
+                                "doj":"20240623",
+                                "departure_time":"0820"
+
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response with cancellation and refund schedule.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": ""
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "table_data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "cancellation_timing": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "title": {
+                                                                        "type": ["string", "null"],
+                                                                        "example": null
+                                                                    },
+                                                                    "subtitle": {
+                                                                        "type": "object",
+                                                                        "properties": {
+                                                                            "en": {
+                                                                                "type": "string",
+                                                                                "example": "Chart Prepared"
+                                                                            },
+                                                                            "hi": {
+                                                                                "type": "string",
+                                                                                "example": "Chart Prepared"
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "text": {
+                                                                        "type": ["string", "null"],
+                                                                        "example": null
+                                                                    }
+                                                                }
+                                                            },
+                                                            "cancellation_charges": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "en": {
+                                                                        "type": "string",
+                                                                        "example": "Non Refundable"
+                                                                    },
+                                                                    "hi": {
+                                                                        "type": "string",
+                                                                        "example": "Non Refundable"
+                                                                    }
+                                                                }
+                                                            },
+                                                            "regular_refund": {
+                                                                "type": "string",
+                                                                "example": "0"
+                                                            },
+                                                            "refund_with_fcs": {
+                                                                "type": "string",
+                                                                "example": "0"
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                "table_headers": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "Header Example"
+                                                    }
+                                                },
+                                                "base_fare": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "text": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "en": {
+                                                                    "type": "string",
+                                                                    "example": "Base Fare:"
+                                                                },
+                                                                "hi": {
+                                                                    "type": "string",
+                                                                    "example": "Base Fare:"
+                                                                }
+                                                            }
+                                                        },
+                                                        "value": {
+                                                            "type": "number",
+                                                            "example": 1000.00
+                                                        }
+                                                    }
+                                                },
+                                                "travel_class": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "text": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "en": {
+                                                                    "type": "string",
+                                                                    "example": "Class :"
+                                                                },
+                                                                "hi": {
+                                                                    "type": "string",
+                                                                    "example": "Class :"
+                                                                }
+                                                            }
+                                                        },
+                                                        "value": {
+                                                            "type": "string",
+                                                            "example": "Economy"
+                                                        }
+                                                    }
+                                                },
+                                                "heading": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "en": {
+                                                            "type": "string",
+                                                            "example": "Cancellation & Refund Schedule"
+                                                        },
+                                                        "hi": {
+                                                            "type": "string",
+                                                            "example": "Cancellation & Refund Schedule"
+                                                        }
+                                                    }
+                                                },
+                                                "terms_and_conditions": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "en": {
+                                                            "type": "string",
+                                                            "example": "Read Cancellation Policy here"
+                                                        },
+                                                        "hi": {
+                                                            "type": "string",
+                                                            "example": "Read Cancellation Policy here"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "example": {
+                                    "success": true,
+                                    "error": "",
+                                    "data": {
+                                        "table_data": [
+                                            {
+                                                "cancellation_timing": {
+                                                    "title": null,
+                                                    "subtitle": {
+                                                        "en": "Chart Prepared",
+                                                        "hi": "Chart Prepared"
+                                                    },
+                                                    "text": null
+                                                },
+                                                "cancellation_charges": {
+                                                    "en": "Non Refundable",
+                                                    "hi": "Non Refundable"
+                                                },
+                                                "regular_refund": "0",
+                                                "refund_with_fcs": "0"
+                                            }
+                                        ],
+                                        "table_headers": [
+                                            "Cancellation Timing",
+                                            "Cancellation Charges",
+                                            "Regular Refund",
+                                            "Refund with FCS"
+                                        ],
+                                        "base_fare": {
+                                            "text": {
+                                                "en": "Base Fare:",
+                                                "hi": "Base Fare:"
+                                            },
+                                            "value": 1000.00
+                                        },
+                                        "travel_class": {
+                                            "text": {
+                                                "en": "Class :",
+                                                "hi": "Class :"
+                                            },
+                                            "value": "Economy"
+                                        },
+                                        "heading": {
+                                            "en": "Cancellation & Refund Schedule",
+                                            "hi": "Cancellation & Refund Schedule"
+                                        },
+                                        "terms_and_conditions": {
+                                            "en": "Read Cancellation Policy here",
+                                            "hi": "Read Cancellation Policy here"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400":{
+                        "description":"insufficient data",
+                        "content":{
+                            "application/json":{
+                                "schema":{
+                                    "type":"object",
+                                    "properties":{
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Insufficient data for page"
+                                        },
+                                        "data":{
+                                            "type":"object",
+                                            "example":{}
+                                        }
+                                    }
+                                },
+                                "example":{
+                                    "success":false,
+                                    "data":{},
+                                    "error":"insufficient data for page"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "services/trip-assurance/ta_opted": {
+            "post": {
+                "tags": [
+                    "trip-assurance"
+                ],
+                "summary": "Get trip-assurance opted or not",
+                "description": "Get trip-assurance opted or not",
+                "operationId": "get-services-for-trip-assurance-opted",
+                "parameters":[],
+                "requestBody": {
+                    "required":true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "tm_booking_id",
+                                    "pnr",
+                                    "user_id"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "user_id":{
+                                        "type":"integer"
+                                    },
+                                    "tm_booking_id":{
+                                        "type":"string"
+                                    },
+                                    "pnr":{
+                                        "type":"string"
+                                    }
+                                }
+                                
+                            },
+                            "example": {
+                                "user":{
+                                    "user_id": 54159421
+                                },
+                                "tm_booking_id":"TM11010019107",
+                                "pnr":"2513225209"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content":{
+                            "application/json":{
+                                "schema":{
+                                    "type":"object",
+                                    "properties":{
+                                        "success":{
+                                            "type":"boolean"
+                                        },
+                                        "error":{
+                                            "type":"string"
+                                        },
+                                        "data":{
+                                            "type":"object",
+                                            "properties":{
+                                                "ta_opted":{
+                                                    "type":"boolean"
+                                                },
+                                                "trip_cancelled":{
+                                                    "type":"boolean"
+                                                },
+                                                "cs_contact":{
+                                                    "type":"string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "example":{
+                                    "success":true,
+                                    "error":"",
+                                    "data":{
+                                        "ta_opted":true,
+                                        "trip_cancelled":true,
+                                        "cs_contact":"+917428518704"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400":{
+                        "description":"error in fetching trip-assurance status,proper data not required in request",
+                        "content":{
+                            "application/json":{
+                                "schema":{
+                                    "type":"object",
+                                    "properties":{
+                                        "success":{
+                                            "type":"boolean",
+                                            "example":true
+                                        },
+                                        "error":{
+                                            "type":"string"
+                                        },
+                                        "data":{
+                                            "type":"object"
+                                        }
+                                    }
+                                },
+                                "example":{
+                                    "success":false,
+                                    "error":"exception",
+                                    "data":{}
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "services/trip-assurance/ta_flight": {
+            "post": {
+                "tags": [
+                    "trip-assurance"
+                ],
+                "summary": "Get Trip Assurance Flight Details",
+                "description": "Get Trip Assurance Flight Details",
+                "operationId": "get-services-for-trip-assurance-flight",
+                "requestBody": {
+                    "required":true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "tm_booking_id":{
+                                        "type":"string"
+                                    },
+                                    "pnr":{
+                                        "type":"string"
+                                    },
+                                    "trip_assurance_id":{
+                                        "type":"integer"
+                                    }
+                                },
+                                "anyOf": [
+                                    {
+                                        "required": ["tm_booking_id"]
+                                    },
+                                    {
+                                        "required": ["pnr"]
+                                    },
+                                    {
+                                        "required": ["ta_id"]
+                                    }
+                                ]
+                                
+                            },
+                            "example": {
+                                "tm_booking_id":"TM11010019107",
+                                "pnr":"2513225209",
+                                "trip_assurance_id":263
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response with flight details.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "tm_booking_id": {
+                                                    "type": "string"
+                                                },
+                                                "pnr_number": {
+                                                    "type": "string"
+                                                },
+                                                "ticket": {
+                                                    "type": "string",
+                                                    "format": "uri"
+                                                },
+                                                "fare": {
+                                                    "type": "number"
+                                                },
+                                                "origin": {
+                                                    "type": "string"
+                                                },
+                                                "dest": {
+                                                    "type": "string"
+                                                },
+                                                "destination_arrival_time": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "departure_time": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "example": {
+                                    "success": true,
+                                    "error": "",
+                                    "data": {
+                                        "tm_booking_id": "TM09060013243",
+                                        "pnr_number": "1234567098",
+                                        "ticket": "debug_trip_assurance/43.png",
+                                        "fare": 2345.00,
+                                        "origin": "New Delhi",
+                                        "dest": "Mumbai",
+                                        "destination_arrival_time": "2022-06-07 13:44:14.000000",
+                                        "departure_time": "2022-06-07 13:44:16.000000"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters or no flight data found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": false
+                                        }
+                                    }
+                                },
+                                "example": {
+                                    "success": false,
+                                    "error": "TM Booking ID or PNR or TA-ID is Req.",
+                                    "data": {}
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "services/trip-assurance/ta_update_pnrs": {
+            "get": {
+                "tags": [
+                    "trip-assurance"
+                ],
+                "summary": "Update Trip Assurance PNR Data",
+                "description": "Updates the PNR data for Trip Assurance, processes prediction and status, and sends data to Slack.",
+                "operationId": "post-services-for-update-trip-assurance-pnr",
+                "parameters":[
+                    {
+                        "name":"minutes",
+                        "in":"query",
+                        "required":true,
+                        "schema":{
+                            "type":"integer",
+                            "example":"1.0"
+                        },
+                        "description":"version"
+                    }
+                ],
+                "requestBody": {
+                    "required":false
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content":{
+                            "application/json":{
+                                "schema":{
+                                    "type":"object",
+                                    "properties":{
+                                        "success":{
+                                            "type":"boolean"
+                                        },
+                                        "error":{
+                                            "type":"string"
+                                        },
+                                        "data":{
+                                            "type":"string"
+                                        }
+                                    }
+                                },
+                                "example":{
+                                    "success":true,
+                                    "error":"",
+                                    "data":"Slack Sent for Pnr's"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error response when parameters are missing or there is an internal error",
+                        "content": {
+                          "application/json": {
+                            "schema": {
+                              "type": "object",
+                              "properties": {
+                                "success": {
+                                    "type": "boolean"
+                                },
+                                "error": {
+                                    "type": "string"
+                                },
+                                "data": {
+                                    "type": "object"
+                                }
+                              }
+                            },
+                            "example":{
+                                "success":false,
+                                "error":"Something Went Wrong.",
+                                "data":{}
+                            }
+                          }
+                        }
+                      }
+                }
+            }
+        },
+        "services/trip-assurance/track_ta_status": {
+            "post": {
+                "tags": [
+                    "trip-assurance"
+                ],
+                "summary": "Retrieve Trip Assurance Status",
+                "description": "Fetches the status of a Trip Assurance booking based on TM Booking ID or PNR.",
+                "operationId": "post-services-for-trip-assurance-status",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                      "application/json": {
+                        "schema": {
+                          "type": "object",
+                          "properties": {
+                            "tm_booking_id": {
+                              "type": "string",
+                              "maxLength": 16
+                            },
+                            "pnr": {
+                              "type": "string",
+                              "maxLength": 16
+                            },
+                            "status": {
+                              "type": "string",
+                              "enum": ["FAILED", "WRONG", "PENDING", "SUCCESS", "CANCELLED"]
+                            },
+                            "chart_prepared": {
+                              "type": "boolean"
+                            }
                           },
-                          "expiry": {
-                            "type": "string",
-                            "format": "date-time",
-                            "description": "Expiry date and time for this balance"
+                          "required": ["status"]
+                        },
+                        "example":{
+                            "tm_booking_id":"TM09060013243",
+                            "pnr":"2513225209",
+                            "status":"FAILED",
+                            "chart_prepared":true
+                        }
+                      }
+                    }
+                  },
+                  "responses": {
+                    "200": {
+                      "description": "Trip Assurance status fetched successfully.",
+                      "content": {
+                        "application/json": {
+                          "schema": {
+                            "type": "object",
+                            "properties": {
+                              "success": {
+                                "type": "boolean"
+                              },
+                              "data": {
+                                "type": "object",
+                                "properties": {
+                                  "cnf": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "title": { "type": "string" },
+                                        "sub-title": { "type": "string" },
+                                        "status": { "type": "string", "enum": ["completed", "pending"] }
+                                      }
+                                    }
+                                  },
+                                  "wl": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "title": { "type": "string" },
+                                        "sub-title": { "type": "string" },
+                                        "status": { "type": "string", "enum": ["completed", "pending"] }
+                                      }
+                                    }
+                                  },
+                                  "final_status": {
+                                    "type": "object",
+                                    "properties": {
+                                      "cnf": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "object",
+                                          "properties": {
+                                            "title": { "type": "string" },
+                                            "sub-title": { "type": "string" },
+                                            "status": { "type": "string", "enum": ["completed", "pending"] }
+                                          }
+                                        }
+                                      },
+                                      "wl": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "object",
+                                          "properties": {
+                                            "title": { "type": "string" },
+                                            "sub-title": { "type": "string" },
+                                            "status": { "type": "string", "enum": ["completed", "pending"] }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "ta_fee": { "type": "number", "example": 120.5 },
+                                  "tm_fee_processed": { "type": "boolean" },
+                                  "flight_booked": { "type": "boolean" },
+                                  "contact-no": { "type": "string", "example": "+919986702216" },
+                                  "conclusive": { "type": "string" },
+                                  "show_wallet_link": { "type": "boolean" }
+                                }
+                              },
+                              "error": { "type": "string" }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "400": {
+                      "description": "Bad Request - Missing TM Booking ID or PNR",
+                      "content": {
+                        "application/json": {
+                          "schema": {
+                            "type": "object",
+                            "properties": {
+                              "success": {
+                                "type": "boolean",
+                                "example": false 
+                              },
+                              "error": { 
+                                  "type": "string", 
+                                  "example": "TM Booking ID or PNR is Required."
+                             },
+                              "data": { "type": "object" }
+                            }
                           }
                         }
                       }
                     }
                   }
-                }
-              }
             }
-          },
-          "401": {
-            "description": "Unauthorized, invalid or missing authentication"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
+        },
+        "/services/widgets/block-user": {
+            "get": {
+                "tags": [
+                    "Widgets"
+                ],
+                "summary": "Get Blocked User Details",
+                "description": "Get Blocked User Details",
+                "operationId": "get-services-for-block-user",
+                "requestBody": {
+                    "required":true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_id"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "user_id":{
+                                        "type":"integer"
+                                        }
+                                }
+                                }
+                            },
+                            "example": {
+                                "user":{
+                                    "user_id": 1
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                      "description": "List of blocked users",
+                      "content": {
+                        "application/json": {
+                          "schema": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "user": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": { "type": "integer", "example": 1 },
+                                    "email": { "type": "string", "example": "user@gmail.com" }
+                                  }
+                                },
+                                "days": { "type": "integer", "example": 30 },
+                                "created_at": { "type": "string", "format": "date-time", "example": "2023-10-01T12:34:56Z" },
+                                "is_blocked": { "type": "boolean", "example": true },
+                                "unblocked_on": { "type": "string", "format": "date-time", "example": "2023-10-31T12:00:00Z" }
+                              }                            }
+                          },
+                          "example":{
+
+                          }
+                        }
+                      }
+                    },
+                    "401": {
+                      "description": "Unauthorized - Authentication required",
+                      "content": {
+                        "application/json": {
+                          "schema": {
+                            "type": "object",
+                            "properties": {
+                              "detail": { "type": "string", "example": "Authentication credentials were not provided." }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+            }
+        },
+        "/services/widgets/experiment":{
+            "get": {
+                "tags": [
+                    "Widgets"
+                ],
+                "summary": "Get Experiment Details for User",
+                "description": "Get Experiment Details for User",
+                "operationId": "get-services-for-experiment",
+                "requestBody": {
+                    "required":true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_id"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "user":{
+                                        "type":"object",
+                                        "properties":{
+                                            "user_id":{
+                                                "type":"integer"
+
+                                            }
+                                            
+                                        }
+                                }
+                                }
+                            },
+                            "example": {
+                                "user":{
+                                    "user_id": 1
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters":[
+                    {
+                        "name":"experiment",
+                        "in":"query",
+                        "required":false,
+                        "schema":{
+                            "type":"string",
+                            "example":"payment_gateway_experiment"
+                        },
+                        "description":"an optional parameter to specify the experiment,if not provided defaults to None"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                      "description": "Successful response with experiment details",
+                      "content": {
+                        "application/json": {
+                          "schema": {
+                            "type": "object",
+                            "properties": {
+                              "success": { "type": "boolean", "example": true },
+                              "data": {
+                                "type": "object",
+                                "properties": {
+                                  "experiment_id": { "type": "integer", "example": 1 },
+                                  "user_id": { "type": "integer", "example": 10 },
+                                  "details": {
+                                    "type": "object",
+                                    "example": {
+                                      "start_date": "2024-01-01T00:00:00Z",
+                                      "end_date": "2024-12-31T23:59:59Z",
+                                      "participation": "active"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "400": {
+                      "description": "Error responses for various scenarios",
+                      "content": {
+                        "application/json": {
+                          "schema": {
+                            "type": "object",
+                            "properties": {
+                              "success": { "type": "boolean", "example": false },
+                              "error": { "type": "string", "example": "no experiment found with provided name" }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "401": {
+                      "description": "Unauthorized - Authentication required",
+                      "content": {
+                        "application/json": {
+                          "schema": {
+                            "type": "object",
+                            "properties": {
+                              "success": { "type": "boolean", "example": false },
+                              "error": { "type": "string", "example": "unauthorized user" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+            }
+        },
+        "/services/widgets/offer":{
+            "get": {
+                "tags": [
+                    "Widgets"
+                ],
+                "summary": "Cache Offers",
+                "description": "Cache Offers",
+                "operationId": "get-services-for-cache-offers",
+                "requestBody": {
+                    "required":true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_id"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "user":{
+                                        "type":"object",
+                                        "properties":{
+                                            "user_id":{
+                                                "type":"integer"
+
+                                            }
+                                            
+                                        }
+                                }
+                                }
+                            },
+                            "example": {
+                                "user":{
+                                    "user_id": "integer"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters":[
+                    {
+                        "name":"page",
+                        "in":"query",
+                        "required":false,
+                        "schema":{
+                            "type":"string",
+                            "example":"home"
+                        },
+                        "description":"an optional parameter to specify the page of offer,if not provided defaults to home"
+                    },
+                    {
+                        "name":"platform",
+                        "in":"query",
+                        "required":false,
+                        "schema":{
+                            "type":"string",
+                            "example":"android"
+                        },
+                        "description":"the platform from which the request made"
+                    },
+                    {
+                        "name":"version",
+                        "in":"query",
+                        "required":false,
+                        "schema":{
+                            "type":"string",
+                            "example":"1.0"
+                        },
+                        "description":"version"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                      "description": "Offers retrieved successfully",
+                      "content": {
+                        "application/json": {
+                          "schema": {
+                            "type": "object",
+                            "properties": {
+                              "success": {
+                                "type": "boolean",
+                                "example": true
+                              },
+                              "data": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "enum": ["general", "user", "experiment"],
+                                      "description": "Type of offer",
+                                      "example": "general"
+                                    },
+                                    "page": {
+                                      "type": "string",
+                                      "enum": ["home", "listing"],
+                                      "description": "Page associated with the offer",
+                                      "example": "home"
+                                    },
+                                    "name": {
+                                      "type": "string",
+                                      "description": "Name of the offer",
+                                      "example": "Special Discount"
+                                    },
+                                    "unique_key": {
+                                      "type": "string",
+                                      "description": "Unique identifier for the offer",
+                                      "example": "special_discount_001"
+                                    },
+                                    "sort_order": {
+                                      "type": "integer",
+                                      "description": "Display order of the offer",
+                                      "example": 1
+                                    },
+                                    "content": {
+                                      "type": "object",
+                                      "description": "Offer content in JSON format",
+                                      "properties": {
+                                        "title": {
+                                          "type": "string",
+                                          "example": "50% off on your first purchase"
+                                        },
+                                        "details": {
+                                          "type": "string",
+                                          "example": "Valid for new users only"
+                                        }
+                                      }
+                                    },
+                                    "active": {
+                                      "type": "boolean",
+                                      "description": "Indicates if the offer is active",
+                                      "example": true
+                                    }
+                                  }
+                                }
+                              },
+                              "error": {
+                                "type": "string",
+                                "example": ""
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "401": {
+                      "description": "Unauthorized",
+                      "content": {
+                        "application/json": {
+                          "schema": {
+                            "type": "object",
+                            "properties": {
+                              "success": {
+                                "type": "boolean",
+                                "example": false
+                              },
+                              "data": {
+                                "type": "null",
+                                "example": null
+                              },
+                              "error": {
+                                "type": "string",
+                                "example": "Unauthorized user"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+            }
+        },
+        "/services/widgets/check-wa-opted":{
+            "get": {
+                "tags": [
+                    "Widgets"
+                ],
+                "summary": "Check Whatsapp is Opeted or not",
+                "description": "Check Whatsapp is Opeted or not",
+                "operationId": "get-services-for-check-wa-opted",
+                "parameters":[
+                    {
+                        "name":"phone",
+                        "in":"query",
+                        "required":true,
+                        "schema":{
+                            "type":"string",
+                            "example":"1234567890"
+                        },
+                        "description":"phone no. for check whatsapp opted for that number or not"
+                    }
+                ],
+                "requestBody": {
+                    "required":false
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content":{
+                            "application/json":{
+                                "schema":{
+                                    "type":"object",
+                                    "properties":{
+                                        "success":{
+                                            "type":"integer"
+                                        },
+                                        "error":{
+                                            "type":"string"
+                                        },
+                                        "data":{
+                                            "type":"object",
+                                            "properties":{
+                                                "opted":{
+                                                    "type":"boolean"
+                                                },
+                                                "exists":{
+                                                    "type":"boolean"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "example":{
+                                        "data": {
+                                            "opted": true,
+                                            "exists": true
+                                        },
+                                        "success": true,
+                                        "error": ""
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error responses for various scenarios",
+                        "content": {
+                          "application/json": {
+                            "schema": {
+                              "type": "object",
+                              "properties": {
+                                "success": { "type": "boolean", "example": false },
+                                "error": { "type": "string", "example": "number not provided" }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "401": {
+                        "description": "Unauthorized - Authentication required",
+                        "content": {
+                          "application/json": {
+                            "schema": {
+                              "type": "object",
+                              "properties": {
+                                "success": { "type": "boolean", "example": false },
+                                "error": { "type": "string", "example": "unauthorized user" }
+                              }
+                            }
+                          }
+                        }
+                      }
+                }
+            }
+        },
+        "/services/widgets/sponsor-ads/journey-card": {
+            "get": {
+                "tags": [
+                    "Widgets"
+                ],
+                "summary": "Get Journey Card Sponser Ads",
+                "description": "Get Journey Card Sponser Ads",
+                "operationId": "get-services-for-sponsor-ads-journey-card",
+                "requestBody": {
+                    "required":false
+                },
+                "responses": {
+                    "200": {
+                        "description": "return data of sponser ads in journey card page from cache using key"
+                    }
+                }
+            }
+        },
+        "/services/widgets/sponsor-ads/running-status": {
+            "get": {
+                "tags": [
+                    "Widgets"
+                ],
+                "summary": "Get Running Status page Sponser Ads",
+                "description": "Get Running Status page Sponser Ads",
+                "operationId": "get-services-for-sponsor-ads-running-status",
+                "requestBody": {
+                    "required":false
+                },
+                "responses": {
+                    "200": {
+                        "description": "return data of sponser ads in running status page from cache using key"
+                    }
+                }
+            }
+        },
+        "/services/widgets/sponsor-ads/pnr": {
+            "get": {
+                "tags": [
+                    "Widgets"
+                ],
+                "summary": "Get Pnr Page Sponser Ads",
+                "description": "Get Pnr Page Sponser Ads",
+                "operationId": "get-services-for-sponsor-ads-pnr",
+                "requestBody": {
+                    "required":false
+                },
+                "responses": {
+                    "200": {
+                        "description": "return data of sponser ads in pnr page from cache using key"
+                    }
+                }
+            }
+        },
+        "/services/tm-cash/transactions/": {
+            "get": {
+                "tags": [
+                    "tm-cash"
+                ],
+                "summary": "Retrieve a list of transactions",
+                "description": "Get a paginated, grouped, and sorted list of transactions for the authenticated user.",
+                "operationId": "get-services-for-tm-cash-transactions",
+                "parameters": [
+                    {
+                      "name": "page",
+                      "in": "query",
+                      "required": false,
+                      "schema": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "description": "Page number for pagination"
+                    }
+                  ],
+                  "responses": {
+                    "200": {
+                      "description": "A list of transactions",
+                      "content": {
+                        "application/json": {
+                          "schema": {
+                            "type": "object",
+                            "properties": {
+                              "count": {
+                                "type": "integer",
+                                "example": 25
+                              },
+                              "next": {
+                                "type": "string",
+                                "nullable": true,
+                                "example": "/transactions/?page=2"
+                              },
+                              "previous": {
+                                "type": "string",
+                                "nullable": true,
+                                "example": null
+                              },
+                              "results": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "amount": {
+                                      "type": "integer",
+                                      "example": 50
+                                    },
+                                    "transaction_type": {
+                                      "type": "string",
+                                      "enum": ["CREDIT", "DEBIT", "EXPIRE", "REFUND"],
+                                      "example": "CREDIT"
+                                    },
+                                    "title": {
+                                      "type": "string",
+                                      "example": "Added for using referral code"
+                                    },
+                                    "subtitle": {
+                                      "type": "string",
+                                      "example": "referral_code_used"
+                                    },
+                                    "created_at": {
+                                      "type": "string",
+                                      "format": "date-time",
+                                      "example": "2020-03-27 11:27:28.256480"
+                                    },
+                                    "text_below_amount": {
+                                      "type": "string",
+                                      "example": "Expires Sat, Nov 09"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "401": {
+                      "description": "Unauthorized",
+                      "content": {
+                        "application/json": {
+                          "schema": {
+                            "type": "object",
+                            "properties": {
+                              "detail": {
+                                "type": "string",
+                                "example": "Authentication credentials were not provided."
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+            }
+        },
+        "/services/tm-cash/balance-breakup": {
+            "get": {
+                "tags": [
+                    "tm-cash"
+                ],
+                "summary": "Fetch the balance breakup and total balance for the authenticated user",
+                "description": "Get the balance breakup and total balance for the authenticated user",
+                "operationId": "get-services-for-tm-cash-balance-breakup",
+                "parameters":[
+                    {
+                        "name":"version",
+                        "in":"query",
+                        "required":true,
+                        "schema":{
+                            "type":"string",
+                            "example":"1.0"
+                        },
+                        "description":"version"
+                    },
+                    {
+                        "name":"platform",
+                        "in":"query",
+                        "required":true,
+                        "schema":{
+                            "type":"string",
+                            "example":"android"
+                        },
+                        "description":"platform"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                      "description": "Successful response with balance details",
+                      "content": {
+                        "application/json": {
+                          "example": {
+                            "total": 5000,
+                            "balances": [
+                              {
+                                "balance": 3000,
+                                "expiry": "2024-12-31T23:59:59"
+                              },
+                              {
+                                "balance": 2000,
+                                "expiry": "2025-06-30T23:59:59"
+                              }
+                            ]
+                          },
+                          "schema": {
+                            "type": "object",
+                            "properties": {
+                              "total": {
+                                "type": "integer",
+                                "description": "Total balance available for the user"
+                              },
+                              "balances": {
+                                "type": "array",
+                                "description": "Detailed balance breakup for the user",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "balance": {
+                                      "type": "integer",
+                                      "description": "Individual balance for a specific type"
+                                    },
+                                    "expiry": {
+                                      "type": "string",
+                                      "format": "date-time",
+                                      "description": "Expiry date and time for this balance"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "401": {
+                      "description": "Unauthorized, invalid or missing authentication"
+                    }
+                  }
+            }
         }
-      }
+    ,
+    "components":{
+        "headers":{
+            "Version":{
+                "description":"version",
+                "type":"string",
+                "example":"1.0"
+            },
+            "platform":{
+                "description":"platform",
+                "type":"string",
+                "example":"android"
+            }
+        }
     }
-  },
-  "components": {
-    "securitySchemes": {
-      "BearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
-      }
-    }
-  }
 }
