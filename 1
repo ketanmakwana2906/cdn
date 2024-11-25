@@ -1,23 +1,34 @@
 import hashlib
-import uuid
+import requests
 
-def generate_transaction_id():
-    return str(uuid.uuid4())
-
-def generate_vpa_hash(key, txnid, amount, productinfo, firstname, email, salt):
-    input_string = f"{key}|{txnid}|{amount}|{productinfo}|{firstname}|{email}|||||||||||{salt}"
+def generate_vpa_hash(key, command, var1, salt):
+    input_string = f"{key}|{command}|{var1}|{salt}"
     hash_object = hashlib.sha512(input_string.encode())
     return hash_object.hexdigest()
 
 # Replace these placeholder values with your actual values
 key = "yourActualKey"
-salt = "yourActualSalt"
-txnid = generate_transaction_id()
-amount = "10.00"
-productinfo = "Test Product"
-firstname = "John"
-email = "john@example.com"
+salt = "your32CharacterSalt"
+command = "validateVPA"
+var1 = "testvpa@upi"  # Replace with the actual VPA you want to validate
 
-vpa_hash = generate_vpa_hash(key, txnid, amount, productinfo, firstname, email, salt)
-print(f"Generated Transaction ID: {txnid}")
-print(f"Generated VPA Hash: {vpa_hash}")
+# Generate the hash
+vpa_hash = generate_vpa_hash(key, command, var1, salt)
+
+# API endpoint for VPA validation
+url = "https://info.payu.in/merchant/postservice.php?form=2"
+
+# Data payload for the API request
+data = {
+    "key": key,
+    "command": command,
+    "var1": var1,
+    "hash": vpa_hash
+}
+
+# Make the API request
+response = requests.post(url, data=data)
+
+# Print the response
+print("Response Status Code:", response.status_code)
+print("Response JSON:", response.json())
