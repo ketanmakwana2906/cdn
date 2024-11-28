@@ -1,37 +1,37 @@
 SELECT 
     t.code, t.route, t.name, t.short_name, t.type, t.class, t.doo, t.description, ts1.day, 
-    c.name AS origin, tso.code AS origin_code, tso.name AS origin_station, 
-    c.name AS dest, tsd.code AS dest_code, tsd.name AS dest_station, 
-    ts1.depart_time, ts1.delay AS origin_delay, ts2.arrive_time, ts2.delay AS dest_delay, 
+    c.name AS origin, tso.code AS origin_code, tso.name AS origin_station, c.name AS dest, 
+    tsd.code AS dest_code, tsd.name AS dest_station, ts1.depart_time, ts1.delay AS origin_delay, 
+    ts2.arrive_time, ts2.delay AS dest_delay, 
     CAST(TIME_FORMAT(TIMEDIFF(
-        CONCAT(DATE(DATE_ADD(NOW(), INTERVAL ts2.day DAY)), ' ', ts2.arrive_time), 
-        CONCAT(DATE(DATE_ADD(NOW(), INTERVAL ts1.day DAY)), ' ', ts1.depart_time)
+        CONCAT(DATE(DATE_ADD(NOW(), INTERVAL ts2.day DAY)), " ", ts2.arrive_time), 
+        CONCAT(DATE(DATE_ADD(NOW(), INTERVAL ts1.day DAY)), " ", ts1.depart_time)
     ), '%H:%i') AS CHAR) AS duration, 
     CAST(TIMEDIFF(ts1.depart_time, ts1.arrive_time) AS CHAR) AS origin_halt, 
     (ts2.distance - ts1.distance) AS distance, 
-    tso.city_id, tsd.city_id, t.origin_id, t.dest_id, 
-    t.distance AS total_distance, t.pantry_car 
+    tso.city_id, tsd.city_id, t.origin_id, t.dest_id, t.distance AS total_distance, t.pantry_car 
 FROM 
-    train_schedule ts1
-JOIN 
-    train_schedule ts2 ON ts1.train_id = ts2.train_id 
+    train_schedule ts1, 
+    train_schedule ts2, 
+    train t, 
+    train_station tso, 
+    train_station tsd, 
+    city c 
+WHERE 
+    t.class != 'NULL' 
+    AND tso.id = ts1.train_station_id 
+    AND tsd.id = ts2.train_station_id 
+    AND ts1.stops = 1 
+    AND ts2.stops = 1 
+    AND ts1.train_id = ts2.train_id 
     AND ts1.distance < ts2.distance 
     AND ts1.day <= ts2.day 
     AND ts1.route = ts2.route 
-JOIN 
-    train t ON t.id = ts1.train_id 
-    AND t.is_active = 1 
-    AND t.class IS NOT NULL 
-JOIN 
-    train_station tso ON tso.id = ts1.train_station_id 
-JOIN 
-    train_station tsd ON tsd.id = ts2.train_station_id 
-JOIN 
-    city c ON tso.city_id = c.id AND tsd.city_id = c.id 
-WHERE 
-    ts1.stops = 1 
-    AND ts2.stops = 1 
+    AND t.id = ts1.train_id 
+    AND tso.city_id = c.id 
+    AND tsd.city_id = c.id 
     AND tso.code = 8376 
     AND tsd.code = 8376 
+    AND t.is_active = 1 
 ORDER BY 
     t.route;
