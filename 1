@@ -1,34 +1,35 @@
-import hashlib
-import requests
+select 
+        t.code, t.route, t.name, t.short_name, t.type, t.class, t.doo, t.description, ts1.day, 
+        c.name as origin,tso.code as origin_code, tso.name as origin_station, c.name as dest,
+        tsd.code as dest_code, tsd.name as dest_station, ts1.depart_time, ts1.delay as origin_delay,
+        ts2.arrive_time, ts2.delay as dest_delay, 
+        CAST(time_format(TIMEDIFF(concat(date(DATE_ADD(NOW(), INTERVAL ts2.day DAY)), " ", ts2.arrive_time), concat(date(DATE_ADD(NOW(), INTERVAL ts1.day DAY)), " ", ts1.depart_time)), '%H:%i')as CHAR) as duration,
+        CAST(TIMEDIFF(ts1.depart_time, ts1.arrive_time) as CHAR) as origin_halt,
+        (ts2.distance-ts1.distance) as distance, 
+        tso.city_id,tsd.city_id,t.origin_id,t.dest_id, t.distance as total_distance, t.pantry_car 
+        from train_schedule ts1,
+        train_schedule ts2,
+        train t,
+        train_station tso,
+        train_station tsd,
+        city c 
+        where 
+            t.class != 'NULL'
+            and t.class != 'NULL'
+            tso.id = ts1.train_station_id and 
+            tsd.id = ts2.train_station_id and 
+            ts1.stops=1 and 
+            ts2.stops=1 and 
+            ts1.train_id=ts2.train_id 
+            and ts1.distance < ts2.distance 
+            and ts1.day <= ts2.day 
+            and ts1.route = ts2.route 
+            and t.id=ts1.train_id 
+            and tso.city_id=c.id 
+            and tsd.city_id=c.id 
+            and tso.code=8376
+            and tsd.code=8376
+            and t.is_active = 1
+        order by t.route;
 
-def generate_vpa_hash(key, command, var1, salt):
-    input_string = f"{key}|{command}|{var1}|{salt}"
-    hash_object = hashlib.sha512(input_string.encode())
-    return hash_object.hexdigest()
-
-# Replace these placeholder values with your actual values
-key = "yourActualKey"
-salt = "your32CharacterSalt"
-command = "validateVPA"
-var1 = "testvpa@upi"  # Replace with the actual VPA you want to validate
-
-# Generate the hash
-vpa_hash = generate_vpa_hash(key, command, var1, salt)
-
-# API endpoint for VPA validation
-url = "https://info.payu.in/merchant/postservice.php?form=2"
-
-# Data payload for the API request
-data = {
-    "key": key,
-    "command": command,
-    "var1": var1,
-    "hash": vpa_hash
-}
-
-# Make the API request
-response = requests.post(url, data=data)
-
-# Print the response
-print("Response Status Code:", response.status_code)
-print("Response JSON:", response.json())
+    19:43:57	select          t.code, t.route, t.name, t.short_name, t.type, t.class, t.doo, t.description, ts1.day,          c.name as origin,tso.code as origin_code, tso.name as origin_station, c.name as dest,         tsd.code as dest_code, tsd.name as dest_station, ts1.depart_time, ts1.delay as origin_delay,         ts2.arrive_time, ts2.delay as dest_delay,          CAST(time_format(TIMEDIFF(concat(date(DATE_ADD(NOW(), INTERVAL ts2.day DAY)), " ", ts2.arrive_time), concat(date(DATE_ADD(NOW(), INTERVAL ts1.day DAY)), " ", ts1.depart_time)), '%H:%i')as CHAR) as duration,         CAST(TIMEDIFF(ts1.depart_time, ts1.arrive_time) as CHAR) as origin_halt,         (ts2.distance-ts1.distance) as distance,          tso.city_id,tsd.city_id,t.origin_id,t.dest_id, t.distance as total_distance, t.pantry_car          from train_schedule ts1,         train_schedule ts2,         train t,         train_station tso,         train_station tsd,         city c          where              t.class != 'NULL'             and t.class != 'NULL'             tso.id = ts1.train_station_id and              tsd.id = ts2.train_station_id and              ts1.stops=1 and              ts2.stops=1 and              ts1.train_id=ts2.train_id              and ts1.distance < ts2.distance              and ts1.day <= ts2.day              and ts1.route = ts2.route              and t.id=ts1.train_id              and tso.city_id=c.id              and tsd.city_id=c.id              and tso.code=8376             and tsd.code=8376             and t.is_active = 1         order by t.route	Error Code: 1064. You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'tso.id = ts1.train_station_id and              tsd.id = ts2.train_station_id and' at line 19	0.0020 sec
