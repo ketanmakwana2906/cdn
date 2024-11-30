@@ -1,30 +1,86 @@
-tarefundaccountdetails = TaRefundAccountDetails(user_id=114969201,merchant_ref="729611a1-0-TM120612204884-114969201",batch_ref="pay_OLRG2lnpae0JiR",note="note",tm_booking_id="123",refund_mode="UPI",phone="123",upi_id="kk@okaxis",pnr_number="2116275642")
->>> tarefundaccountdetails.save()
-Traceback (most recent call last):
-  File "<console>", line 1, in <module>
-  File "/usr/src/Trainman/TripAssurance/models.py", line 526, in save
-    super(TaRefundAccountDetails, self).save(*args, **kwargs)
-  File "/usr/local/lib/python3.9/site-packages/django/db/models/base.py", line 807, in save
-    self.save_base(using=using, force_insert=force_insert,
-  File "/usr/local/lib/python3.9/site-packages/django/db/models/base.py", line 846, in save_base
-    post_save.send(
-  File "/usr/local/lib/python3.9/site-packages/django/dispatch/dispatcher.py", line 191, in send
-    return [
-  File "/usr/local/lib/python3.9/site-packages/django/dispatch/dispatcher.py", line 192, in <listcomp>
-    (receiver, receiver(signal=self, sender=sender, **named))
-  File "/usr/src/Trainman/TripAssurance/models.py", line 556, in send_booking_refund_details_whatsapp
-    from irctc.booking_api import confirm_bank_details_whatsapp, confirm_upi_details_whatsapp
-  File "/usr/src/Trainman/irctc/booking_api.py", line 37, in <module>
-    from irctc.payment_api import Payment, GatewayRefund, GatewayRefundSerializer
-  File "/usr/src/Trainman/irctc/payment_api.py", line 39, in <module>
-    from irctc.utils import get_pg_base_and_tax, same_pg_charges_version
-  File "/usr/src/Trainman/irctc/utils.py", line 10, in <module>
-    from TmCash.tm_cash import issue_tm_cash_for_irctc_link
-  File "/usr/src/Trainman/TmCash/tm_cash.py", line 15, in <module>
-    from User.user_auth import User
-  File "/usr/src/Trainman/User/user_auth.py", line 33, in <module>
-    from Referral.referral import Referral
-  File "/usr/src/Trainman/Referral/referral.py", line 19, in <module>
-    from TmCash.tm_cash import TrainmanCash
-ImportError: cannot import name 'TrainmanCash' from partially initialized module 'TmCash.tm_cash' (most likely due to a circular import) (/usr/src/Trainman/TmCash/tm_cash.py)
->>> 
+def validate_payu_vpa(self, vpa):
+    url = "https://uatoneapi.payu.in/payout/merchant/validateVpa"
+    access_token = get_pay_u_access_token()
+    if not access_token:
+        return False, "access token not generated"
+    params = {
+        "vpa": vpa
+    }
+    headers = {
+        "accept": "application/json",
+        "payoutMerchantId": settings.PAYU_URL_PAYMENT_MERCHANT_ID,
+        "Content-Type": "application/json",
+        "authorization": "Bearer {}".format(access_token)
+    }
+    response = requests.post(url, headers=headers, params=params).json()
+    #return response.get("status")
+    try:
+        response = requests.post(url, headers=headers, params=params).json()
+        if response.status_code == 200:
+            result = response.get("status")
+            if result == 1:
+                raise ValidationError(f"The UPI ID '{vpa}' is invalid")
+        else:
+            raise ValidationError("api not reachable")
+    except requests.exceptions.RequestException as e:
+        raise ValidationError(f"Error validating upi id: {e}")
+
+
+class TaRefundAccountDetails(models.Model):
+    refund_choices = [
+        ("Bank Account", "Bank Account"),
+        ("UPI", "UPI"),
+    ]
+    user_id = models.IntegerField()
+    merchant_ref = models.CharField(max_length=40, null=True, blank=True)
+    batch_ref = models.CharField(max_length=40, null=True, blank=True)
+    note = models.TextField(default="[]", null=True, blank=True)
+    tm_booking_id = models.CharField(max_length=16, null=True, blank=True)
+    refund_mode = models.CharField(choices=refund_choices, default="UPI", max_length=14)
+    ac_number = models.CharField(null=True, blank=True, max_length=50)
+    ifsc_code = models.CharField(max_length=20, null=True, blank=True)
+    ac_holder_name = models.CharField(max_length=50, null=True, blank=True)
+    phone = models.CharField(max_length=20)
+    upi_id = models.CharField(max_length=50, null=True, blank=True)
+    pnr_number = models.CharField(max_length=15, null=True, blank=True)
+    retry = models.BooleanField(default=False)  # for adding beneficiary data only
+    initiated = models.BooleanField(default=False)  # refund API is successful and payu acknowledged the transaction
+    refunded = models.BooleanField(default=False)
+    amount_refunded = models.FloatField(default=0.0, validators=[MinValueValidator(0.0)])
+    wa_send = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Trip Assurance User Account Details'
+        verbose_name_plural = 'Trip Assurance User Account Details'
+        db_table = 'ta_refund_account_details'
+
+    def clean(self):
+        validate_payu_vpa(self.upi_id)
+
+    def save(self, *args, **kwargs):
+        if self.retry == True:
+            self.refund_mode = None
+            self.ifsc_code = None
+            self.upi_id = None
+            self.ac_number = None
+            self.ac_holder_name = None
+
+        if not self.merchant_ref:
+            self.merchant_ref = str(uuid.uuid4())[:10] + "-" + self.tm_booking_id + "-" + str(self.user_id)
+
+        if not self.batch_ref:
+            from irctc.models import Booking
+            from irctc.booking_api import get_payment
+            payment_obj = get_payment(Booking.objects.get(tm_booking_id=self.tm_booking_id))
+            self.batch_ref = payment_obj.gateway_payment_id if payment_obj else "No payment id"
+
+        super(TaRefundAccountDetails, self).save(*args, **kwargs)
+
+    def __unicode__(self):
+        return str(self.tm_booking_id) if self.tm_booking_id else None
+
+    def __str__(self):
+        return str(self.tm_booking_id) if self.tm_booking_id else None
+
