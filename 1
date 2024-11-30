@@ -1,37 +1,30 @@
-SELECT 
-    t.code, t.route, t.name, t.short_name, t.type, t.class, t.doo, t.description, ts1.day, 
-    c.name AS origin, tso.code AS origin_code, tso.name AS origin_station, c.name AS dest, 
-    tsd.code AS dest_code, tsd.name AS dest_station, ts1.depart_time, ts1.delay AS origin_delay, 
-    ts2.arrive_time, ts2.delay AS dest_delay, 
-    CAST(TIME_FORMAT(TIMEDIFF(
-        CONCAT(DATE(DATE_ADD(NOW(), INTERVAL ts2.day DAY)), " ", ts2.arrive_time), 
-        CONCAT(DATE(DATE_ADD(NOW(), INTERVAL ts1.day DAY)), " ", ts1.depart_time)
-    ), '%H:%i') AS CHAR) AS duration, 
-    CAST(TIMEDIFF(ts1.depart_time, ts1.arrive_time) AS CHAR) AS origin_halt, 
-    (ts2.distance - ts1.distance) AS distance, 
-    tso.city_id, tsd.city_id, t.origin_id, t.dest_id, t.distance AS total_distance, t.pantry_car 
-FROM 
-    train_schedule ts1, 
-    train_schedule ts2, 
-    train t, 
-    train_station tso, 
-    train_station tsd, 
-    city c 
-WHERE 
-    t.class != 'NULL' 
-    AND tso.id = ts1.train_station_id 
-    AND tsd.id = ts2.train_station_id 
-    AND ts1.stops = 1 
-    AND ts2.stops = 1 
-    AND ts1.train_id = ts2.train_id 
-    AND ts1.distance < ts2.distance 
-    AND ts1.day <= ts2.day 
-    AND ts1.route = ts2.route 
-    AND t.id = ts1.train_id 
-    AND tso.city_id = c.id 
-    AND tsd.city_id = c.id 
-    AND tso.code = 8376 
-    AND tsd.code = 8376 
-    AND t.is_active = 1 
-ORDER BY 
-    t.route;
+tarefundaccountdetails = TaRefundAccountDetails(user_id=114969201,merchant_ref="729611a1-0-TM120612204884-114969201",batch_ref="pay_OLRG2lnpae0JiR",note="note",tm_booking_id="123",refund_mode="UPI",phone="123",upi_id="kk@okaxis",pnr_number="2116275642")
+>>> tarefundaccountdetails.save()
+Traceback (most recent call last):
+  File "<console>", line 1, in <module>
+  File "/usr/src/Trainman/TripAssurance/models.py", line 526, in save
+    super(TaRefundAccountDetails, self).save(*args, **kwargs)
+  File "/usr/local/lib/python3.9/site-packages/django/db/models/base.py", line 807, in save
+    self.save_base(using=using, force_insert=force_insert,
+  File "/usr/local/lib/python3.9/site-packages/django/db/models/base.py", line 846, in save_base
+    post_save.send(
+  File "/usr/local/lib/python3.9/site-packages/django/dispatch/dispatcher.py", line 191, in send
+    return [
+  File "/usr/local/lib/python3.9/site-packages/django/dispatch/dispatcher.py", line 192, in <listcomp>
+    (receiver, receiver(signal=self, sender=sender, **named))
+  File "/usr/src/Trainman/TripAssurance/models.py", line 556, in send_booking_refund_details_whatsapp
+    from irctc.booking_api import confirm_bank_details_whatsapp, confirm_upi_details_whatsapp
+  File "/usr/src/Trainman/irctc/booking_api.py", line 37, in <module>
+    from irctc.payment_api import Payment, GatewayRefund, GatewayRefundSerializer
+  File "/usr/src/Trainman/irctc/payment_api.py", line 39, in <module>
+    from irctc.utils import get_pg_base_and_tax, same_pg_charges_version
+  File "/usr/src/Trainman/irctc/utils.py", line 10, in <module>
+    from TmCash.tm_cash import issue_tm_cash_for_irctc_link
+  File "/usr/src/Trainman/TmCash/tm_cash.py", line 15, in <module>
+    from User.user_auth import User
+  File "/usr/src/Trainman/User/user_auth.py", line 33, in <module>
+    from Referral.referral import Referral
+  File "/usr/src/Trainman/Referral/referral.py", line 19, in <module>
+    from TmCash.tm_cash import TrainmanCash
+ImportError: cannot import name 'TrainmanCash' from partially initialized module 'TmCash.tm_cash' (most likely due to a circular import) (/usr/src/Trainman/TmCash/tm_cash.py)
+>>> 
