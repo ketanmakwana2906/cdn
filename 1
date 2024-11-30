@@ -1,86 +1,33 @@
-def validate_payu_vpa(self, vpa):
+def validate_payu_vpa(vpa):
     url = "https://uatoneapi.payu.in/payout/merchant/validateVpa"
     access_token = get_pay_u_access_token()
     if not access_token:
-        return False, "access token not generated"
-    params = {
-        "vpa": vpa
-    }
+        raise ValidationError("Access token not generated")
+
+    params = {"vpa": vpa}
     headers = {
         "accept": "application/json",
         "payoutMerchantId": settings.PAYU_URL_PAYMENT_MERCHANT_ID,
         "Content-Type": "application/json",
-        "authorization": "Bearer {}".format(access_token)
+        "authorization": f"Bearer {access_token}",
     }
-    response = requests.post(url, headers=headers, params=params).json()
-    #return response.get("status")
+
     try:
-        response = requests.post(url, headers=headers, params=params).json()
+        response = requests.post(url, headers=headers, params=params)
         if response.status_code == 200:
-            result = response.get("status")
-            if result == 1:
+            result = response.json().get("status")
+            if result == 1:  # Assuming 1 indicates an invalid UPI ID
                 raise ValidationError(f"The UPI ID '{vpa}' is invalid")
+            return True  # UPI ID is valid
         else:
-            raise ValidationError("api not reachable")
+            raise ValidationError("API not reachable or returned a non-200 status")
     except requests.exceptions.RequestException as e:
-        raise ValidationError(f"Error validating upi id: {e}")
+        raise ValidationError(f"Error validating UPI ID: {e}")
 
 
-class TaRefundAccountDetails(models.Model):
-    refund_choices = [
-        ("Bank Account", "Bank Account"),
-        ("UPI", "UPI"),
-    ]
-    user_id = models.IntegerField()
-    merchant_ref = models.CharField(max_length=40, null=True, blank=True)
-    batch_ref = models.CharField(max_length=40, null=True, blank=True)
-    note = models.TextField(default="[]", null=True, blank=True)
-    tm_booking_id = models.CharField(max_length=16, null=True, blank=True)
-    refund_mode = models.CharField(choices=refund_choices, default="UPI", max_length=14)
-    ac_number = models.CharField(null=True, blank=True, max_length=50)
-    ifsc_code = models.CharField(max_length=20, null=True, blank=True)
-    ac_holder_name = models.CharField(max_length=50, null=True, blank=True)
-    phone = models.CharField(max_length=20)
-    upi_id = models.CharField(max_length=50, null=True, blank=True)
-    pnr_number = models.CharField(max_length=15, null=True, blank=True)
-    retry = models.BooleanField(default=False)  # for adding beneficiary data only
-    initiated = models.BooleanField(default=False)  # refund API is successful and payu acknowledged the transaction
-    refunded = models.BooleanField(default=False)
-    amount_refunded = models.FloatField(default=0.0, validators=[MinValueValidator(0.0)])
-    wa_send = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = 'Trip Assurance User Account Details'
-        verbose_name_plural = 'Trip Assurance User Account Details'
-        db_table = 'ta_refund_account_details'
-
-    def clean(self):
+def clean(self):
+    if self.refund_mode == "UPI" and self.upi_id:
         validate_payu_vpa(self.upi_id)
-
-    def save(self, *args, **kwargs):
-        if self.retry == True:
-            self.refund_mode = None
-            self.ifsc_code = None
-            self.upi_id = None
-            self.ac_number = None
-            self.ac_holder_name = None
-
-        if not self.merchant_ref:
-            self.merchant_ref = str(uuid.uuid4())[:10] + "-" + self.tm_booking_id + "-" + str(self.user_id)
-
-        if not self.batch_ref:
-            from irctc.models import Booking
-            from irctc.booking_api import get_payment
-            payment_obj = get_payment(Booking.objects.get(tm_booking_id=self.tm_booking_id))
-            self.batch_ref = payment_obj.gateway_payment_id if payment_obj else "No payment id"
-
-        super(TaRefundAccountDetails, self).save(*args, **kwargs)
-
-    def __unicode__(self):
-        return str(self.tm_booking_id) if self.tm_booking_id else None
-
-    def __str__(self):
-        return str(self.tm_booking_id) if self.tm_booking_id else None
-
+    elif self.refund_mode == "UPI" and not self.upi_id:
+        raise ValidationError("UPI ID is required for UPI refund mode")
+        
