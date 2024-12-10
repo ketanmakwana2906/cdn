@@ -1,52 +1,49 @@
-def blog_list(request):
-    params = validate_request(request)
-    blogs = views.get_blog_list()[:50]
-    all_blogs = []
-    for blog in blogs:
-        this_blog = {
-                'title': blog.title,
-                'slug': blog.slug,
-                'shortDescription': blog.short_description,
-                'views': blog.views,
-                'author': str(blog.written_by),
-                'category': str(blog.category),
-                'headerImage': blog.get_header_image_url(),
-                'createdOn': blog.created_on,
-                }
-        all_blogs.append(this_blog)
-    response = {'blogs': all_blogs, 'success': True}
-    return JsonResponse(response)
+msg = """*Dear* {name},
 
-def blog_detail(request):
-    params = validate_request(request)
-    slug = request.GET.get('id')
-    current_blog, next_blog, prev_blog, random_blogs = views.get_blog_page(slug)
-    this_blog = {
-            'title': current_blog.title,
-            'slug': current_blog.slug,
-            'shortDescription': current_blog.short_description,
-            'content': appify(current_blog.content),
-            #'content': current_blog.content,
-            'keywords': current_blog.tags,
-            'views': current_blog.views,
-            'author': str(current_blog.written_by),
-            'category': str(current_blog.category),
-            'headerImage': current_blog.get_header_image_url(),
-            'createdOn': current_blog.created_on,
-            }
+Your train booking from *{from_name} ({from_code})* to *{reservation_upto_name} ({reservation_upto_code})* is confirmed. Below are your booking details:
 
-    response = {
-            'blog': this_blog, 
-            'next': next_blog.slug if next_blog else None, 
-            'prev':prev_blog.slug if prev_blog else None,
-            'random': [{
-                'slug': blog.slug,
-                'title': blog.title,
-                'desc': blog.short_description,
-                'views': blog.views,
-                'image': blog.get_header_image_url(),
-                } 
-                for blog in random_blogs],
-            'success': True,
-            }
-    return JsonResponse(response)
+*Booking Information:*
+- *Train:* {train}
+- *PNR:* {pnr}
+- *Quota:* {quota}
+- *Class:* {travel_class}
+- *Date of Journey:* {doj}
+- *Boarding Station:* {boardingStn}
+- *Boarding Time:* {departure_time}
+- *TM Booking ID:* {tm_booking_id}
+- *Amount Paid:* ₹ {amount}
+
+*Passenger Information:* 
+{passenger_string}
+
+For booking details, status checks, or cancellations, visit: https://trainman.page.link/booking
+
+*Additional Information:*
+- Order meals on Zomato using code *{food_coupon}* to get {zomato_offer_perc}% off.
+- Unlock Zomato Gold on this booking at: https://link.zomato.com/xqzv/gldamex?coupon_code={gold_coupon}
+
+For real-time train timings, contact Railway Station Enquiry at 139 or SMS RAIL to 139.
+
+Thank you for booking with us. Have a safe journey!
+""".format(
+    name=context.get('psgnDtlList')[0].get('passengerName'),
+    from_name=context.get('from_name'),
+    from_code=context.get('fromStn'),
+    reservation_upto_name=context.get('reservation_upto_name'),
+    reservation_upto_code=context.get('resvnUptoStn'),
+    pnr=context.get('pnrNumber'),
+    train=context.get('trainName') + ' (' + context.get('trainNumber') + ')',
+    quota=context.get('journeyQuota'),
+    travel_class=context.get('journeyClass'),
+    doj=context.get('journeyDate').strftime('%d-%m-%Y'),
+    boardingStn=context.get('boarding_name') + ' (' + context.get('boardingStn') + ')',
+    departure_time=departure_time,
+    tm_booking_id=context.get('tm_booking_id'),
+    amount=context.get('total_amount'),
+    passenger_string=passenger_string,
+    food_coupon=coupons[0],
+    zomato_offer_perc=settings.ZOMATO_OFFER_PERC,
+    gold_coupon=coupons[1]
+)
+
+print(msg)
