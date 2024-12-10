@@ -1,49 +1,12 @@
-msg = """*Dear* {name},
-
-Your train booking from *{from_name} ({from_code})* to *{reservation_upto_name} ({reservation_upto_code})* is confirmed. Below are your booking details:
-
-*Booking Information:*
-- *Train:* {train}
-- *PNR:* {pnr}
-- *Quota:* {quota}
-- *Class:* {travel_class}
-- *Date of Journey:* {doj}
-- *Boarding Station:* {boardingStn}
-- *Boarding Time:* {departure_time}
-- *TM Booking ID:* {tm_booking_id}
-- *Amount Paid:* ₹ {amount}
-
-*Passenger Information:* 
-{passenger_string}
-
-For booking details, status checks, or cancellations, visit: https://trainman.page.link/booking
-
-*Additional Information:*
-- Order meals on Zomato using code *{food_coupon}* to get {zomato_offer_perc}% off.
-- Unlock Zomato Gold on this booking at: https://link.zomato.com/xqzv/gldamex?coupon_code={gold_coupon}
-
-For real-time train timings, contact Railway Station Enquiry at 139 or SMS RAIL to 139.
-
-Thank you for booking with us. Have a safe journey!
-""".format(
-    name=context.get('psgnDtlList')[0].get('passengerName'),
-    from_name=context.get('from_name'),
-    from_code=context.get('fromStn'),
-    reservation_upto_name=context.get('reservation_upto_name'),
-    reservation_upto_code=context.get('resvnUptoStn'),
-    pnr=context.get('pnrNumber'),
-    train=context.get('trainName') + ' (' + context.get('trainNumber') + ')',
-    quota=context.get('journeyQuota'),
-    travel_class=context.get('journeyClass'),
-    doj=context.get('journeyDate').strftime('%d-%m-%Y'),
-    boardingStn=context.get('boarding_name') + ' (' + context.get('boardingStn') + ')',
-    departure_time=departure_time,
-    tm_booking_id=context.get('tm_booking_id'),
-    amount=context.get('total_amount'),
-    passenger_string=passenger_string,
-    food_coupon=coupons[0],
-    zomato_offer_perc=settings.ZOMATO_OFFER_PERC,
-    gold_coupon=coupons[1]
-)
-
-print(msg)
+ => ERROR [5/7] RUN yum install -y python2-devel.aarch64 libffi-devel openssl openssl-devel li  1.7s
+------
+ > [5/7] RUN yum install -y python2-devel.aarch64 libffi-devel openssl openssl-devel libjpeg-turbo-devel mariadb-connector-c-devel gcc make tzdata:
+1.075 Updating Subscription Management repositories.
+1.076 Unable to read consumer identity
+1.089 
+1.089 This system is not registered with an entitlement server. You can use subscription-manager to register.
+1.089 
+1.356 Last metadata expiration check: 0:00:21 ago on Tue Dec 10 09:58:25 2024.
+1.595 No match for argument: python2-devel.aarch64
+1.598 Package tzdata-2024b-4.el8.noarch is already installed.
+1.617 Error: Unable to find a match: python2-devel.aarch64
