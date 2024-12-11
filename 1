@@ -1,12 +1,22 @@
- => ERROR [5/7] RUN yum install -y python2-devel.aarch64 libffi-devel openssl openssl-devel li  1.7s
-------
- > [5/7] RUN yum install -y python2-devel.aarch64 libffi-devel openssl openssl-devel libjpeg-turbo-devel mariadb-connector-c-devel gcc make tzdata:
-1.075 Updating Subscription Management repositories.
-1.076 Unable to read consumer identity
-1.089 
-1.089 This system is not registered with an entitlement server. You can use subscription-manager to register.
-1.089 
-1.356 Last metadata expiration check: 0:00:21 ago on Tue Dec 10 09:58:25 2024.
-1.595 No match for argument: python2-devel.aarch64
-1.598 Package tzdata-2024b-4.el8.noarch is already installed.
-1.617 Error: Unable to find a match: python2-devel.aarch64
+import pandas as pd
+
+# Load the Excel file
+file_path = "coupons.xlsx"  # Replace with your Excel file name
+data = pd.read_excel(file_path)
+
+# Extract the coupon codes from the first column
+coupon_codes = data.iloc[:, 0].tolist()
+
+# SQL INSERT statement generation
+output_file = "insert_queries.sql"
+with open(output_file, "w") as f:
+    f.write("INSERT INTO marketing_zomato_gold_coupons (coupon_code, created_at, is_used, tm_booking_id, updated_at, user_id) VALUES\n")
+    for i, coupon in enumerate(coupon_codes):
+        query_part = f'("{coupon}", NOW(), FALSE, NULL, NULL, NULL)'
+        if i < len(coupon_codes) - 1:
+            query_part += ",\n"
+        else:
+            query_part += ";\n"
+        f.write(query_part)
+
+print(f"SQL queries written to {output_file}")
