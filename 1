@@ -1,1 +1,87 @@
-select t.code as train_code,t.name as train_name,t.doo, tsc.day, tsc.arrive_time, tsc.depart_time, CAST(TIME_FORMAT(tsc.halt, '%H:%i') as CHAR), tsc.platform from train t, train_station ts, train_schedule tsc, city where t.id=tsc.train_id and ts.id=tsc.train_station_id and city.id=ts.city_id and ts.code='CSTM' and tsc.stops=1 and t.is_active = 1 order by arrive_time;
+def send_wa_msg(phone, msg, header, type):
+    print("eneterd to send_wa_msg")
+    #To send a WA msg
+    try:
+        if settings.STAGING_FLAG and phone not in settings.TEST_NUMBER_FOR_SMS_AND_WA:
+            print("not sending wa for staging")
+            return
+        querystring = "password={password}&send_to={phone}&v={version}&format=json&msg_type=TEXT&method=SENDMESSAGE" \
+                    "&msg={msg}&isTemplate=true&header={header}".format(
+                        password=type.get('WA_PASSWORD'),
+                        phone=phone,
+                        msg=urllib.parse.quote_plus(msg),
+                        header=urllib.parse.quote_plus(header),
+                        version = settings.GUPSHUP_API_VERSION
+                    )
+        encrypted_data = encrypt(querystring, type)
+        
+        url = "https://media.smsgupshup.com/GatewayAPI/rest?userid={userid}&encrdata={encrypted_data}".format(
+            userid=type.get('WA_USER'),
+            encrypted_data=encrypted_data
+        )
+        
+        response = requests.get(url)
+        response.raise_for_status()
+        response = json.loads(response.text)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        logger.error("send_wa_msg: {}".format(str(e)))
+        return False
+    return True
+
+
+def encrypt(querystring, type):
+    #initialization vector/nonce
+    nonce = get_random_bytes(GCM_IV_LENGTH)
+    #decoding base64 key to byte array
+    decodedKey = decode_b64_key(type.get('WA_ENCRYPTION_KEY'))#urlsafe_b64decode(ENCRYPTION_KEY)
+
+    #converting original text to byte array
+    bytes_text = bytes(querystring, 'utf-8')
+    #Initializing Cipher AES/GCM/NoPadding
+    cipher = AES.new(decodedKey, AES.MODE_GCM, nonce=nonce, mac_len=GCM_TAG_LENGTH_BYTES)
+    #carrying out encryption
+    ciphertext, tag = cipher.encrypt_and_digest(bytes_text)
+    finalbytesbuffer = b"".join([nonce,ciphertext, tag])
+
+    #converting bytearray to url safe base64 format
+    return (urlsafe_b64encode(finalbytesbuffer).decode('utf-8'))
+
+def decode_b64_key(querystring):
+    #utility method that checks for padding before decoding the key
+    byte_key = bytes(querystring, 'utf-8')
+    missing_padding = 4-len(byte_key)% 4
+    if missing_padding:
+        byte_key += b'=' * missing_padding
+    return urlsafe_b64decode(byte_key)
+
+errror is :
+
+	
+binascii.Error: Invalid base64-encoded string: number of data characters (1) cannot be 1 more than a multiple of 4
+2024-12-13 17:03:26.334	
+    return binascii.a2b_base64(s)
+2024-12-13 17:03:26.334	
+  File "/usr/local/lib/python3.9/base64.py", line 87, in b64decode
+2024-12-13 17:03:26.333	
+    return b64decode(s)
+2024-12-13 17:03:26.333	
+  File "/usr/local/lib/python3.9/base64.py", line 133, in urlsafe_b64decode
+
+
+
+2024-12-13 17:03:26.333	
+    return urlsafe_b64decode(byte_key)
+2024-12-13 17:03:26.333	
+  File "/usr/src/Trainman/User/whatsapp.py", line 23, in decode_b64_key
+2024-12-13 17:03:26.333	
+    decodedKey = decode_b64_key(type.get('WA_ENCRYPTION_KEY'))#urlsafe_b64decode(ENCRYPTION_KEY)
+2024-12-13 17:03:26.333	
+  File "/usr/src/Trainman/User/whatsapp.py", line 30, in encrypt
+2024-12-13 17:03:26.333	
+    encrypted_data = encrypt(querystring, type)
+2024-12-13 17:03:26.333	
+  File "/usr/src/Trainman/User/whatsapp.py", line 113, in send_wa_msg
+2024-12-13 17:03:26.333	
+Traceback (most recent call last):
