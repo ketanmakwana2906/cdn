@@ -1,70 +1,45 @@
-Gupshup has shared below whatsapp template required to include this message in utility category. Currently this message is in promotion category.
+header = "Booking Confirmation"
 
-This template will be changed only for the Successful Booking Message. Any other template will not be changed. 
+msg = (
+    "*Dear * {traveller_name},\n\n"
+    "Your train booking from {from_station} ({from_station_code}) to {to_station} ({to_station_code}) is confirmed. "
+    "Below are your booking details:\n\n"
+    "*Booking Information:*\n\n"
+    "- *Train:* {train_details}\n"
+    "- *PNR:* {pnr}\n"
+    "- *Quota:* {quota}\n"
+    "- *Class:* {travel_class}\n"
+    "- *Date of Journey:* {journey_date}\n"
+    "- *Boarding Station:* {boarding_station}\n"
+    "- *Boarding Time:* {boarding_time}\n"
+    "- *TM Booking ID:* {tm_booking_id}\n"
+    "- *Amount Paid:* ₹ {amount_paid}\n\n"
+    "*Passenger Information:* {passenger_info}\n\n"
+    "For booking details, status checks, or cancellations, visit: https://trainman.page.link/booking\n\n"
+    "*Additional Information:*\n\n"
+    "- Order meals on Zomato using code {zomato_code}.\n"
+    "- Unlock {zomato_gold} on this booking at: {zomato_gold_code}\n\n"
+    "For real-time train timings, contact Railway Station Enquiry at 139 or SMS RAIL to 139.\n\n"
+    "Thank you for booking with us. Have a safe journey!"
+).format(
+    traveller_name="John Doe",
+    from_station="Mumbai Central",
+    from_station_code="BCT",
+    to_station="New Delhi",
+    to_station_code="NDLS",
+    train_details="12951 Rajdhani Express",
+    pnr="1234567890",
+    quota="General",
+    travel_class="2A",
+    journey_date="25th December 2024",
+    boarding_station="Bandra Terminus",
+    boarding_time="05:30 AM",
+    tm_booking_id="TM123456789",
+    amount_paid="1500",
+    passenger_info="John Doe / Confirmed / 2A / Berth 5 / Side Upper",
+    zomato_code="ZOM123",
+    zomato_gold="Zomato Gold Benefits",
+    zomato_gold_code="https://zomato.page.link/gold123"
+)
 
-
----------------------------------------------------------------------------------------
-Here's the updated templated to be used from now on:
-
-*Dear * {{1}},
-
-
-Your train booking from {{2}} ({{3}}) to {{4}} ({{5}}) is confirmed. Below are your booking details:
- 
-*Booking Information:*
-
-- *Train:* {{6}}
-
-- *PNR:* {{7}}
-
-- *Quota:* {{8}}
-
-- *Class:* {{9}}
-
-- *Date of Journey:* {{10}}
-
-- *Boarding Station:* {{11}}
-
-- *Boarding Time:* {{12}}
-
-- *TM Booking ID:* {{13}}
-
-- *Amount Paid:* ₹ {{14}}
-
-*Passenger Information:* {{15}}
-
-For booking details, status checks, or cancellations, visit: https://trainman.page.link/booking
- 
-
-*Additional Information:*
-
-- Order meals on Zomato using code {{16}}.
-
-- Unlock {{17}} on this booking at: {{18}}
-
-For real-time train timings, contact Railway Station Enquiry at 139 or SMS RAIL to 139.
-
-Thank you for booking with us. Have a safe journey!
-----------------------------------------------------------------------------------------
- 
-
-These are the variables mentioned in the template
-{{1}} - Traveller's Name (As saved in 1st Passenger's name)
-{{2}} - From Station
-{{3}} - From Station (code in caps)
-{{4}} - To Station
-{{5}} - To Station (code in caps)
-{{6}} - Train No. & Name
-{{7}} - PNR No.
-{{8}}- Quota (under which ticket is booked)
-{{9}} - Class (under which ticket is booked)
-{{10}} - Date of Journey
-{{11}} - Boarding Station
-{{12}} - Boarding Time
-{{13}} - TM Booking ID
-{{14}} - Paid Amount 
-{{15}} - Passenger Name/Ticket Status/ Class/Berth no./Berth Type
-{{16}} - Zomato Food Code affiliated to the PNR
-{{17}} - ZOMATO GOLD
-{{18}} - Zomato GOLD Code affiliated to the PNR
-
+send_wa_msg("6354888981", msg, header, WHATSAPP_CREDS.Transactional.value)
