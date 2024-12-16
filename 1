@@ -1,71 +1,38 @@
-def send_wa_msg(phone, msg, header, type):
-    print("eneterd to send_wa_msg")
-    #To send a WA msg
-    try:
-        if settings.STAGING_FLAG and phone not in settings.TEST_NUMBER_FOR_SMS_AND_WA:
-            print("not sending wa for staging")
-            return
-        querystring = "password={password}&send_to={phone}&v={version}&format=json&msg_type=TEXT&method=SENDMESSAGE" \
-                    "&msg={msg}&isTemplate=true&header={header}".format(
-                        password=type.get('WA_PASSWORD'),
-                        phone=phone,
-                        msg=urllib.parse.quote_plus(msg),
-                        header=urllib.parse.quote_plus(header),
-                        version = settings.GUPSHUP_API_VERSION
-                    )
-        encrypted_data = encrypt(querystring, type)
-        
-        url = "https://media.smsgupshup.com/GatewayAPI/rest?userid={userid}&encrdata={encrypted_data}".format(
-            userid=type.get('WA_USER'),
-            encrypted_data=encrypted_data
-        )
-        
-        response = requests.get(url)
-        response.raise_for_status()
-        response = json.loads(response.text)
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        logger.error("send_wa_msg: {}".format(str(e)))
-        return False
-    return True
+"*Dear * {{1}}, 
 
+Your train booking from {{2}} ({{3}}) to {{4}} ({{5}}) is confirmed. Below are your booking details:
+ 
+*Booking Information:*
 
-def encrypt(querystring, type):
-    #initialization vector/nonce
-    nonce = get_random_bytes(GCM_IV_LENGTH)
-    #decoding base64 key to byte array
-    decodedKey = decode_b64_key(type.get('WA_ENCRYPTION_KEY'))#urlsafe_b64decode(ENCRYPTION_KEY)
+- *Train:* {{6}}
 
-    #converting original text to byte array
-    bytes_text = bytes(querystring, 'utf-8')
-    #Initializing Cipher AES/GCM/NoPadding
-    cipher = AES.new(decodedKey, AES.MODE_GCM, nonce=nonce, mac_len=GCM_TAG_LENGTH_BYTES)
-    #carrying out encryption
-    ciphertext, tag = cipher.encrypt_and_digest(bytes_text)
-    finalbytesbuffer = b"".join([nonce,ciphertext, tag])
+- *PNR:* {{7}}
 
-    #converting bytearray to url safe base64 format
-    return (urlsafe_b64encode(finalbytesbuffer).decode('utf-8'))
+- *Quota:* {{8}}
 
-def decode_b64_key(querystring):
-    #utility method that checks for padding before decoding the key
-    byte_key = bytes(querystring, 'utf-8')
-    missing_padding = 4-len(byte_key)% 4
-    if missing_padding:
-        byte_key += b'=' * missing_padding
-    return urlsafe_b64decode(byte_key)
+- *Class:* {{9}}
 
-def confirm_upi_details_whatsapp():
-    header = "Refund Update"
-    msg = "Dear {user_name}, \n\nThis is regarding the submission of your bank details for the 3X refund. " \
-          "" \
-        "*Kindly verify the details*. \n\nUPI ID - {upi_id}\nMobile Number - {mobile_number}\n\nIn case of any changes, " \
-        "please contact our customer support on +917428518704 within 48 hours.\n\nTeam Trainman".format(
-            user_name = "neeji",
-            upi_id = "test@test@test",
-            mobile_number = "8888888888",
-            ketan = "ketan"
-        )
-    send_wa_msg("6354888981", msg, header, WHATSAPP_CREDS.Transactional.value)
+- *Date of Journey:* {{10}}
 
+- *Boarding Station:* {{11}}
+
+- *Boarding Time:* {{12}}
+
+- *TM Booking ID:* {{13}}
+
+- *Amount Paid:* ₹ {{14}}
+
+*Passenger Information:* {{15}} 
+
+For booking details, status checks, or cancellations, visit: https://trainman.page.link/booking
+ 
+
+*Additional Information:*
+
+- Order meals on Zomato using code {{16}}.
+
+- Unlock {{17}} on this booking at: {{18}}
+
+For real-time train timings, contact Railway Station Enquiry at 139 or SMS RAIL to 139.
+
+Thank you for booking with us. Have a safe journey!"
