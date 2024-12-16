@@ -1,38 +1,31 @@
-"*Dear * {{1}}, 
+header = 'BOOKING CONFIRMED !!'
 
-Your train booking from {{2}} ({{3}}) to {{4}} ({{5}}) is confirmed. Below are your booking details:
- 
-*Booking Information:*
-
-- *Train:* {{6}}
-
-- *PNR:* {{7}}
-
-- *Quota:* {{8}}
-
-- *Class:* {{9}}
-
-- *Date of Journey:* {{10}}
-
-- *Boarding Station:* {{11}}
-
-- *Boarding Time:* {{12}}
-
-- *TM Booking ID:* {{13}}
-
-- *Amount Paid:* ₹ {{14}}
-
-*Passenger Information:* {{15}} 
-
-For booking details, status checks, or cancellations, visit: https://trainman.page.link/booking
- 
-
-*Additional Information:*
-
-- Order meals on Zomato using code {{16}}.
-
-- Unlock {{17}} on this booking at: {{18}}
-
-For real-time train timings, contact Railway Station Enquiry at 139 or SMS RAIL to 139.
-
-Thank you for booking with us. Have a safe journey!"
+msg = "Dear *{name}*,\nYour train booking from *{from_name} ({from_code})* to *{reservation_upto_name} " \
+                "({reservation_upto_code})* is successful. Your PNR number is *{pnr}*.\n\n*Booking Information*\n" \
+                "Train: {train}\nPNR:{pnr}\nQuota:{quota}\nClass: {travel_class}\nDate of Journey: {doj}\n" \
+                "Boarding Station:{boardingStn}\nBoarding Time: {departure_time}\nTM Booking ID: {tm_booking_id}\n" \
+                "Amount Paid: ₹ {amount}\n\n*Passenger Information*\n{passenger_string}\n\nTo view booking details/" \
+                "check status/cancel, check: https://trainman.page.link/booking\n\n" \
+                "Freshly cooked hot meals delivered to your berth in train, order food on Zomato and use code- *{food_coupon}* to get {zomato_offer_perc} off.\n\n" \
+                "Unlock Zomato Gold on this booking, Visit- https://link.zomato.com/xqzv/gldamex?coupon_code={gold_coupon}\n\n" \
+                "Please check your Train’s current departure " \
+                "and arrival timings with the Railway Station Enquiry. Dial 139 or SMS RAIL to 139".format(
+                    name = 'xyz',
+                    from_name = 'xyz',
+                    from_code = 'xyz',
+                    reservation_upto_name = 'xyz',
+                    reservation_upto_code = 'xyz',
+                    pnr = 'xyz',
+                    train = 'xyz',
+                    quota = 'xyz',
+                    travel_class = 'xyz',
+                    doj = 'xyz',
+                    boardingStn = 'xyz',
+                    departure_time = 'xyz',
+                    tm_booking_id = 'xyz',
+                    amount = 'xyz',
+                    passenger_string = 'xyz',
+                    food_coupon = 'xyz',
+                    zomato_offer_perc = 'xyz',
+                    gold_coupon = 'xyz'
+                )         
