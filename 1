@@ -1,29 +1,3 @@
-import requests
-
-# Define your credentials
-WA_USER = 'your_user'
-WA_PASSWORD = 'your_password'
-WA_ENCRYPTION_KEY = 'your_encryption_key'
-WA_ACCOUNT_PHONE = 'your_whatsapp_account_phone'
-
-# Define the API endpoint
-url = 'https://api.gupshup.io/sm/api/v1/templates'
-
-# Set up headers for authentication, ensuring they are strings
-headers = {
-    "Content-Type": "application/json",
-    "apikey": str(WA_USER),
-    "password": str(WA_PASSWORD)
-}
-
-# Make the API request
-response = requests.get(url, headers=headers)
-
-# Check the response
-if response.status_code == 200:
-    templates = response.json()
-    print("Approved Templates:")
-    for template in templates:
-        print(f"Name: {template['name']}, Content: {template['content']}")
-else:
-    print(f"Failed to fetch templates. Status code: {response.status_code}, Response: {response.text}")
+curl --request GET \
+     --url https://partner.gupshup.io/partner/app/appId/templates \
+     --header 'accept: application/json'
