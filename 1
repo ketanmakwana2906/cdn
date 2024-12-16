@@ -1,3 +1,27 @@
-curl --request GET \
-     --url https://partner.gupshup.io/partner/app/appId/templates \
-     --header 'accept: application/json'
+import requests
+
+# Define your credentials
+WA_USER = 'your_user'
+WA_PASSWORD = 'your_password'
+
+# Define the API endpoint (replace 'appId' with your actual app ID)
+url = 'https://partner.gupshup.io/partner/app/appId/templates'
+
+# Set up headers for authentication
+headers = {
+    "accept": "application/json",
+    "apikey": str(WA_USER),
+    "password": str(WA_PASSWORD)
+}
+
+# Make the API request
+response = requests.get(url, headers=headers)
+
+# Check the response
+if response.status_code == 200:
+    templates = response.json()
+    print("Approved Templates:")
+    for template in templates:
+        print(f"Name: {template['name']}, Content: {template['content']}")
+else:
+    print(f"Failed to fetch templates. Status code: {response.status_code}, Response: {response.text}")
