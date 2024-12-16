@@ -1,6 +1,84 @@
-header = 'Ticket Booked Successfully!'
+from enum import Enum
+import urllib
+import requests
+import json
+from Cryptodome.Cipher import AES
+from Cryptodome.Random import get_random_bytes
+from base64 import urlsafe_b64decode, urlsafe_b64encode
+WA_USER = 2000211779,
+WA_PASSWORD = '$#g5Mwk5',
+WA_ENCRYPTION_KEY= 'SImLkqCvISgBPuT25TZILXTZkW9Rkv1WjER-g_Kcd6E',
+WA_ACCOUNT_PHONE= '9810266716'
+rec_phone = '6354888981'
 
-msg = "*Dear* {name},\n\n" \
+GCM_IV_LENGTH = 12
+GCM_TAG_LENGTH_BYTES = 16
+class WHATSAPP_CREDS(Enum):
+    Transactional = {
+        'WA_USER' : 2000211779,
+        'WA_PASSWORD' : '$#g5Mwk5',
+        'WA_ENCRYPTION_KEY': 'SImLkqCvISgBPuT25TZILXTZkW9Rkv1WjER-g_Kcd6E',
+        'WA_ACCOUNT_PHONE': '9810266716'
+    }
+
+def decode_b64_key(querystring):
+    #utility method that checks for padding before decoding the key
+    byte_key = bytes(querystring ,  encoding='utf8')
+    missing_padding = 4-len(byte_key)% 4
+    if missing_padding:
+        byte_key += b'=' * missing_padding
+    return urlsafe_b64decode(byte_key)
+
+def encrypt(querystring, type):
+    nonce = get_random_bytes(GCM_IV_LENGTH)
+    decodedKey = decode_b64_key(type.get('WA_ENCRYPTION_KEY'))
+    bytes_text = bytes(querystring  ,  encoding='utf8')
+    cipher = AES.new(decodedKey, AES.MODE_GCM, nonce=nonce, mac_len=GCM_TAG_LENGTH_BYTES)
+    ciphertext, tag = cipher.encrypt_and_digest(bytes_text)
+    finalbytesbuffer = b"".join([nonce,ciphertext, tag])
+    return (urlsafe_b64encode(finalbytesbuffer).decode('utf-8'))
+
+def send_wa_msg(phone, msg, header, type):
+    try:
+        querystring = "password={password}&send_to={phone}&v={version}&format=json&msg_type=TEXT&method=SENDMESSAGE" \
+                    "&msg={msg}&isTemplate=true&header={header}".format(
+                        password=type.get('WA_PASSWORD'),
+                        phone=phone,
+                        msg=urllib.parse.quote_plus(msg),
+                        header=urllib.parse.quote_plus(header),
+                        version = 1.1
+                    )
+        # querystring = "password={password}&send_to={phone}&v={version}&format=json&msg_type=TEXT&method=SENDMESSAGE" \
+        #             "&msg={msg}&isTemplate=true".format(
+        #                 password=type.get('WA_PASSWORD'),
+        #                 phone=phone,
+        #                 msg=urllib.quote_plus(msg),
+        #                 header=urllib.quote_plus(header),
+        #                 version = 1.1
+        #             )
+        
+        encrypted_data = encrypt(querystring, type)
+        
+        url = "https://media.smsgupshup.com/GatewayAPI/rest?userid={userid}&encrdata={encrypted_data}".format(
+            userid=type.get('WA_USER'),
+            encrypted_data=encrypted_data
+        )
+        print(url)
+        response = requests.get(url)
+        response.raise_for_status()
+        response = json.loads(response.text)
+        print(response)
+    except Exception as e:
+        print(str(e))
+        return False
+    return True
+
+
+def confirm_upi_details_whatsapp():
+    header = 'BOOKING CONFIRMED !!'
+    header = 'Ticket Booked Successfully!'
+
+    msg = "*Dear * {name},\n\n" \
       "Your train booking from {from_station_name} ({from_station_code}) to {to_station_name} ({to_station_code}) is confirmed. Below are your booking details:\n\n" \
       "*Booking Information:*\n\n" \
       "- *Train:* {train}\n" \
@@ -39,5 +117,10 @@ msg = "*Dear* {name},\n\n" \
           zomato_gold_link="xyz"
       )
 
-print(header)
-print(msg)
+    print(header)
+    print(msg) 
+
+    send_wa_msg("6354888981", msg, header, WHATSAPP_CREDS.Transactional.value)
+
+
+confirm_upi_details_whatsapp()
