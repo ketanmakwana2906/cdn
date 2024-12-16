@@ -1,45 +1,29 @@
-header = "Booking Confirmation"
+import requests
 
-msg = (
-    "*Dear * {traveller_name},\n\n"
-    "Your train booking from {from_station} ({from_station_code}) to {to_station} ({to_station_code}) is confirmed. "
-    "Below are your booking details:\n\n"
-    "*Booking Information:*\n\n"
-    "- *Train:* {train_details}\n"
-    "- *PNR:* {pnr}\n"
-    "- *Quota:* {quota}\n"
-    "- *Class:* {travel_class}\n"
-    "- *Date of Journey:* {journey_date}\n"
-    "- *Boarding Station:* {boarding_station}\n"
-    "- *Boarding Time:* {boarding_time}\n"
-    "- *TM Booking ID:* {tm_booking_id}\n"
-    "- *Amount Paid:* ₹ {amount_paid}\n\n"
-    "*Passenger Information:* {passenger_info}\n\n"
-    "For booking details, status checks, or cancellations, visit: https://trainman.page.link/booking\n\n"
-    "*Additional Information:*\n\n"
-    "- Order meals on Zomato using code {zomato_code}.\n"
-    "- Unlock {zomato_gold} on this booking at: {zomato_gold_code}\n\n"
-    "For real-time train timings, contact Railway Station Enquiry at 139 or SMS RAIL to 139.\n\n"
-    "Thank you for booking with us. Have a safe journey!"
-).format(
-    traveller_name="John Doe",
-    from_station="Mumbai Central",
-    from_station_code="BCT",
-    to_station="New Delhi",
-    to_station_code="NDLS",
-    train_details="12951 Rajdhani Express",
-    pnr="1234567890",
-    quota="General",
-    travel_class="2A",
-    journey_date="25th December 2024",
-    boarding_station="Bandra Terminus",
-    boarding_time="05:30 AM",
-    tm_booking_id="TM123456789",
-    amount_paid="1500",
-    passenger_info="John Doe / Confirmed / 2A / Berth 5 / Side Upper",
-    zomato_code="ZOM123",
-    zomato_gold="Zomato Gold Benefits",
-    zomato_gold_code="https://zomato.page.link/gold123"
-)
+# Define your credentials
+WA_USER = 'your_user'
+WA_PASSWORD = 'your_password'
+WA_ENCRYPTION_KEY = 'your_encryption_key'
+WA_ACCOUNT_PHONE = 'your_whatsapp_account_phone'
 
-send_wa_msg("6354888981", msg, header, WHATSAPP_CREDS.Transactional.value)
+# Define the API endpoint
+url = 'https://api.gupshup.io/sm/api/v1/templates'
+
+# Set up headers for authentication
+headers = {
+    "Content-Type": "application/json",
+    "apikey": WA_USER,
+    "password": WA_PASSWORD
+}
+
+# Make the API request
+response = requests.get(url, headers=headers)
+
+# Check the response
+if response.status_code == 200:
+    templates = response.json()
+    print("Approved Templates:")
+    for template in templates:
+        print(f"Name: {template['name']}, Content: {template['content']}")
+else:
+    print(f"Failed to fetch templates. Status code: {response.status_code}, Response: {response.text}")
