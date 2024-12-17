@@ -1,41 +1,38 @@
-import requests
+msg = """*Dear * {{1}}, 
 
-# Define the Gupshup credentials
-WA_USER = '2000211779'  # Replace with your actual user ID
-WA_PASSWORD = '$#g5Mwk5'  # Replace with your actual password
+Your train booking from {{2}} ({{3}}) to {{4}} ({{5}}) is confirmed. Below are your booking details:
+ 
+*Booking Information:*
 
-def fetch_templates(user_id, password):
-    try:
-        # API endpoint for fetching templates
-        url = f"https://api.gupshup.io/sm/api/v1/template/list"
+- *Train:* {{6}}
 
-        # Define query parameters
-        params = {
-            'userid': user_id,
-            'password': password,
-        }
+- *PNR:* {{7}}
 
-        # Send GET request to Gupshup API
-        response = requests.get(url, params=params)
+- *Quota:* {{8}}
 
-        # Raise an error for HTTP response codes >= 400
-        response.raise_for_status()
+- *Class:* {{9}}
 
-        # Parse JSON response
-        templates = response.json()
-        return templates
+- *Date of Journey:* {{10}}
 
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching templates: {e}")
-        return None
+- *Boarding Station:* {{11}}
 
-# Call the function to fetch templates
-templates = fetch_templates(WA_USER, WA_PASSWORD)
+- *Boarding Time:* {{12}}
 
-# Display the templates
-if templates:
-    print("Templates fetched successfully:")
-    for template in templates:
-        print(template)
-else:
-    print("Failed to fetch templates.")
+- *TM Booking ID:* {{13}}
+
+- *Amount Paid:* ₹ {{14}}
+
+*Passenger Information:* {{15}} 
+
+For booking details, status checks, or cancellations, visit: https://trainman.page.link/booking
+ 
+
+*Additional Information:*
+
+- Order meals on Zomato using code {{16}}.
+
+- Unlock {{17}} on this booking at: {{18}}
+
+For real-time train timings, contact Railway Station Enquiry at 139 or SMS RAIL to 139.
+
+Thank you for booking with us. Have a safe journey!"""
