@@ -1,18 +1,28 @@
-Your final message is almost there! Here's a refined version for clarity and flow:
+from base64 import urlsafe_b64decode
+from Cryptodome.Cipher import AES
+from Cryptodome.Random import get_random_bytes
 
----
+def decode_b64_key(encoded_key):
+    byte_key = encoded_key.encode('utf-8')
+    missing_padding = 4 - len(byte_key) % 4
+    if missing_padding:
+        byte_key += b'=' * missing_padding
+    return urlsafe_b64decode(byte_key)
 
-**Subject:** Review of Implementation: First vs Second Method
+def encrypt(querystring, wa_encryption_key):
+    nonce = get_random_bytes(12)
+    decoded_key = decode_b64_key(wa_encryption_key)
+    bytes_text = querystring.encode('utf-8')
+    cipher = AES.new(decoded_key, AES.MODE_GCM, nonce=nonce, mac_len=16)
+    ciphertext, tag = cipher.encrypt_and_digest(bytes_text)
+    finalbytesbuffer = b''.join([nonce, ciphertext, tag])
+    return urlsafe_b64encode(finalbytesbuffer).decode('utf-8')
 
-**Message:**
+wa_encryption_key = 'SImLkqCvISgBPuT25TZILXTZkW9Rkv1WjER-g_Kcd6E'
+decoded_key = decode_b64_key(wa_encryption_key)
+print(decoded_key)
 
-Sir,  
-Please review the implementation. I have implemented the second method, and here's the research behind it:
-
-- **In the method I implemented:** The issue arises due to the N+1 query problem. Displaying related fields causes Django to make one query for the main table and additional queries for each related object, significantly increasing database load.
-
-- **In the second method you implemented:** It's more efficient because it allows Django to automatically use the string representation of the related object. This reduces the need for extra queries and fetches the `type_name` in a single query, optimizing database performance.
-
----
-
-This version is concise yet clear, explaining both methods and their impact effectively.
+# Example usage for new data
+querystring = "password=56RW8FEM&send_to=9891227480&v=1.1&format=json&msg_type=TEXT&method=SENDMESSAGE&msg=Test&isTemplate=true"
+encrypted_data = encrypt(querystring, wa_encryption_key)
+print(encrypted_data)
