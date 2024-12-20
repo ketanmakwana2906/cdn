@@ -1,28 +1,23 @@
-from base64 import urlsafe_b64decode
-from Cryptodome.Cipher import AES
-from Cryptodome.Random import get_random_bytes
+import hashlib
+import base64
 
-def decode_b64_key(encoded_key):
-    byte_key = encoded_key.encode('utf-8')
-    missing_padding = 4 - len(byte_key) % 4
-    if missing_padding:
-        byte_key += b'=' * missing_padding
-    return urlsafe_b64decode(byte_key)
+# Inputs
+wa_user = "2000211780"
+wa_password = "56RW8FEM"
+wa_phone = "9891227480"
 
-def encrypt(querystring, wa_encryption_key):
-    nonce = get_random_bytes(12)
-    decoded_key = decode_b64_key(wa_encryption_key)
-    bytes_text = querystring.encode('utf-8')
-    cipher = AES.new(decoded_key, AES.MODE_GCM, nonce=nonce, mac_len=16)
-    ciphertext, tag = cipher.encrypt_and_digest(bytes_text)
-    finalbytesbuffer = b''.join([nonce, ciphertext, tag])
-    return urlsafe_b64encode(finalbytesbuffer).decode('utf-8')
+# Concatenate inputs
+data = f"{wa_user}{wa_password}{wa_phone}"
 
-wa_encryption_key = 'SImLkqCvISgBPuT25TZILXTZkW9Rkv1WjER-g_Kcd6E'
-decoded_key = decode_b64_key(wa_encryption_key)
-print(decoded_key)
+# Generate hash (SHA256 as a guess)
+hash_object = hashlib.sha256(data.encode())
+hash_bytes = hash_object.digest()
 
-# Example usage for new data
-querystring = "password=56RW8FEM&send_to=9891227480&v=1.1&format=json&msg_type=TEXT&method=SENDMESSAGE&msg=Test&isTemplate=true"
-encrypted_data = encrypt(querystring, wa_encryption_key)
-print(encrypted_data)
+# Encode with Base64 URL-safe
+encryption_key = base64.urlsafe_b64encode(hash_bytes).decode().rstrip("=")
+
+# Decoded form
+decoded_form = base64.urlsafe_b64decode(encryption_key + "=" * (-len(encryption_key) % 4))
+
+print("Encryption Key:", encryption_key)
+print("Decoded Form:", decoded_form)
