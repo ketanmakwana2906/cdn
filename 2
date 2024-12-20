@@ -1,23 +1,40 @@
 import hashlib
 import base64
 
-# Inputs
-wa_user = "2000211780"
-wa_password = "56RW8FEM"
-wa_phone = "9891227480"
+# Inputs (Case 1)
+wa_user_1 = "2000211779"
+wa_password_1 = "$#g5Mwk5"
+wa_phone_1 = "9810266716"
 
-# Concatenate inputs
-data = f"{wa_user}{wa_password}{wa_phone}"
+# Inputs (Case 2 - New Data)
+wa_user_2 = "2000211780"
+wa_password_2 = "56RW8FEM"
+wa_phone_2 = "9891227480"
 
-# Generate hash (SHA256 as a guess)
-hash_object = hashlib.sha256(data.encode())
-hash_bytes = hash_object.digest()
+# Hypotheses for combining inputs
+def generate_key(user, password, phone):
+    # 1. Concatenate directly
+    data = user + password + phone
 
-# Encode with Base64 URL-safe
-encryption_key = base64.urlsafe_b64encode(hash_bytes).decode().rstrip("=")
+    # 2. Hash the data (SHA256)
+    hash_object = hashlib.sha256(data.encode())
+    hash_bytes = hash_object.digest()
 
-# Decoded form
-decoded_form = base64.urlsafe_b64decode(encryption_key + "=" * (-len(encryption_key) % 4))
+    # 3. Encode to Base64 URL-safe
+    encryption_key = base64.urlsafe_b64encode(hash_bytes).decode().rstrip("=")
+    
+    # Return both forms
+    return encryption_key, hash_bytes
 
-print("Encryption Key:", encryption_key)
-print("Decoded Form:", decoded_form)
+# Generate encryption key for both cases
+key_1, decoded_1 = generate_key(wa_user_1, wa_password_1, wa_phone_1)
+key_2, decoded_2 = generate_key(wa_user_2, wa_password_2, wa_phone_2)
+
+# Print results
+print("Case 1 (Given Data):")
+print("Encryption Key:", key_1)
+print("Decoded Form:", decoded_1)
+
+print("\nCase 2 (New Data):")
+print("Encryption Key:", key_2)
+print("Decoded Form:", decoded_2)
