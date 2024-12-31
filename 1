@@ -1,1 +1,5 @@
 curl -L -o firefox.tar.bz2 "https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US"
+tar -xjf firefox.tar.bz2 -C /opt/
+
+
+ln -s /opt/firefox/firefox /usr/local/bin/firefox
