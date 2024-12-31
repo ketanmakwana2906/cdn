@@ -1,97 +1,24 @@
-import os
-from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.firefox.service import Service
-from selenium.webdriver.firefox.options import Options
-import time
-import requests
-import zipfile
+# Download Firefox tarball
+curl -L https://download.mozilla.org/?product=firefox-esr-latest&os=linux64&lang=en-US -o firefox.tar.bz2
 
-def download_geckodriver():
-    """
-    Downloads and extracts geckodriver if not already present in the current directory.
-    """
-    geckodriver_path = "./geckodriver"
-    if not os.path.exists(geckodriver_path):
-        print("Downloading geckodriver...")
-        url = "https://github.com/mozilla/geckodriver/releases/latest/download/geckodriver-v0.35.0-linux64.tar.gz"
-        response = requests.get(url, stream=True)
-        if response.status_code == 200:
-            with open("geckodriver.tar.gz", "wb") as file:
-                file.write(response.content)
-            os.system("tar -xvzf geckodriver.tar.gz")
-            os.chmod(geckodriver_path, 0o755)  # Make it executable
-            os.remove("geckodriver.tar.gz")
-            print("Geckodriver downloaded and ready.")
-        else:
-            raise Exception("Failed to download geckodriver.")
-    return geckodriver_path
+# Extract the tarball
+tar -xvjf firefox.tar.bz2
 
-def get_html_with_scroll(url, max_scrolls=50):
-    """
-    Fetch HTML content of a dynamically loaded page using Selenium with auto-scrolling.
-    """
-    firefox_options = Options()
-    firefox_options.add_argument("--headless")  # Run browser in headless mode
+# Move Firefox to an appropriate location
+mv firefox /opt/firefox
 
-    # Get geckodriver path
-    gecko_path = download_geckodriver()
+# Clean up
+rm firefox.tar.bz2
 
-    firefox_service = Service(gecko_path)
+# Download Geckodriver tarball
+curl -L https://github.com/mozilla/geckodriver/releases/download/v0.33.0/geckodriver-v0.33.0-linux64.tar.gz -o geckodriver.tar.gz
 
-    # Start WebDriver
-    driver = webdriver.Firefox(service=firefox_service, options=firefox_options)
-    driver.get(url)
+# Extract the tarball
+tar -xvzf geckodriver.tar.gz
 
-    scrolls = 0
-    while scrolls < max_scrolls:
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(2)  # Wait for the page to load more content
-        scrolls += 1
+# Move geckodriver to a directory in your PATH (e.g., /usr/local/bin)
+mv geckodriver /usr/local/bin/
 
-        # Check if the "Next" button exists and click it
-        try:
-            next_button = driver.find_element(By.CSS_SELECTOR, "button.nextbtn")
-            next_button.click()
-            time.sleep(2)
-        except Exception:
-            print("No more 'Next' button found.")
-            break
+# Clean up
+rm geckodriver.tar.gz
 
-    html = driver.page_source
-    driver.quit()
-    return html
-
-def parse_train_data(html):
-    """
-    Parse the train data from the HTML using BeautifulSoup.
-    """
-    soup = BeautifulSoup(html, 'html.parser')
-    data_rows = soup.find_all('div', attrs={"style": "line-height:20px;"})
-
-    train_list = []
-    for row in data_rows:
-        tds = row.find_all('div')
-        data = [td.text.strip() for td in tds]
-
-        if len(data) < 15:  # Ensure we have enough columns
-            continue
-
-        train_data = {
-            'train_code': data[0],
-            'origin_code': data[6],
-            'dest_code': data[8],
-            'distance': data[14].replace('km', '').strip(),
-        }
-        train_list.append(train_data)
-
-    print(f"Total trains scraped: {len(train_list)}")
-    return train_list
-
-# Example usage
-url = 'https://indiarailinfo.com/trains/special-fare/specialfare'
-html_content = get_html_with_scroll(url)
-trains = parse_train_data(html_content)
-for train in trains:
-    print(train)
