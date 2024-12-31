@@ -1,17 +1,245 @@
-wa_user = 2000211779
-wa_password = $#g5Mwk5
-wa_phone = 9810266716
+from bs4 import BeautifulSoup
+from selenium.webdriver.firefox.options import Options
+from selenium import webdriver
+from string import Template
+url_template = Template('http://indiarailinfo.com/train/timetable/$train_code-$origin_code-to-$dest_code/$t/$fs/$ts')
 
-based on above data
-wa_encryption_key = SImLkqCvISgBPuT25TZILXTZkW9Rkv1WjER-g_Kcd6E
-and decode form of that key using urlsafe_b64decode after add padding = to key is SImLkqCvISgBPuT25TZILXTZkW9Rkv1WjER-g_Kcd6E=
-decoded form : b'H\x89\x8b\x92\xa0\xaf!(\x01>\xe4\xf6\xe56H-t\xd9\x91oQ\x92\xfdV\x8cD~\x83\xf2\x9cw\xa1'
 
-now have another wa_user and password and number
-wa_user = 2000211780
-wa_password = 56RW8FEM
-wa_phone = 9891227480
+indiarailinfo_train_urls = ['https://indiarailinfo.com/trains/special-fare/specialfare']
 
-analyze existing given case of encryption and decryption
-and give new encryption key or decoded form for given new data 
-give for whatever possible encryption key or decoded form
+indiarailinfo_train_urls = indiarailinfo_train_urls
+train_map = []
+
+def calculate_doo_value(self, doo):
+        doo_list = list(doo) # converting string of doo into list "YYYYYYY" -> ['Y','Y','Y','Y','Y','Y','Y']
+        # doo_list starts from Sunday so rotate it left to start from Monday
+        doo_list = doo_list[1:] + doo_list[:1]
+        doo_value = 0
+        for count,day in enumerate(doo_list):
+            if day != '?':
+                value = 2 ** (6 - count)
+            else:
+                value = 0
+            doo_value += value
+        return doo_value
+
+def get_html_from_auto_scrolling_url( url, attempt=1):
+        if attempt > 1: print("Attempt : ", attempt)
+        # display = Display(visible=0, size=(1024, 768))
+        # display.start()
+
+        # This will open a new browser window.
+        firefox_options = Options()
+        firefox_options.add_argument("--headless")  # Headless for memory efficiency
+        firefox_options.add_argument("--disable-extensions")
+        firefox_options.add_argument('--no-sandbox')
+        firefox_options.add_argument('--disable-gpu')
+        firefox_options.add_argument("--disable-dev-shm-usage")
+        firefox_options.add_argument('--disable-application-cache')
+        try:
+         driver = webdriver.Firefox(executable_path='/usr/bin/geckodriver', options=firefox_options)
+        # Load WebDriver and navigate to the page url.
+         driver.get(url)
+        except Exception as e:
+            print(e)
+     
+        # We use html_length field to find out if we have reached the end of auto-scrolling
+        html_length = 0
+        old_html_length = 0
+
+        # Scroll to the bottom of page to enable infinite loader
+        for i in range(1, 500):
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            #time.sleep(delay)
+
+            # Do Javascript button click using selenium
+            try:
+                #driver.find_element_by_class_name('nextbtn').click() # Did not work
+                # to reach the end of page in case bootom ad sheet is open
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                driver.find_element_by_css_selector("button.nextbtn").click()
+                reached_end = False
+            # except NoSuchElementException as e:
+            #     reached_end = True
+            except Exception as e:
+                driver.quit()
+                # display.stop()
+                print("Selenium Exception : ", str(e))
+                if attempt < 5:
+                    return get_html_from_auto_scrolling_url(url, attempt+1)
+                else:
+                    print(("reached maximum attempt limit for url: {}".format(url)))
+                    return ''
+
+            html = driver.page_source
+            html_length = len(html)
+            if reached_end : #or (html_length > 0 and html_length == old_html_length): 
+                print('Reached the end of page after {0} auto-scrolls'.format(str(i)))
+                break
+            old_html_length = html_length
+
+        driver.quit()
+        # display.stop()
+        return html
+
+def get_trains_url( url):
+        print('Url for infinite scroll:',url)
+        # First get complete html after doing infinite scroll till page end is reached
+        html = get_html_from_auto_scrolling_url(url)
+        html = html.replace('a0:','')
+        soup = BeautifulSoup(html, 'html5lib')
+        table = soup.find('div', class_='newbg')
+        data_rows = soup.findAll('div', attrs={"style": "line-height:20px;"})
+
+        if table:
+            meta_data_rows = table.findAll('div', class_='trnsumm')
+        else:
+            meta_data_rows = []
+        train_list = []
+        for data_row, meta_data_row in zip(data_rows, meta_data_rows):
+            tds = data_row.findAll('div')
+            data = [td.text.strip() for td in tds]
+
+            # Find train schedule url
+            meta_attrs = meta_data_row.attrs
+            meta_data = (meta_attrs['t'], meta_attrs['fs'], meta_attrs['ts'])
+            train_code = data[0].strip().lower()
+
+            # Check if it is a slip route
+            if train_code.endswith('slip'):
+                route = 2
+                train_code = train_code.split('-')[0]
+            elif train_code.endswith('slip2'):
+                route = 3
+                train_code = train_code.split('-')[0]
+            else:
+                route = 1
+            if len(train_code) != 5: continue
+
+            # Check if this train has already been fetched before
+            this_train = (train_code, route)
+            trains_added = set()
+            if this_train in trains_added:
+                # print this_train,'already added'
+                continue
+
+            # Get name from indianrail site
+            train_code_to_name_map = {}
+            train_types = {
+                'pass': 'passenger',
+                'sf' : 'superfast',
+                'exp': 'express',
+                'acsf': 'ac-superfast',
+                'acexp' : 'ac-express',
+                'prm' : 'suvidha',
+                'dd' : 'double-decker',
+                'memu' : 'memu',
+                'demu' : 'demu',
+                'raj': 'rajdhani',
+                'shtb' : 'shatabdi',
+                'drnt': 'duronto',
+                'gr': 'garib-rath',
+                'skr' : 'sampark-kranti',
+                'jshtb': 'jan-shatabdi',
+                'toy' : 'toy',
+                'svd' : 'suvidha',
+                'hms' : 'humsafar',
+                'tjs' : 'tejas',
+                'ant' : 'antyodaya',
+                'del' : 'delhi-emu',
+                'hyd' : 'hyderabad-emu',
+                'chn' : 'chennai-emu',
+                'klkt' : 'kolkata-emu',
+                'mumb': 'mumbai-emu',
+                'pune': 'pune-emu',
+                'cov': 'covid',
+                'covr': 'covid',
+                'covu': 'covid',
+        }
+        
+            train_name = train_code_to_name_map.get(train_code)
+            train_type = train_types.get(data[2].lower(), data[2].lower())
+            origin_code = data[6]
+            dest_code = data[8]
+            distance = data[14].replace('km','').strip()
+            data_map = {
+                    'train_code': train_code,
+                    'origin_code': origin_code,
+                    'dest_code': dest_code,
+                    't': meta_attrs['t'],
+                    'fs': meta_attrs['fs'],
+                    'ts': meta_attrs['ts'],
+                }
+            schedule_url = url_template.substitute(data_map).lower()
+
+            # Find train doo
+            try:
+                doo = data[12]
+                doo_value = calculate_doo_value(doo)
+            except:
+                doo_value = 127
+
+            # Find train classes
+            try:
+                # EC class is now shown as Ex in Indiarailinfo
+                classes = data[13].replace('Ex', 'EC').split(' ')
+                classes.reverse() # The classes in indiarailinfo is in reverse order as per our convention
+                classes = [c.strip() for c in classes]
+                classes = ':'.join(classes)
+                if not classes: classes = 'NULL'
+                if 'emu' in train_type: classes = 'NULL' # So that we dont add FC in mumbai locals
+            except:
+                classes = 'NULL'
+
+            # Find distance
+            try:
+                if 'km' in data[14]:
+                    distance = data[14].replace('km', '').strip()
+                else:
+                    distance = 'NULL'
+            except:
+                distance = 'NULL'
+
+            # Find Date_from and date_to
+            try:
+                if len(data[4]) > 0  or len(data[5]) > 0:
+                    date_from = data[4]
+                    date_to = data[5]
+                else:
+                    date_from = 'NULL'
+                    date_to = 'NULL'
+            except:
+                date_from = 'NULL'
+                date_to = 'NULL'
+
+            train_map = {
+                        'tcode': train_code,
+                        'tname': train_name,
+                        'ttype': train_type,
+                        'ocode': origin_code,
+                        'dcode': dest_code,
+                        'class': classes,
+                        'doo': doo_value,
+                        'route': route,
+                        'distance': distance,
+                        'url': schedule_url,
+                        'date_from': date_from,
+                        'date_to': date_to
+                    }
+            
+            #save_date_from_iri_trainman_db(train_map) # IRI date's insertion in Trainman DB
+            train_list.append(train_map)
+            # print train_map
+            trains_added.add(this_train)
+        print('Total trains',len(train_list))
+        return train_list
+
+for url in indiarailinfo_train_urls:
+            try:
+                print('\nTrain type url:',url)
+                train_list = get_trains_url(url)
+                train_map.append(train_list)
+            except:
+                print("Scrapping Failed for this url: {}".format(url))
+                continue
+            print('Done for this train type. Sleeping... 5 sec.')
