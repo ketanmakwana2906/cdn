@@ -1,115 +1,97 @@
+import os
 from bs4 import BeautifulSoup
-from string import Template
-from requests_html import HTMLSession
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.firefox.options import Options
+import time
+import requests
+import zipfile
 
-url_template = Template('http://indiarailinfo.com/train/timetable/$train_code-$origin_code-to-$dest_code/$t/$fs/$ts')
+def download_geckodriver():
+    """
+    Downloads and extracts geckodriver if not already present in the current directory.
+    """
+    geckodriver_path = "./geckodriver"
+    if not os.path.exists(geckodriver_path):
+        print("Downloading geckodriver...")
+        url = "https://github.com/mozilla/geckodriver/releases/latest/download/geckodriver-v0.35.0-linux64.tar.gz"
+        response = requests.get(url, stream=True)
+        if response.status_code == 200:
+            with open("geckodriver.tar.gz", "wb") as file:
+                file.write(response.content)
+            os.system("tar -xvzf geckodriver.tar.gz")
+            os.chmod(geckodriver_path, 0o755)  # Make it executable
+            os.remove("geckodriver.tar.gz")
+            print("Geckodriver downloaded and ready.")
+        else:
+            raise Exception("Failed to download geckodriver.")
+    return geckodriver_path
 
-indiarailinfo_train_urls = ['https://indiarailinfo.com/trains/special-fare/specialfare']
+def get_html_with_scroll(url, max_scrolls=50):
+    """
+    Fetch HTML content of a dynamically loaded page using Selenium with auto-scrolling.
+    """
+    firefox_options = Options()
+    firefox_options.add_argument("--headless")  # Run browser in headless mode
 
-train_map = []
+    # Get geckodriver path
+    gecko_path = download_geckodriver()
 
+    firefox_service = Service(gecko_path)
 
-def calculate_doo_value(doo):
-    doo_list = list(doo)  # Convert string of doo into list "YYYYYYY" -> ['Y','Y','Y','Y','Y','Y','Y']
-    doo_list = doo_list[1:] + doo_list[:1]  # Rotate left to start from Monday
-    doo_value = 0
-    for count, day in enumerate(doo_list):
-        value = 2 ** (6 - count) if day != '?' else 0
-        doo_value += value
-    return doo_value
+    # Start WebDriver
+    driver = webdriver.Firefox(service=firefox_service, options=firefox_options)
+    driver.get(url)
 
+    scrolls = 0
+    while scrolls < max_scrolls:
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(2)  # Wait for the page to load more content
+        scrolls += 1
 
-def get_html_from_auto_scrolling_url(url):
-    session = HTMLSession()
-    response = session.get(url)
-    response.html.render(timeout=60)  # Render JavaScript with a timeout
-    return response.html.html
+        # Check if the "Next" button exists and click it
+        try:
+            next_button = driver.find_element(By.CSS_SELECTOR, "button.nextbtn")
+            next_button.click()
+            time.sleep(2)
+        except Exception:
+            print("No more 'Next' button found.")
+            break
 
+    html = driver.page_source
+    driver.quit()
+    return html
 
-def get_trains_url(url):
-    print('Url for infinite scroll:', url)
-    html = get_html_from_auto_scrolling_url(url)
-    html = html.replace('a0:', '')
-    soup = BeautifulSoup(html, 'html5lib')
-    table = soup.find('div', class_='newbg')
-    data_rows = soup.findAll('div', attrs={"style": "line-height:20px;"})
+def parse_train_data(html):
+    """
+    Parse the train data from the HTML using BeautifulSoup.
+    """
+    soup = BeautifulSoup(html, 'html.parser')
+    data_rows = soup.find_all('div', attrs={"style": "line-height:20px;"})
 
-    if table:
-        meta_data_rows = table.findAll('div', class_='trnsumm')
-    else:
-        meta_data_rows = []
     train_list = []
-    trains_added = set()
-
-    for data_row, meta_data_row in zip(data_rows, meta_data_rows):
-        tds = data_row.findAll('div')
+    for row in data_rows:
+        tds = row.find_all('div')
         data = [td.text.strip() for td in tds]
 
-        meta_attrs = meta_data_row.attrs
-        train_code = data[0].strip().lower()
-        route = 1 if not train_code.endswith('slip') else (2 if train_code.endswith('slip2') else 3)
-        train_code = train_code.split('-')[0]
-        if len(train_code) != 5 or (train_code, route) in trains_added:
+        if len(data) < 15:  # Ensure we have enough columns
             continue
 
-        train_name = data[1]
-        origin_code = data[6]
-        dest_code = data[8]
-        try:
-            doo_value = calculate_doo_value(data[12])
-        except IndexError:
-            doo_value = 127
-
-        try:
-            classes = ':'.join(data[13].replace('Ex', 'EC').split())
-        except IndexError:
-            classes = 'NULL'
-
-        try:
-            distance = data[14].replace('km', '').strip()
-        except IndexError:
-            distance = 'NULL'
-
-        try:
-            date_from = data[4] if data[4] else 'NULL'
-            date_to = data[5] if data[5] else 'NULL'
-        except IndexError:
-            date_from = date_to = 'NULL'
-
-        train_map_entry = {
-            'tcode': train_code,
-            'tname': train_name,
-            'ocode': origin_code,
-            'dcode': dest_code,
-            'class': classes,
-            'doo': doo_value,
-            'route': route,
-            'distance': distance,
-            'url': url_template.substitute({
-                'train_code': train_code,
-                'origin_code': origin_code,
-                'dest_code': dest_code,
-                't': meta_attrs.get('t', ''),
-                'fs': meta_attrs.get('fs', ''),
-                'ts': meta_attrs.get('ts', ''),
-            }).lower(),
-            'date_from': date_from,
-            'date_to': date_to
+        train_data = {
+            'train_code': data[0],
+            'origin_code': data[6],
+            'dest_code': data[8],
+            'distance': data[14].replace('km', '').strip(),
         }
+        train_list.append(train_data)
 
-        train_list.append(train_map_entry)
-        trains_added.add((train_code, route))
-
-    print('Total trains:', len(train_list))
+    print(f"Total trains scraped: {len(train_list)}")
     return train_list
 
-
-for url in indiarailinfo_train_urls:
-    try:
-        print('\nTrain type url:', url)
-        train_list = get_trains_url(url)
-        train_map.append(train_list)
-    except Exception as e:
-        print("Scraping Failed for this url:", url, "Error:", str(e))
-        continue
-    print('Done for this train type. Sleeping... 5 sec.')
+# Example usage
+url = 'https://indiarailinfo.com/trains/special-fare/specialfare'
+html_content = get_html_with_scroll(url)
+trains = parse_train_data(html_content)
+for train in trains:
+    print(train)
