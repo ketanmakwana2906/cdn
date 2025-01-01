@@ -1,6 +1,14 @@
-curl -L -o firefox-esr.tar.bz2 "https://ftp.mozilla.org/pub/firefox/releases/78.15.0esr/linux-x86_64/en-US/firefox-78.15.0esr.tar.bz2"
+def format_days(running_days):
+    full_week = 'SMTWTFS'
+    formatted_days = ''.join(day if day in running_days else '?' for day in full_week)
+    return formatted_days
 
-tar -xjf firefox-esr.tar.bz2 -C /opt/
+# Example usage
+print(format_days('MTT S'))    # Output: ?MT?T?S
+print(format_days('S  W F'))   # Output: S??W?F?
+print(format_days('T'))        # Output: ??T????
 
-ln -s /opt/firefox/firefox /usr/local/bin/firefox
-
+# Process multiple trains
+trains = ['MTT S', 'S  W F', 'T']
+formatted_trains = [format_days(train) for train in trains]
+print(formatted_trains)  # Output: ['?MT?T?S', 'S??W?F?', '??T????']
