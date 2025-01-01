@@ -1,7 +1,7 @@
 def format_days(running_days):
     full_week = 'SMTWTFS'
-    # Remove spaces from the input string
-    running_days = running_days.replace(' ', '')
+    # Remove all spaces from the input string
+    running_days = ''.join(running_days.split())
     formatted_days = ''.join(day if day in running_days else '?' for day in full_week)
     return formatted_days
 
