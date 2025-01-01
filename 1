@@ -1,21 +1,14 @@
 def format_days(running_days):
     full_week = 'SMTWTFS'
-    # Create a dictionary to map the days to their positions in the week
-    days_dict = {day: '?' for day in full_week}
-    # Strip spaces and set each running day in the dictionary
-    for day in running_days.strip():
-        if day in days_dict:
-            days_dict[day] = day
-    # Join the formatted days back together
-    formatted_days = ''.join(days_dict[day] for day in full_week)
+    formatted_days = ''.join(day if day in running_days else '?' for day in full_week)
     return formatted_days
 
 # Example usage
-print(format_days('MTT S'))    # Output: ?MT?T?S
-print(format_days('S  W F'))   # Output: S??W?F?
-print(format_days('T'))        # Output: ??T????
+print(format_days('MT T S'))    # Output: ?MT?T?S
+print(format_days('S  W F'))    # Output: S??W?F?
+print(format_days('T'))         # Output: ??T????
 
 # Process multiple trains
-trains = ['MTT S', 'S  W F', 'T']
+trains = ['MT T S', 'S  W F', 'T']
 formatted_trains = [format_days(train) for train in trains]
 print(formatted_trains)  # Output: ['?MT?T?S', 'S??W?F?', '??T????']
