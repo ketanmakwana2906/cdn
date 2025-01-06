@@ -1,3 +1,9 @@
-self.extra_special_festival_trains = [train_id for train_id,train_details in custom_mapping_for_train_url.items() if "kumbh" in train_details["tname"].lower()]
-            if self.extra_special_festival_trains:
-                print(self.extra_special_festival_trains)
+self.extra_special_festival_trains = [
+    train_id for train_id, train_details in custom_mapping_for_train_url.items()
+    if train_details and "kumbh" in train_details.get("tname", "").lower()
+]
+
+if self.extra_special_festival_trains:
+    print(self.extra_special_festival_trains)
+else:
+    print("No trains with 'Kumbh' in their name.")
