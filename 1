@@ -1,14 +1,3 @@
-def format_days(running_days):
-    full_week = 'SMTWTFS'
-    formatted_days = ''.join(day if day in running_days else '?' for day in full_week)
-    return formatted_days
-
-# Example usage
-print(format_days('MT T S'))    # Output: ?MT?T?S
-print(format_days('S  W F'))    # Output: S??W?F?
-print(format_days('T'))         # Output: ??T????
-
-# Process multiple trains
-trains = ['MT T S', 'S  W F', 'T']
-formatted_trains = [format_days(train) for train in trains]
-print(formatted_trains)  # Output: ['?MT?T?S', 'S??W?F?', '??T????']
+self.extra_special_festival_trains = [train_id for train_id,train_details in custom_mapping_for_train_url.items() if "kumbh" in train_details["tname"].lower()]
+            if self.extra_special_festival_trains:
+                print(self.extra_special_festival_trains)
