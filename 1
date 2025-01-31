@@ -1,3 +1,29 @@
-Details: A properly configured Content Security Policy (CSP) can help prevent cross-site scripting (XSS) attacks by restricting the origins of JavaScript, CSS, and other potentially dangerous resources. A suitable CSP should: Implement directives that set valid source restrictions from where the client can load frames and scripts, as well as limit where the client can submit form data. Restrict plugins and specify a valid resource for reporting policy violations. Not contain "unsafe" keywords or include wildcards that are ineffective for restricting sources. For this assessment, we will focus on the most essential objective of a good Content Security Policy, which is to prevent Cross Site Scripting and dynamic content injection attacks.
- 
-Remediation Tip: We recommend reviewing the CSP of each Web site such that it is effective in meeting the security objectives defined for the Content Security Policy, such as: Preventing loading of unauthorized content resources and scripts. Preventing clickjacking and other nested frame attacks. Ensuring that Web forms and links are behaving as intended. Specifically for this assessment, we are focusing mainly on preventing Cross Site Scripting attacks. Therefore, in order to obtain a GOOD grade, it is sufficient to: Implement directives that set valid and complete source restrictions for loading dynamic content (script-src, object-src, default-src). Avoiding the use of unsafe directives such as 'unsafe-eval' and 'unsafe-inline'. Avoiding typos or otherwise invalid CSP directives. Avoiding wildcards, host-based allowlists, or bare URL schemes such as 'HTTP' in source directives.
+# Default policy: Allow content only from the same origin
+CSP_DEFAULT_SRC = ("'self'",)
+
+# Script policy: Only allow trusted domains for scripts
+CSP_SCRIPT_SRC = ("'self'", "https://trusted-cdn.com")  # No 'unsafe-inline' or 'unsafe-eval'
+
+# Style policy: Only allow trusted domains for CSS
+CSP_STYLE_SRC = ("'self'", "https://trusted-cdn.com")
+
+# Image policy: Restrict images to specific sources
+CSP_IMG_SRC = ("'self'", "https://images.example.com")
+
+# Font policy: Restrict fonts to trusted providers
+CSP_FONT_SRC = ("'self'", "https://fonts.googleapis.com")
+
+# Prevent unauthorized AJAX requests and WebSockets
+CSP_CONNECT_SRC = ("'self'", "https://api.example.com")
+
+# Prevent embedding using <iframe> (clickjacking protection)
+CSP_FRAME_ANCESTORS = ("'none'",)  
+
+# Prevent plugin execution (e.g., Flash)
+CSP_OBJECT_SRC = ("'none'",)  
+
+# Prevent form submission to unauthorized URLs
+CSP_FORM_ACTION = ("'self'",)
+
+# Enable CSP violation reporting
+CSP_REPORT_TO = "/csp-violation-report/"
