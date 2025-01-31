@@ -1,1 +1,24 @@
-self.extra_special_trains = [train_id for train_id,train_details in custom_mapping_for_train_url.items() if train_id not in all_active_trains_in_db and train_details["from_date"] > today_date and train_details["to_date"] > today_date]
+from rest_framework_social_oauth2.views import TokenView
+from django.http import JsonResponse
+import json
+from rest_framework.renderers import JSONRenderer
+class CustomTokenView(TokenView):
+    def post(self, request, *args, **kwargs):
+        print("custom called",request)
+        try:
+            response = super().post(request, *args, **kwargs)
+            response.accepted_renderer = JSONRenderer()
+            response.accepted_media_type = 'application/json'
+            response.renderer_context = {}
+            response.render()
+            response_data = json.loads(response.content.decode('utf-8'))
+            print("response json is", response_data)
+        except Exception as e:
+            print("Exception is", e)
+            return JsonResponse({"message": "An error occurred", "status": "failed"}, status=500)
+
+        if response.status_code == 401:
+            if "invalid_grant" in response_data.get("error", ""):
+                return JsonResponse({"message": 'otp is invalid, expired or used','error': 'invalid_grant', 'error_description': 'Invalid credentials given.'}, status=200)
+
+        return response
