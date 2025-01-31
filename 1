@@ -1,24 +1,53 @@
-from rest_framework_social_oauth2.views import TokenView
-from django.http import JsonResponse
-import json
-from rest_framework.renderers import JSONRenderer
-class CustomTokenView(TokenView):
-    def post(self, request, *args, **kwargs):
-        print("custom called",request)
+class customBackend(ModelBackend):
+    def authenticate(self, username=None, password=None, errors=[], **kwargs):
+        UserModel = get_user_model()
+        # from User.tasks import wa_opted_func
+
+        if username is None:
+            username = kwargs.get(UserModel.USERNAME_FIELD)
+            print("username", username)
+        if username is None:
+            return
+
         try:
-            response = super().post(request, *args, **kwargs)
-            response.accepted_renderer = JSONRenderer()
-            response.accepted_media_type = 'application/json'
-            response.renderer_context = {}
-            response.render()
-            response_data = json.loads(response.content.decode('utf-8'))
-            print("response json is", response_data)
-        except Exception as e:
-            print("Exception is", e)
-            return JsonResponse({"message": "An error occurred", "status": "failed"}, status=500)
+            # Allow phone + otp login
+            # Check if username is a phone number
+            wa_opted_user = None
+            if username.isdigit() and len(username) == 10:
+                user = UserModel.objects.get(phone=username)
+                # if 'wa_opt' in kwargs.keys():
+                #     print("wa_opt is true")
+                #     params = {}
+                #     params['username'] = kwargs.get('username')
+                #     params['wa_opt'] = kwargs.get('wa_opt')
+                #     success = run_via_celery(wa_opted_func, **params)
+                #     del params
+                used, expired, verified, new_phone, invalidate_all = UserOtp.verify(
+                    user, password)
+                print("here custom called for verify")
+                if not any((used, expired, verified, new_phone, invalidate_all)):
+                    errors.append("Wrong OTP entered.")
+                else:
+                    if invalidate_all:
+                        errors.append("This OTP has already expired.")
+                    if used:
+                        errors.append("This OTP has already been used.")
+                    if expired:
+                        errors.append("This OTP has already expired.")
+                    if verified:
+                        return user
+            else:
+                # Email + password login
 
-        if response.status_code == 401:
-            if "invalid_grant" in response_data.get("error", ""):
-                return JsonResponse({"message": 'otp is invalid, expired or used','error': 'invalid_grant', 'error_description': 'Invalid credentials given.'}, status=200)
+                user = UserModel._default_manager.get_by_natural_key(username)
+                if user.check_password(password) and user.is_email_verified:
+                    return user
 
-        return response
+                # Since password gets created later, this is not required
+                # if not user.is_email_verified:
+                #     errors.append("Email not verified")
+
+        except UserModel.DoesNotExist:
+            # Run the default password hasher once to reduce the timing
+            # difference between an existing and a non-existing user (#20760).
+            UserModel().set_password(password)
