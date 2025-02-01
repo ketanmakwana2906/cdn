@@ -1,1 +1,22 @@
-Refused to execute inline script because it violates the following Content Security Policy directive: "script-src https://www.google-analytics.com http://connect.facebook.net/'unsafe-inline' 'unsafe-eval'". Either the 'unsafe-inline' keyword, a hash ('sha256-rB4G/+e/bAPU7rKI/9HC1lBZ0XEa/nHDH6hXFz4GIh4='), or a nonce ('nonce-...') is required to enable inline execution.
+my final configuration
+TRUSTED_DOMAINS = ["https://www.trainman.in/", "https://uat.trainman.in/", "https://blog.trainman.in/", "https://blog-uat.trainman.in/"]
+CSP_DEFAULT_SRC = ["'self'"]
+CSP_SCRIPT_SRC = TRUSTED_DOMAINS+["https://cdnjs.cloudflare.com/","https://www.google-analytics.com","http://connect.facebook.net/","http://ajax.googleapis.com/","https://www.googletagmanager.com/", "'unsafe-inline'"]
+CSP_STYLE_SRC = TRUSTED_DOMAINS+["'self'","https://fonts.googleapis.com/","https://maxcdn.bootstrapcdn.com/","'unsafe-inline'"]
+CSP_IMG_SRC = TRUSTED_DOMAINS+["'self'"]
+CSP_FONT_SRC = TRUSTED_DOMAINS+["'self'", "https://fonts.gstatic.com/", "https://maxcdn.bootstrapcdn.com/"]
+CSP_CONNECT_SRC = TRUSTED_DOMAINS+["'self'","https://www.google-analytics.com/"]
+CSP_FRAME_ANCESTORS = ["'self'"]
+CSP_OBJECT_SRC = ["'none'"]
+CSP_FORM_ACTION = ["'self'"]
+
+security team mail
+Details: A properly configured Content Security Policy (CSP) can help prevent cross-site scripting (XSS) attacks by restricting the origins of JavaScript, CSS, and other potentially dangerous resources. A suitable CSP should: Implement directives that set valid source restrictions from where the client can load frames and scripts, as well as limit where the client can submit form data. Restrict plugins and specify a valid resource for reporting policy violations. Not contain "unsafe" keywords or include wildcards that are ineffective for restricting sources. For this assessment, we will focus on the most essential objective of a good Content Security Policy, which is to prevent Cross Site Scripting and dynamic content injection attacks.
+ 
+Remediation Tip: We recommend reviewing the CSP of each Web site such that it is effective in meeting the security objectives defined for the Content Security Policy, such as: Preventing loading of unauthorized content resources and scripts. Preventing clickjacking and other nested frame attacks. Ensuring that Web forms and links are behaving as intended. Specifically for this assessment, we are focusing mainly on preventing Cross Site Scripting attacks. Therefore, in order to obtain a GOOD grade, it is sufficient to: Implement directives that set valid and complete source restrictions for loading dynamic content (script-src, object-src, default-src). Avoiding the use of unsafe directives such as 'unsafe-eval' and 'unsafe-inline'. Avoiding typos or otherwise invalid CSP directives. Avoiding wildcards, host-based allowlists, or bare URL schemes such as 'HTTP' in source directives.
+
+
+
+please let me know if any important policy as mail is viloated or left
+plese review throughly
+after that will send header to security team
