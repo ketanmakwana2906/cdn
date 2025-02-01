@@ -1,1 +1,22 @@
-Refused to load the image 'https://www.trainman.in/static/pnrApp/images/app-store-btn.png' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'img-src' was not explicitly set, so 'default-src' is used as a fallback.
+# settings.py
+
+INSTALLED_APPS = [
+    # ... your other apps ...
+    'csp',
+]
+
+MIDDLEWARE = [
+    # ... other middleware ...
+    'csp.middleware.CSPMiddleware',
+]
+
+# Temporarily allow all sources (for debugging only!)
+CSP_DEFAULT_SRC = ["*"]
+CSP_SCRIPT_SRC = ["*", "'unsafe-inline'", "'unsafe-eval'"]
+CSP_STYLE_SRC = ["*", "'unsafe-inline'"]
+CSP_IMG_SRC = ["*"]
+CSP_FONT_SRC = ["*"]
+CSP_CONNECT_SRC = ["*"]
+CSP_FRAME_ANCESTORS = ["*"]
+CSP_OBJECT_SRC = ["*"]
+CSP_FORM_ACTION = ["*"]
