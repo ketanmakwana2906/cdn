@@ -7,6 +7,6 @@ logger = logging.getLogger(__name__)
 def csp_report(request):
     if request.method == "POST":
         report = request.body.decode('utf-8')
-        logger.warning(f'CSP Violation Report: {report}')
+        logger.warning('CSP Violation Report: {}'.format(report))
         return JsonResponse({'status': 'success'})
     return JsonResponse({'status': 'only POST requests are allowed'}, status=405)
