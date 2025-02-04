@@ -36,9 +36,31 @@ class CSPNonceMiddleware(MiddlewareMixin):
                 "https://fonts.gstatic.com/ https://maxcdn.bootstrapcdn.com/; "
             "form-action 'self'; "
             "base-uri 'self'; "
-            "require-trusted-types-for 'script'"
         )
 
         # Set the CSP header on the response
         response["Content-Security-Policy"] = csp_header
         return response
+
+in settings.py 
+MIDDLEWARE_CLASSES = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    #'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'csp.middleware.CSPMiddleware',
+    'TrainmanBlog.middleware.CSPNonceMiddleware',
+]
+
+now want to move policies in settings.py 
+like CSP_DEFAULT_SRC and all
+
+give code for that
+in middleware ,only logic of nonce
+    
