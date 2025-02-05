@@ -1,18 +1,39 @@
 from bs4 import BeautifulSoup
-import re , uuid
+import uuid
 from django.utils.deprecation import MiddlewareMixin
 
 class CSPNonceMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
-        nonce = str(uuid.uuid4()).replace("-","")
+        # Generate a new nonce for every request
+        nonce = str(uuid.uuid4()).replace("-", "")
         content_type = response.get("Content-Type", "")
+
         if "text/html" in content_type:
             soup = BeautifulSoup(response.content, "html.parser")
-            nonce = nonce
+
+            # Apply the new nonce to all <script> tags
             for script in soup.find_all("script"):
-                if not script.get("nonce"):
-                    script["nonce"] = nonce
+                script["nonce"] = nonce
+
             response.content = str(soup)
-            csp_header = "script-src https://www.trainman.in/ https://uat.trainman.in/ https://blog.trainman.in/ https://blog-uat.trainman.in/ https://cdnjs.cloudflare.com/ https://www.google-analytics.com http://connect.facebook.net/ http://ajax.googleapis.com/ https://www.googletagmanager.com/ http://pagead2.googlesyndication.com/ https://s.go-mpulse.net/ 'unsafe-inline' 'strict-dynamic' 'nonce-{}'; style-src https://www.trainman.in/ https://uat.trainman.in/ https://blog.trainman.in/ https://blog-uat.trainman.in/ 'self' https://fonts.googleapis.com/ https://maxcdn.bootstrapcdn.com/ 'unsafe-inline'; frame-ancestors 'self'; default-src 'self'; img-src https://www.trainman.in/ https://uat.trainman.in/ https://blog.trainman.in/ https://blog-uat.trainman.in/ 'self'; connect-src https://www.trainman.in/ https://uat.trainman.in/ https://blog.trainman.in/ https://blog-uat.trainman.in/ 'self' https://www.google-analytics.com/ https://c.go-mpulse.net/ https://s.go-mpulse.net/ https://*.akstat.io/; object-src 'none'; font-src https://www.trainman.in/ https://uat.trainman.in/ https://blog.trainman.in/ https://blog-uat.trainman.in/ 'self' https://fonts.gstatic.com/ https://maxcdn.bootstrapcdn.com/; form-action 'self'; base-uri 'self'".format(nonce)
+
+            # Dynamically update CSP header with the new nonce
+            csp_header = (
+                "script-src https://www.trainman.in/ https://uat.trainman.in/ https://blog.trainman.in/ "
+                "https://blog-uat.trainman.in/ https://cdnjs.cloudflare.com/ https://www.google-analytics.com "
+                "http://connect.facebook.net/ http://ajax.googleapis.com/ https://www.googletagmanager.com/ "
+                "http://pagead2.googlesyndication.com/ https://s.go-mpulse.net/ 'unsafe-inline' 'strict-dynamic' 'nonce-{}'; "
+                "style-src https://www.trainman.in/ https://uat.trainman.in/ https://blog.trainman.in/ https://blog-uat.trainman.in/ "
+                "'self' https://fonts.googleapis.com/ https://maxcdn.bootstrapcdn.com/ 'unsafe-inline'; "
+                "frame-ancestors 'self'; default-src 'self'; "
+                "img-src https://www.trainman.in/ https://uat.trainman.in/ https://blog.trainman.in/ https://blog-uat.trainman.in/ 'self'; "
+                "connect-src https://www.trainman.in/ https://uat.trainman.in/ https://blog.trainman.in/ https://blog-uat.trainman.in/ "
+                "'self' https://www.google-analytics.com/ https://c.go-mpulse.net/ https://s.go-mpulse.net/ https://*.akstat.io/; "
+                "object-src 'none'; font-src https://www.trainman.in/ https://uat.trainman.in/ https://blog.trainman.in/ "
+                "https://blog-uat.trainman.in/ 'self' https://fonts.gstatic.com/ https://maxcdn.bootstrapcdn.com/; "
+                "form-action 'self'; base-uri 'self'"
+            ).format(nonce)
+
             response["Content-Security-Policy"] = csp_header
+
         return response
