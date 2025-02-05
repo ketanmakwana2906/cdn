@@ -1,1 +1,50 @@
-script-src https://www.trainman.in/ https://uat.trainman.in/ https://blog.trainman.in/ https://blog-uat.trainman.in/ https://www.namniart.in/ https://aksdev.trainman.in/ https://cdnjs.cloudflare.com/ https://www.google-analytics.com http://connect.facebook.net/ http://ajax.googleapis.com/ https://www.googletagmanager.com/ http://pagead2.googlesyndication.com/ https://s.go-mpulse.net/ 'unsafe-inline' 'strict-dynamic' 'nonce-123456789'; style-src https://www.trainman.in/ https://uat.trainman.in/ https://blog.trainman.in/ https://blog-uat.trainman.in/ https://www.namniart.in/ https://aksdev.trainman.in/ 'self' https://fonts.googleapis.com/ https://maxcdn.bootstrapcdn.com/ 'unsafe-inline'; frame-ancestors 'self'; default-src 'self'; img-src https://www.trainman.in/ https://uat.trainman.in/ https://blog.trainman.in/ https://blog-uat.trainman.in/ https://www.namniart.in/ https://aksdev.trainman.in/ 'self'; connect-src https://www.trainman.in/ https://uat.trainman.in/ https://blog.trainman.in/ https://blog-uat.trainman.in/ https://www.namniart.in/ https://aksdev.trainman.in/ 'self' https://www.google-analytics.com/ https://c.go-mpulse.net/ https://s.go-mpulse.net/ https://*.akstat.io/; object-src 'none'; font-src https://www.trainman.in/ https://uat.trainman.in/ https://blog.trainman.in/ https://blog-uat.trainman.in/ https://www.namniart.in/ https://aksdev.trainman.in/ 'self' https://fonts.gstatic.com/ https://maxcdn.bootstrapcdn.com/; form-action 'self'; base-uri 'self'
+import re
+import uuid
+from bs4 import BeautifulSoup
+from django.utils.deprecation import MiddlewareMixin
+from django.http import HttpResponse
+
+class CSPMiddleware(MiddlewareMixin):
+    def process_response(self, request, response):
+        if "text/html" in response.get('Content-Type', ''):
+            nonce = str(uuid.uuid4()).replace("-", "")  # Generate a unique nonce
+            
+            # Modify the CSP header dynamically
+            csp_header = f"""
+                default-src 'self'; 
+                script-src https://www.trainman.in/ https://uat.trainman.in/ https://blog.trainman.in/ https://blog-uat.trainman.in/ 
+                           https://www.namniart.in/ https://aksdev.trainman.in/ https://cdnjs.cloudflare.com/ 
+                           https://www.google-analytics.com http://connect.facebook.net/ http://ajax.googleapis.com/ 
+                           https://www.googletagmanager.com/ http://pagead2.googlesyndication.com/ https://s.go-mpulse.net/ 
+                           'unsafe-inline' 'strict-dynamic' 'nonce-{nonce}';
+                style-src https://www.trainman.in/ https://uat.trainman.in/ https://blog.trainman.in/ 
+                          https://blog-uat.trainman.in/ https://www.namniart.in/ https://aksdev.trainman.in/ 'self' 
+                          https://fonts.googleapis.com/ https://maxcdn.bootstrapcdn.com/ 'unsafe-inline';
+                frame-ancestors 'self';
+                img-src https://www.trainman.in/ https://uat.trainman.in/ https://blog.trainman.in/ 
+                        https://blog-uat.trainman.in/ https://www.namniart.in/ https://aksdev.trainman.in/ 'self';
+                connect-src https://www.trainman.in/ https://uat.trainman.in/ https://blog.trainman.in/ 
+                            https://blog-uat.trainman.in/ https://www.namniart.in/ https://aksdev.trainman.in/ 'self' 
+                            https://www.google-analytics.com/ https://c.go-mpulse.net/ https://s.go-mpulse.net/ 
+                            https://*.akstat.io/;
+                object-src 'none';
+                font-src https://www.trainman.in/ https://uat.trainman.in/ https://blog.trainman.in/ 
+                         https://blog-uat.trainman.in/ https://www.namniart.in/ https://aksdev.trainman.in/ 'self' 
+                         https://fonts.gstatic.com/ https://maxcdn.bootstrapcdn.com/;
+                form-action 'self';
+                base-uri 'self';
+            """.replace("\n", "").strip()
+            
+            response["Content-Security-Policy"] = csp_header
+
+            # Modify HTML response to add nonce attributes to inline scripts
+            soup = BeautifulSoup(response.content, "html.parser")
+
+            for script in soup.find_all("script"):
+                if not script.has_attr("src"):  # Only modify inline scripts
+                    script["nonce"] = nonce
+
+            response.content = str(soup)
+        
+        return response
+        
