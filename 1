@@ -46,3 +46,7 @@ class CSPMiddleware(object):
             response.content = str(soup)
         
         return response
+
+
+Refused to load the script 'http://ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js' because it violates the following Content Security Policy directive: "script-src https://www.trainman.in/ https://uat.trainman.in/ https://blog.trainman.in/ https://blog-uat.trainman.in/ https://www.namniart.in/ https://aksdev.trainman.in/ https://cdnjs.cloudflare.com/ https://www.google-analytics.com http://connect.facebook.net/ http://ajax.googleapis.com/ https://www.googletagmanager.com/ http://pagead2.googlesyndication.com/ https://s.go-mpulse.net/ 'unsafe-inline' 'strict-dynamic' 'nonce-7951a10dbb6a4789bc3510c9748a0f92'". Note that 'strict-dynamic' is present, so host-based allowlisting is disabled. Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
