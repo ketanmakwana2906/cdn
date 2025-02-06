@@ -13,3 +13,22 @@ class CustomOAuth2Validator(OAuth2Validator):
         # Store errors in request to be used later
         request.oauth2_errors = errors  
         return False
+
+
+from rest_framework.response import Response
+from rest_framework_social_oauth2.views import ConvertTokenView
+
+class CustomConvertTokenView(ConvertTokenView):
+    validator_class = CustomOAuth2Validator  # Use custom validator
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+
+        # Retrieve stored errors from request
+        errors = getattr(request, 'oauth2_errors', None)  
+
+        if response.status_code == 401 and errors:
+            return Response({'errors': errors}, status=401)
+
+        return response
+        
