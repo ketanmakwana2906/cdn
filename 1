@@ -1,34 +1,20 @@
-from oauth2_provider.oauth2_validators import OAuth2Validator
-
 class CustomOAuth2Validator(OAuth2Validator):
     def validate_user(self, username, password, client, request, *args, **kwargs):
-        errors = []  # Store authentication errors
-
-        user = custom_authenticate(username=username, password=password, errors=errors)
-
-        if user:
-            request.user = user
-            return True
-
-        # Store errors in request to be used later
-        request.oauth2_errors = errors  
-        return False
-
-
-from rest_framework.response import Response
-from rest_framework_social_oauth2.views import ConvertTokenView
-
-class CustomConvertTokenView(ConvertTokenView):
-    validator_class = CustomOAuth2Validator  # Use custom validator
-
+        kwargs['custom_validator_used'] = True
+        try:
+            u = authenticate(username=username, password=password, errors=[], **kwargs)
+            if u is not None and u.is_active:
+                request.user = u
+                return True
+        except AuthenticationFailed as e:
+            CustomOAuth2Validator.error_message = e.detail[0]
+            return False
+    
+class CustomTokenView(TokenView):
+    validator_class = CustomOAuth2Validator
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
-
-        # Retrieve stored errors from request
-        errors = getattr(request, 'oauth2_errors', None)  
-
-        if response.status_code == 401 and errors:
-            return Response({'errors': errors}, status=401)
-
+        message = CustomOAuth2Validator.error_message
+        if response.status_code == 401:
+            return Response({"success":False, "message": message}, status=status.HTTP_200_OK)
         return response
-        
