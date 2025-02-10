@@ -1,3 +1,5 @@
+i think below is perfect and proper method , pleae review and let me know if any potential issue you can see
+
 class CustomOAuth2Validator(OAuth2Validator):
     def validate_user(self, username, password, client, request, *args, **kwargs):
         kwargs["custom_validator_used"] = True
