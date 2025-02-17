@@ -1,21 +1,37 @@
-import pandas as pd
-from sqlalchemy import create_engine
+table format
+Field	Type	Null	Key	Default	Extra
+id	int	NO	PRI		auto_increment
+code	char(5)	YES	MUL		
+name	varchar(100)	YES			
+short_name	varchar(50)	YES			
+description	longtext	YES			
+type	varchar(30)	YES			
+tags	varchar(100)	YES			
+doo	int	YES			
+class	varchar(20)	YES			
+origin_id	int	YES	MUL		
+dest_id	int	YES	MUL		
+route	int	YES			
+distance	int	YES			
+rake_type	varchar(20)	YES			
+rake_composition	varchar(200)	YES			
+rake_reversal	varchar(100)	YES			
+pantry_car	tinyint(1)	YES			
+on_board_catering	tinyint(1)	YES			
+e_catering	tinyint(1)	YES			
+is_active	smallint	YES		1	
+deactivation_count	int	YES		0	
+created_on	timestamp	NO		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+updated_on	timestamp	NO		CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP
+date_from	date	YES			
+date_to	date	YES			
 
-# Database connection details
-DB_USER = "your_username"
-DB_PASSWORD = "your_password"
-DB_HOST = "localhost"  # Change if needed
-DB_NAME = "your_database"
-TABLE_NAME = "your_table"
+excel one row data and column name and column names format
+ID	Code	Name	Short Name	Description	Type	Tags	Doo	Class	Origin ID	Dest ID	Route	Distance	Rake Type	Rake Composition	Rake Reversal	Pantry Car	On Board Catering	E Catering	Is Active	Deactivation Count	Created On	Updated On	Date From	Date To
+1	12001	NDLS SHATABDI	NDLS SHATABDI	Bhopal Shatabdi was considered to be fastest train in India until Gatimaan Express was launched in April, 2016. It still retains its number 2 position in fastest trains category. Started running on tracks on Nov 14,1988 - Bhopal Shatabdi was the first ever Shatabdi train in India. It was introduced to commemorate birth century of our first Prime Minister Pt. Jawaharlal Nehru by the then Railway Minister Madhavrao Scindia.	shatabdi	covid	127	EC:CC	11700	5400	1	709	LHB Rake	L:EOG:C14:C13:C12:C11:C10:C9:C8:C7:C6:C5:C4:C3:C2:C1:E2:E1:EOG	NULL	FALSE	TRUE	TRUE	1	0	July 26, 2022, 11:02 AM	November 13, 2024, 9:55 PM
 
-# Create DB connection
-engine = create_engine(f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}")
 
-# Load CSV file
-csv_file_path = "metabase_data.csv"  # Change this to your file path
-df = pd.read_csv(csv_file_path)
+have thousands of rows in excel
+want to generate insert queries of all rows for sync same excel metabase data in local
 
-# Insert data into the database (Replace if necessary)
-df.to_sql(TABLE_NAME, con=engine, if_exists="replace", index=False)
-
-print("Data synced successfully!")
+give python code or any simple way for this
