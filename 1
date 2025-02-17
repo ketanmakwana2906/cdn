@@ -1,99 +1,15 @@
-import pandas as pd
-import numpy as np
+# myapp/middleware.py
+import uuid
+from django.utils.deprecation import MiddlewareMixin
 
-# Load Excel file
-excel_file_path = 'metabase_data.xlsx'  # Update with your file path
-df = pd.read_excel(excel_file_path)
-
-# Mapping from Excel column names to MySQL table column names
-column_mapping = {
-    'ID': 'id',
-    'Code': 'code',
-    'Name': 'name',
-    'Short Name': 'short_name',
-    'Description': 'description',
-    'Type': 'type',
-    'Tags': 'tags',
-    'Doo': 'doo',
-    'Class': 'class',
-    'Origin ID': 'origin_id',
-    'Dest ID': 'dest_id',
-    'Route': 'route',
-    'Distance': 'distance',
-    'Rake Type': 'rake_type',
-    'Rake Composition': 'rake_composition',
-    'Rake Reversal': 'rake_reversal',
-    'Pantry Car': 'pantry_car',
-    'On Board Catering': 'on_board_catering',
-    'E Catering': 'e_catering',
-    'Is Active': 'is_active',
-    'Deactivation Count': 'deactivation_count',
-    'Created On': 'created_on',
-    'Updated On': 'updated_on',
-    'Date From': 'date_from',
-    'Date To': 'date_to'
-}
-
-# Apply the mapping to change column names in the dataframe
-df.columns = [column_mapping.get(col, col) for col in df.columns]
-
-# MySQL insert template for each row
-def generate_insert_query(row):
-    insert_values = []
-
-    # Default values from MySQL schema
-    defaults = {
-        'code': 'NULL',
-        'name': 'NULL',
-        'short_name': 'NULL',
-        'description': 'NULL',
-        'type': 'NULL',
-        'tags': 'NULL',
-        'doo': 'NULL',
-        'class': 'NULL',
-        'origin_id': 'NULL',
-        'dest_id': 'NULL',
-        'route': 'NULL',
-        'distance': 'NULL',
-        'rake_type': 'NULL',
-        'rake_composition': 'NULL',
-        'rake_reversal': 'NULL',
-        'pantry_car': 'NULL',
-        'on_board_catering': 'NULL',
-        'e_catering': 'NULL',
-        'is_active': '1',  # Default value for `is_active`
-        'deactivation_count': '0',  # Default value for `deactivation_count`
-        'created_on': 'CURRENT_TIMESTAMP',  # Default value for `created_on`
-        'updated_on': 'CURRENT_TIMESTAMP',  # Default value for `updated_on`
-        'date_from': 'NULL',
-        'date_to': 'NULL'
-    }
-    
-    # Loop through each column and handle nulls
-    for column in df.columns:
-        value = row[column]
-        if pd.isna(value):  # If NaN, use default value
-            insert_values.append(defaults.get(column, 'NULL'))
-        else:
-            if isinstance(value, str):  # Escape single quotes in strings
-                value = value.replace("'", "''")
-                insert_values.append(f"'{value}'")
-            else:
-                insert_values.append(str(value))
-
-    # Construct the SQL query for the "train" table
-    insert_query = f"INSERT INTO train ({', '.join(df.columns)}) VALUES ({', '.join(insert_values)});"
-    return insert_query
-
-# Generate all insert queries
-insert_queries = []
-for index, row in df.iterrows():
-    query = generate_insert_query(row)
-    insert_queries.append(query)
-
-# Write queries to a file or print them
-with open('insert_queries.sql', 'w') as f:
-    for query in insert_queries:
-        f.write(query + '\n')
-
-print("SQL insert queries for the 'train' table have been generated successfully.")
+class CSPMiddleware(MiddlewareMixin):
+    def process_response(self, request, response):
+        nonce = uuid.uuid4().hex
+        response['Content-Security-Policy'] = (
+            f"default-src 'self'; "
+            f"script-src 'strict-dynamic' 'nonce-{nonce}'; "
+            f"object-src 'none'; "
+            f"base-uri 'self';"
+        )
+        request.csp_nonce = nonce
+        return response
