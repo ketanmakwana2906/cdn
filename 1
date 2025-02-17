@@ -5,11 +5,42 @@ import numpy as np
 excel_file_path = 'metabase_data.xlsx'  # Update with your file path
 df = pd.read_excel(excel_file_path)
 
+# Mapping from Excel column names to MySQL table column names
+column_mapping = {
+    'ID': 'id',
+    'Code': 'code',
+    'Name': 'name',
+    'Short Name': 'short_name',
+    'Description': 'description',
+    'Type': 'type',
+    'Tags': 'tags',
+    'Doo': 'doo',
+    'Class': 'class',
+    'Origin ID': 'origin_id',
+    'Dest ID': 'dest_id',
+    'Route': 'route',
+    'Distance': 'distance',
+    'Rake Type': 'rake_type',
+    'Rake Composition': 'rake_composition',
+    'Rake Reversal': 'rake_reversal',
+    'Pantry Car': 'pantry_car',
+    'On Board Catering': 'on_board_catering',
+    'E Catering': 'e_catering',
+    'Is Active': 'is_active',
+    'Deactivation Count': 'deactivation_count',
+    'Created On': 'created_on',
+    'Updated On': 'updated_on',
+    'Date From': 'date_from',
+    'Date To': 'date_to'
+}
+
+# Apply the mapping to change column names in the dataframe
+df.columns = [column_mapping.get(col, col) for col in df.columns]
+
 # MySQL insert template for each row
 def generate_insert_query(row):
-    # Check and handle NaN values, set defaults if NaN is found
     insert_values = []
-    
+
     # Default values from MySQL schema
     defaults = {
         'code': 'NULL',
