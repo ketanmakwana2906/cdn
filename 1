@@ -1,40 +1,68 @@
-table format
-Field	Type	Null	Key	Default	Extra
-id	int	NO	PRI		auto_increment
-code	char(5)	YES	MUL		
-name	varchar(100)	YES			
-short_name	varchar(50)	YES			
-description	longtext	YES			
-type	varchar(30)	YES			
-tags	varchar(100)	YES			
-doo	int	YES			
-class	varchar(20)	YES			
-origin_id	int	YES	MUL		
-dest_id	int	YES	MUL		
-route	int	YES			
-distance	int	YES			
-rake_type	varchar(20)	YES			
-rake_composition	varchar(200)	YES			
-rake_reversal	varchar(100)	YES			
-pantry_car	tinyint(1)	YES			
-on_board_catering	tinyint(1)	YES			
-e_catering	tinyint(1)	YES			
-is_active	smallint	YES		1	
-deactivation_count	int	YES		0	
-created_on	timestamp	NO		CURRENT_TIMESTAMP	DEFAULT_GENERATED
-updated_on	timestamp	NO		CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP
-date_from	date	YES			
-date_to	date	YES			
+import pandas as pd
+import numpy as np
 
-excel one row data and column name and column names format
-ID	Code	Name	Short Name	Description	Type	Tags	Doo	Class	Origin ID	Dest ID	Route	Distance	Rake Type	Rake Composition	Rake Reversal	Pantry Car	On Board Catering	E Catering	Is Active	Deactivation Count	Created On	Updated On	Date From	Date To
-1	12001	NDLS SHATABDI	NDLS SHATABDI	Bhopal Shatabdi was considered to be fastest train in India until Gatimaan Express was launched in April, 2016. It still retains its number 2 position in fastest trains category. Started running on tracks on Nov 14,1988 - Bhopal Shatabdi was the first ever Shatabdi train in India. It was introduced to commemorate birth century of our first Prime Minister Pt. Jawaharlal Nehru by the then Railway Minister Madhavrao Scindia.	shatabdi	covid	127	EC:CC	11700	5400	1	709	LHB Rake	L:EOG:C14:C13:C12:C11:C10:C9:C8:C7:C6:C5:C4:C3:C2:C1:E2:E1:EOG	NULL	FALSE	TRUE	TRUE	1	0	July 26, 2022, 11:02 AM	November 13, 2024, 9:55 PM
+# Load Excel file
+excel_file_path = 'metabase_data.xlsx'  # Update with your file path
+df = pd.read_excel(excel_file_path)
 
+# MySQL insert template for each row
+def generate_insert_query(row):
+    # Check and handle NaN values, set defaults if NaN is found
+    insert_values = []
+    
+    # Default values from MySQL schema
+    defaults = {
+        'code': 'NULL',
+        'name': 'NULL',
+        'short_name': 'NULL',
+        'description': 'NULL',
+        'type': 'NULL',
+        'tags': 'NULL',
+        'doo': 'NULL',
+        'class': 'NULL',
+        'origin_id': 'NULL',
+        'dest_id': 'NULL',
+        'route': 'NULL',
+        'distance': 'NULL',
+        'rake_type': 'NULL',
+        'rake_composition': 'NULL',
+        'rake_reversal': 'NULL',
+        'pantry_car': 'NULL',
+        'on_board_catering': 'NULL',
+        'e_catering': 'NULL',
+        'is_active': '1',  # Default value for `is_active`
+        'deactivation_count': '0',  # Default value for `deactivation_count`
+        'created_on': 'CURRENT_TIMESTAMP',  # Default value for `created_on`
+        'updated_on': 'CURRENT_TIMESTAMP',  # Default value for `updated_on`
+        'date_from': 'NULL',
+        'date_to': 'NULL'
+    }
+    
+    # Loop through each column and handle nulls
+    for column in df.columns:
+        value = row[column]
+        if pd.isna(value):  # If NaN, use default value
+            insert_values.append(defaults.get(column, 'NULL'))
+        else:
+            if isinstance(value, str):  # Escape single quotes in strings
+                value = value.replace("'", "''")
+                insert_values.append(f"'{value}'")
+            else:
+                insert_values.append(str(value))
 
-have thousands of rows in excel
-want to generate insert queries of all rows for sync same excel metabase data in local
+    # Construct the SQL query for the "train" table
+    insert_query = f"INSERT INTO train ({', '.join(df.columns)}) VALUES ({', '.join(insert_values)});"
+    return insert_query
 
-give python code or any simple way for this
-keep in mind that is any value is null then default excel gives nan
-but in query we have to set default value if nan found , \
-analyze all thing properly using given description of mysql table , column names and row sample
+# Generate all insert queries
+insert_queries = []
+for index, row in df.iterrows():
+    query = generate_insert_query(row)
+    insert_queries.append(query)
+
+# Write queries to a file or print them
+with open('insert_queries.sql', 'w') as f:
+    for query in insert_queries:
+        f.write(query + '\n')
+
+print("SQL insert queries for the 'train' table have been generated successfully.")
