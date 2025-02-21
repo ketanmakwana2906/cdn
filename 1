@@ -1,31 +1,7 @@
-<head>
-    <script>
-      (function() {
-        var nonce = "{{ request.csp_nonce }}";  // Get nonce from Django
+from django.utils.deprecation import MiddlewareMixin
 
-        // Function to add nonce to scripts
-        function addNonceToScript(script) {
-            if (!script.hasAttribute("nonce")) {
-                script.setAttribute("nonce", nonce);
-            }
-        }
-
-        // Add nonce to all existing scripts
-        document.querySelectorAll("script").forEach(addNonceToScript);
-
-        // Watch for newly added script tags
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach(mutation => {
-                mutation.addedNodes.forEach(node => {
-                    if (node.tagName === "SCRIPT") {
-                        addNonceToScript(node);
-                    }
-                });
-            });
-        });
-
-        observer.observe(document.documentElement, { childList: true, subtree: true });
-
-      })();
-    </script>
-</head>
+class CustomHeaderMiddleware(MiddlewareMixin):
+    def process_response(self, request, response):
+        response["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response["Permissions-Policy"] = "geolocation=(), microphone=()"
+        return response
