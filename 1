@@ -1,152 +1,21 @@
-{% extends "base.html" %}
-{% block meta %}
-{% load staticfiles %}
-{{block.super}}
-<!-- <meta name="description" content="{{ SITE_DESCRIPTION }}{% for category in categories %}{{category|title}}{%if not forloop.last %},{% endif %} {% endfor %} | {{SITE_DESCRIPTION_SUFFIX}}"> -->
-    <meta name="author" content="Trainman">
-    <meta name="description" content="{{ SITE_DESCRIPTION }}">
-    <meta property="og:description" content="{{ SITE_DESCRIPTION }}">
-    <meta property="og:type" content="blog"/>
-    <meta property="og:image" content="https://www.trainman.in/static/blog/images/trainman-blog-image.jpg"/> 
-{% endblock meta %}
-{% block title %}
-    {{ SITE_DESCRIPTION }}{% for category in categories %}{{category|title}}{%if not forloop.last %},{% endif %} {% endfor %} | {{SITE_DESCRIPTION_SUFFIX}}
-{% endblock %}
-{% block innerbody %}
-    <!-- Page Header -->
-    <!-- Set your background image for this header on the line below. -->
-    <!-- <header class="intro-header" style="background-image: url('{% static "blog/images/trainman-blog-image.jpg" %}');"> -->
-    <header class="intro-header" style="background-image: url('{% static "images/trainman-blog-image.jpg" %}');">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-10 col-md-offset-1">
-                    <div class="site-heading">
-
-                          <div class="blog-header">
-                            <h1 class="blog-title">Trainman Blog</h1>
-                            <p class="lead blog-description">The official blog of Trainman, with rants and advices on trains.</p>
-                          </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <div class="container">
-
-      
-
-    </div>
-    <!-- Main Content -->
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-8 blog-main">
-		{% comment %}
-		{% if category.0 %}
-		<h3 style="font-size:36px;"> Blogs on {{category.0|title}}:</h3>
-		{% endif %}
-		{% endcomment %}
-
-                {% for blog in blogs %}
-                    <div class="blog-post">
-                        <a href="{{blog.get_url}}">
-                            <h4 class="blog-post-title">
-                                <u>{{ blog.title }}</u>
-                            </h4>
-                        </a>
-                            <div class="post-subtitle" style="margin-bottom: 10px">
-                                {{ blog.short_description|truncatechars:200 }}
-                            </div>
-
-                        <ul class="post-meta">
-                            <li>
-                            <em></em>&nbsp;{{blog.views}}&nbsp;views&nbsp;&middot;&nbsp;
-                            Posted by&nbsp;<i>{{ blog.written_by.first_name }} {{blog.written_by.last_name }}</i>&nbsp;&middot;&nbsp;
-                            {{ blog.created_on|date }}
-                            </li>
-                            <li>
-                            Category : <a href="/category{{blog.category.get_url}}/">{{ blog.category.name}}</a>
-                            </li>
-                        </ul>
-
-
-                        <!-- <ul class="post-meta">
-                            <div class="fb-like" data-href="{{blog.get_url}}" data-layout="button_count" data-action="like" data-show-faces="true" data-share="true"></div>
-                        </ul> -->
-
-                    </div>
-                    {% if not forloop.last %}
-                        <hr>
-                    {% endif %}
-                {% endfor %}
-                <ul class="pagination">
-                    {% if blogs.has_previous %}
-                        <li><a href="?page={{ blogs.previous_page_number }}"><i class="fa fa-chevron-left" aria-hidden="true"></i></a></li>
-                    {% else %}
-                        <li class="disabled"><span><i class="fa fa-chevron-left" aria-hidden="true"></i></span></li>
-                    {% endif %}
-
-                    {% if blogs.number|add:'-2' > 1 %}
-                        <li><a href="?page={{ blogs.number|add:'-3' }}">&hellip;</a></li>
-                    {% endif %}
-
-                    {% for i in blogs.paginator.page_range %}
-                        {% if blogs.number == i %}
-                            <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
-                        {% elif i > blogs.number|add:'-2' and i < blogs.number|add:'2' %}
-                            <li><a href="?page={{ i }}">{{ i }}</a></li>
-                        {% endif %}
-                    {% endfor %}
-
-                    {% if blogs.paginator.num_pages > blogs.number|add:'2' %}
-                        <li><a href="?page={{ blogs.number|add:'3' }}">&hellip;</a></li>
-                    {% endif %}
-
-                    {% if blogs.has_next %}
-                        <li><a href="?page={{ blogs.next_page_number }}"><i class="fa fa-chevron-right" aria-hidden="true"></i></a></li>
-                    {% else %}
-                        <li class="disabled"><span><i class="fa fa-chevron-right" aria-hidden="true"></i></span></li>
-                    {% endif %}
-                </ul>
-                <!-- Pager -->
-                <ul class="pager">
-                    {% comment %}
-                    <li class="next">
-                        <a href="#">Older Posts &rarr;</a>
-                    </li>
-                    {% endcomment %}
-                </ul>
-            </div>
-            <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
-                <div class="sidebar-module sidebar-module-inset">
-                    <h4>
-                        About
-                    </h4>
-                    <p style="text-align: justify;">
-                    Trainman is the guy you count on when it comes to Indian Railways. It is an effort to provide train related intelligence in making your decisions while planning your train journeys. It goes beyond the common notion of berth availability in trains and guides you further even if berths are not available. For now, Trainman tells you whether to book a waiting ticket or not, by giving you chances of confirmation in that train. It also allows you to compare waiting tickets of various trains. Trainman also gives you confirmation chances of an already booked ticket.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-    <hr>
-{% endblock innerbody %}
 <script>
-    (function() {
+    document.addEventListener("DOMContentLoaded", function () {
         var nonceMeta = document.querySelector("meta[name='csp-nonce']");
         if (nonceMeta) {
             var nonce = nonceMeta.getAttribute("content");
 
             var originalAppendChild = Element.prototype.appendChild;
-            Element.prototype.appendChild = function(node) {
+            Element.prototype.appendChild = function (node) {
                 if (node.tagName === "SCRIPT" && !node.nonce) {
                     node.nonce = nonce;
                 }
                 return originalAppendChild.call(this, node);
             };
+
+            // Also update existing script tags without nonce
+            document.querySelectorAll("script:not([nonce])").forEach(function (script) {
+                script.nonce = nonce;
+            });
         }
-    })();
+    });
 </script>
-
-
-this does not adding nonce in scrit that load from base.html 
