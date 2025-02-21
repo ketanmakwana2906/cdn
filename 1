@@ -1,21 +1,31 @@
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        var nonceMeta = document.querySelector("meta[name='csp-nonce']");
-        if (nonceMeta) {
-            var nonce = nonceMeta.getAttribute("content");
+<head>
+    <script>
+      (function() {
+        var nonce = "{{ request.csp_nonce }}";  // Get nonce from Django
 
-            var originalAppendChild = Element.prototype.appendChild;
-            Element.prototype.appendChild = function (node) {
-                if (node.tagName === "SCRIPT" && !node.nonce) {
-                    node.nonce = nonce;
-                }
-                return originalAppendChild.call(this, node);
-            };
-
-            // Also update existing script tags without nonce
-            document.querySelectorAll("script:not([nonce])").forEach(function (script) {
-                script.nonce = nonce;
-            });
+        // Function to add nonce to scripts
+        function addNonceToScript(script) {
+            if (!script.hasAttribute("nonce")) {
+                script.setAttribute("nonce", nonce);
+            }
         }
-    });
-</script>
+
+        // Add nonce to all existing scripts
+        document.querySelectorAll("script").forEach(addNonceToScript);
+
+        // Watch for newly added script tags
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach(mutation => {
+                mutation.addedNodes.forEach(node => {
+                    if (node.tagName === "SCRIPT") {
+                        addNonceToScript(node);
+                    }
+                });
+            });
+        });
+
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+
+      })();
+    </script>
+</head>
