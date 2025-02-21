@@ -1,67 +1,18 @@
-import random
-import base64
+{{ endblock innerbody }}
 
-class CSPMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
+<script>
+    (function() {
+        var nonceMeta = document.querySelector("meta[name='csp-nonce']");
+        if (nonceMeta) {
+            var nonce = nonceMeta.getAttribute("content");
 
-    def __call__(self, request):
-        nonce = base64.b64encode(random.randbytes(16)).decode('utf-8')
-        request.csp_nonce = nonce
-
-        response = self.get_response(request)
-        response["Content-Security-Policy"] = f"script-src 'self' 'nonce-{nonce}';"
-        return response
-
-
-
-MIDDLEWARE = [
-    'your_project.middlewares.CSPMiddleware',
-    # other middleware...
-]
-
-
-
-def nonce_context(request):
-    return {"csp_nonce": getattr(request, "csp_nonce", "")}
-
-
-
-
-    TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.jinja2.Jinja2',
-        'DIRS': [BASE_DIR / "templates"],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'your_project.context_processors.nonce_context',
-                # other context processors...
-            ],
-        },
-    },
-]
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Page</title>
-</head>
-<body>
-
-    <script nonce="{{ csp_nonce }}">
-        console.log("This is an inline script secured with a nonce.");
-    </script>
-
-    <script src="{% static 'js/script.js' %}" nonce="{{ csp_nonce }}"></script>
-
-</body>
-</html>
-
-
-
-
-    
+            var originalAppendChild = Element.prototype.appendChild;
+            Element.prototype.appendChild = function(node) {
+                if (node.tagName === "SCRIPT" && !node.nonce) {
+                    node.nonce = nonce;
+                }
+                return originalAppendChild.call(this, node);
+            };
+        }
+    })();
+</script>
