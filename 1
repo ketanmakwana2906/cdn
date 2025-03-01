@@ -1,33 +1,127 @@
-const puppeteer = require('puppeteer');
+async function scrapConfirmTkt(pnr) {
+    const args = [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
+        '--window-size=1920x1080'
+    ];
 
-async function testProxy() {
-    const proxy = {
-        protocol: "http",       // Change to "socks5" if needed
-        host: "123.456.789.000", // Replace with a real proxy IP
-        port: "8080",           // Proxy port
-        auth: { username: "testuser", password: "testpass" } // Proxy authentication
+    const options = {
+        args,
+        userAgent: randomUA.generate(),
+        headless: true,
+        ignoreHTTPSErrors: true,
+        defaultViewport: null,
+        ignoreDefaultArgs: ["--enable-automation"]
     };
 
-    const browser = await puppeteer.launch({
-        headless: true,
-        args: [`--proxy-server=${proxy.protocol}://${proxy.host}:${proxy.port}`]
-    });
+    try {   
+        const browser = await puppeteer.launch(options);
+        const page = await browser.newPage();
 
-    const page = await browser.newPage();
+        logger.log({
+            level: 'info',
+            message: `Page Loading ${pnr}`,
+            label: 'Indian Rail'
+        });
 
-    // Authenticate Proxy
-    await page.authenticate({
-        username: proxy.auth.username,
-        password: proxy.auth.password
-    });
+        page.on('error', err => {
+            browser.close();
+        });
 
-    // Open IP checker site to verify IP change
-    await page.goto("https://api64.ipify.org?format=json", { waitUntil: "domcontentloaded" });
+        var response = '';
+        try {
+            // await page.waitFor(500);
+            await page.goto('https://www.confirmtkt.com/pnr-status');
 
-    const ip = await page.evaluate(() => document.body.innerText);
-    console.log("Current IP:", ip);
+            await page.addScriptTag({ url: 'https://code.jquery.com/jquery-3.2.1.min.js' });
+            await page.addScriptTag({ url: 'https://www.google.com/recaptcha/api.js?render=6LdT9ogUAAAAACf7wlZ5dsVfsDj-21XnSTwVPSvo' });
 
-    await browser.close();
+            try {
+                logger.log({
+                    level: 'info',
+                    message: `Page loaded ${pnr}`,
+                    label: 'Indian Rail'
+                });
+
+                
+
+                await page.evaluate((PNR) => { $('#pnrtext').val(PNR) }, pnr);
+                
+                await Promise.all([
+                    // Manual clicking of the link
+                    page.$eval('form button', el => el.click()),
+                    page.waitForNavigation()
+
+                ]).catch(e => console.log(e));
+
+                await page.waitFor(2000)
+                logger.log({
+                    level: 'info',
+                    message: `Navigate on pnr page`,
+                    label: 'Indian Rail'
+                });
+
+                response = await page.evaluate(() => {
+                    
+                    return new Promise((resolve) => {
+                        domSpan =  document.body.innerHTML//document.getElementsByTagName('html')[0]
+                        pnrQuerySelector = document.querySelectorAll('#pnrFullDetails .main>table.table span')
+                        pnrStatus = []
+
+                        resolve({'html':domSpan})
+                    })
+
+
+                })
+
+            } catch (e) {
+                if (e instanceof TimeoutError) {
+                    logger.log({
+                        level: 'error',
+                        message: `Error Occurred in getting data ${e}`,
+                        label: 'Indian Rail'
+                    });
+                }
+            }
+
+        } catch (e) {
+            if (e instanceof TimeoutError) {
+                logger.log({
+                    level: 'error',
+                    message: `Error Occurred in loading page ${e}`,
+                    label: 'Indian Rail'
+                });
+            }
+
+        }
+        finally {
+            if (!page.isClosed()) {
+                await page.close();
+            }
+            await browser.close();
+        }
+        logger.log({
+            level: 'info',
+            message: `pnr Scrapped ${pnr}`,
+            label: 'Indian Rail'
+        });
+        return response;
+    } catch (e) {
+        logger.log({
+            level: 'error',
+            message: `Error Occurred in Launching page ${e}`,
+            label: 'Indian Rail'
+        });
+
+    }
+
+
 }
 
-testProxy().catch(console.error);
+
+issue in above is when page loaded one loader comes and immediately html of that while loader is returned
+like below , but want to catch html content after of this loader 
+<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"/><link rel=\"icon\" href=\"/rbooking/favicon.ico\"/><meta name=\"viewport\" content=\"width=device-width,initial-scale=1,shrink-to-fit=no,user-scalable=no\"/><meta name=\"theme-color\" content=\"#fff\"/><link rel=\"manifest\" href=\"/rbooking/manifest.json\"/><link rel=\"apple-touch-icon\" sizes=\"180x180\" href=\"/rbooking/apple-touch-icon.png\"/><title>Confirm Ticket - Train Ticket booking Online | Train seat availability</title><meta name=\"keywords\" content=\"Confirm Ticket, irctc tickets,Train tickets,train seat\"/><link rel=\"preload\" href=\"https://cdn.confirmtkt.com/fonts/ixisans/ixi_regular.woff2\" as=\"font\" type=\"font/woff2\" crossorigin/><link rel=\"preload\" href=\"https://cdn.confirmtkt.com/fonts/ixisans/ixi_medium.woff2\" as=\"font\" type=\"font/woff2\" crossorigin/><link rel=\"preload\" href=\"https://cdn.confirmtkt.com/fonts/ixisans/ixi_bold.woff2\" as=\"font\" type=\"font/woff2\" crossorigin/><link rel=\"preload\" href=\"/rbooking/fonts/material-icons.woff2\" as=\"font\" type=\"font/woff2\" crossorigin/><style>@font-face{font-family:ixi-sans;font-style:normal;font-weight:400;font-display:swap;src:url('https://cdn.confirmtkt.com/fonts/ixisans/ixi_regular.woff2') format('woff2'),url('https://cdn.confirmtkt.com/fonts/ixisans/ixi_regular.woff') format('woff')}@font-face{font-family:ixi-sans;font-style:normal;font-weight:500;font-display:swap;src:url('https://cdn.confirmtkt.com/fonts/ixisans/ixi_medium.woff2') format('woff2'),url('https://cdn.confirmtkt.com/fonts/ixisans/ixi_medium.woff') format('woff')}@font-face{font-family:ixi-sans;font-style:normal;font-weight:700;font-display:swap;src:url('https://cdn.confirmtkt.com/fonts/ixisans/ixi_bold.woff2') format('woff2'),url('https://cdn.confirmtkt.com/fonts/ixisans/ixi_bold.woff') format('woff')}@font-face{font-family:'Material Icons';font-style:normal;font-weight:400;font-display:swap;src:url('/rbooking/fonts/material-icons.woff2')}body{margin:0;font-family:ixi-sans,sans-serif}h1,h2{margin-top:0;margin-bottom:.5rem;font-weight:500;line-height:1.2}#root{min-height:100vh;margin:auto;background-color:#fff}@media (max-width:768px){#root{max-width:480px}}#splash-screen{position:fixed;background:#43a64e;width:100%;height:100vh;color:#fff;text-align:center}.desp{font-size:16px;position:fixed;bottom:40px;left:0;right:0}.lds-ring{display:inline-block;position:relative;width:64px;height:64px}.lds-ring div{box-sizing:border-box;display:block;position:absolute;width:51px;height:51px;margin:6px;border:6px solid #fff;border-radius:50%;animation:lds-ring 1.2s cubic-bezier(.5,0,.5,1) infinite;border-color:#fff transparent transparent transparent}.lds-ring div:first-child{animation-delay:-.45s}.lds-ring div:nth-child(2){animation-delay:-.3s}.lds-ring div:nth-child(3){animation-delay:-.15s}@keyframes lds-ring{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}</style><script defer=\"defer\" src=\"/rbooking/static/js/main.4ebfefa5.js\"></script><link href=\"/rbooking/static/css/main.3c36caf3.css\" rel=\"stylesheet\"></head><body><noscript>You need to enable JavaScript to run this app.</noscript><div id=\"root\"><div id=\"splash-screen\"><div style=\"padding-top:40%\"><div class=\"lds-ring\"><div></div><div></div><div></div><div></div></div><h1 style=\"font-size:34px;letter-spacing:1px\">ConfirmTkt</h1><h2 style=\"font-size:16px\">IRCTC TICKET BOOKING</h2></div><div class=\"desp\"><div>POWERED BY</div><p style=\"font-size:12px\">ConfirmTkt Prediction & Alternates</p><h3 style=\"font-size:12px\">Get Confirm Ticket</h3></div></div></div></body></html>"
