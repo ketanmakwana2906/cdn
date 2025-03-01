@@ -1,41 +1,42 @@
-const puppeteer = require('puppeteer');
+code is just for refernce from one another function , use only ip logic from below , then hit with that ip monitor that all logic is your think
 
-(async () => {
-    console.log('hey');
-
-    const options = { headless: true }; // Define options if needed
-    const browser = await puppeteer.launch(options);
-
-    try {
-        const page = await browser.newPage();
-        await page.setDefaultNavigationTimeout(60000);
-
-        console.log('wtf');
-        console.log('scanning ... ');
-
-        // Monitor network responses
-        page.on("response", async (response) => {
-            let urlPattern = `ctpro/mweb/${pnr}`;
-            if (response.url().includes(urlPattern)) {
-                console.log('scanning success ... ', response.url());
-                try {
-                    const jsonResponse = await response.json();
-                    console.log(jsonResponse);
-                } catch (err) {
-                    console.error("Error parsing response:", err);
-                }
+myCache.del("ip_list");
+proxy_ips = myCache.get( "ip_list" );
+            if (proxy_ips==undefined){
+                logger.log({
+                    level: 'info',
+                       message: `Finding IP List from Oxylabs url using creds.`,
+                        label: "OxyLabs"
+                });
+                proxy_ips = await getOxyLabsIps();
+                proxy_ips = proxy_ips.split("\n")
+                success = myCache.set( "ip_list", proxy_ips, 3600 );
             }
-        });
+            random_proxy_ip = proxy_ips[Math.floor(Math.random()*proxy_ips.length)];
+            ip_data = random_proxy_ip.split(":");
+            domain = ip_data[0];
+            port = ip_data[1];
+            user_agent = randomUseragent.getRandom();
+            logger.log({
+                level: 'info',
+                message: `Proxy IP hit by OxyLabs: ${ip_data}`,
+                label: "OxyLabs"
+            });
+            result = await axios({
+                method:'get',
+                url: `https://www.confirmtkt.com/pnr-status/${pnr}?`,
+                headers: {
+                    'User-Agent': String(user_agent)
+                },
+                proxy:{
+                    protocol: 'http',
+                    host: String(domain),
+                    port: port,
+                    auth: {
+                        username: config.OxyLabsCreds.username,
+                        password: config.OxyLabsCreds.password
+                    }
+                }
+            })
 
-        // Navigate to the page
-        await page.goto(`https://www.confirmtkt.com/pnr-status/${pnr}`);
 
-        // Wait for some time to capture responses
-        await new Promise(resolve => setTimeout(resolve, 5000));
-
-    } catch (err) {
-        console.error("Error:", err);
-    } finally {
-        await browser.close();
-    }
-})();
