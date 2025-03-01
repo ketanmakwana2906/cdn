@@ -1,33 +1,46 @@
-const puppeteer = require('puppeteer');
-const randomUseragent = require('random-useragent');
+below is my one old code where we implemented , please analyze thoughly and give new as minimum modification and minimum code change
 
-// Oxylabs Proxy Credentials
-const OXYLABS_USERNAME = "your_oxylabs_username";
-const OXYLABS_PASSWORD = "your_oxylabs_password";
-const PROXY_URL = `http://${OXYLABS_USERNAME}:${OXYLABS_PASSWORD}@pr.oxylabs.io:7777`;
+result = await axios(`https://www.confirmtkt.com/pnr-status/${pnr}?`)
+             myCache.del("ip_list");
+            
+		
+	    proxy_ips = myCache.get( "ip_list" );
+            if (proxy_ips==undefined){
+                logger.log({
+                    level: 'info',
+                       message: `Finding IP List from Oxylabs url using creds.`,
+                        label: "OxyLabs"
+                });
+                proxy_ips = await getOxyLabsIps();
+                proxy_ips = proxy_ips.split("\n")
+                success = myCache.set( "ip_list", proxy_ips, 3600 );
+            }
+            random_proxy_ip = proxy_ips[Math.floor(Math.random()*proxy_ips.length)];
+            ip_data = random_proxy_ip.split(":");
+            domain = ip_data[0];
+            port = ip_data[1];
+            user_agent = randomUseragent.getRandom();
+            logger.log({
+                level: 'info',
+                message: `Proxy IP hit by OxyLabs: ${ip_data}`,
+                label: "OxyLabs"
+            });
+            result = await axios({
+                method:'get',
+                url: `https://www.confirmtkt.com/pnr-status/${pnr}?`,
+                headers: {
+                    'User-Agent': String(user_agent)
+                },
+                proxy:{
+                    protocol: 'http',
+                    host: String(domain),
+                    port: port,
+                    auth: {
+                        username: config.OxyLabsCreds.username,
+                        password: config.OxyLabsCreds.password
+                    }
+                }
+            })
 
-async function scrapeWithNewIP(pnr) {
-    console.log(`\nRequesting PNR: ${pnr} with a new IP...`);
-
-    const browser = await puppeteer.launch({
-        headless: true,
-        args: [`--proxy-server=${PROXY_URL}`] // Change IP using Oxylabs
-    });
-
-    const page = await browser.newPage();
-    await page.setUserAgent(randomUseragent.getRandom());
-
-    await page.goto(`https://www.confirmtkt.com/pnr-status/${pnr}`, { waitUntil: 'networkidle2' });
-
-    console.log(`Loaded page for PNR: ${pnr}`);
-    
-    await browser.close();
-}
-
-// Example Usage (Each call gets a different IP)
-(async () => {
-    const pnrNumbers = ["1234567890", "2345678901", "3456789012"]; // Example PNR numbers
-    for (let pnr of pnrNumbers) {
-        await scrapeWithNewIP(pnr);
-    }
-})();
+            htmlData = result.data.replace(/(\r)/gm,"")
+            return {'html':htmlData}
