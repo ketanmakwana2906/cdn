@@ -1,6 +1,6 @@
 const puppeteer = require('puppeteer');
 
-async function fetchPNRStatus(pnr) {
+async function fetchFullPageHTML(pnr) {
     try {
         const browser = await puppeteer.launch({ headless: true });
         const page = await browser.newPage();
@@ -8,38 +8,23 @@ async function fetchPNRStatus(pnr) {
         // Set User-Agent to mimic a real browser
         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36');
 
-        let pnrResponse = null;
-
-        // Monitor network responses
-        page.on('response', async (response) => {
-            const url = response.url();
-            if (url.includes('/pnr-status/')) {  // Identify API response URL
-                try {
-                    pnrResponse = await response.text(); // Extract JSON or HTML response
-                } catch (error) {
-                    console.error(`Error reading response: ${error.message}`);
-                }
-            }
-        });
-
-        // Open the PNR status page
+        // Open the PNR status page and wait for network requests to finish
         await page.goto(`https://www.confirmtkt.com/pnr-status/${pnr}`, { waitUntil: 'networkidle2' });
 
-        // Wait for some time to ensure response is captured
-        await page.waitForTimeout(3000);
+        // Optional: Wait for a specific element to confirm page has fully loaded
+        await page.waitForSelector('.pnrStatusTable', { timeout: 5000 }).catch(() => console.warn("PNR status table not found!"));
+
+        // Extract the full HTML content
+        const fullHTML = await page.content();
 
         await browser.close();
 
-        if (!pnrResponse) {
-            return { 'error': 'PNR response not captured. Possible bot detection or site changes.' };
-        }
-
-        return { 'html': pnrResponse };
+        return { 'html': fullHTML };
 
     } catch (error) {
-        return { 'error': `Failed to fetch PNR status: ${error.message}` };
+        return { 'error': `Failed to fetch full page HTML: ${error.message}` };
     }
 }
 
 // Example usage
-fetchPNRStatus('1234567890').then(console.log);
+fetchFullPageHTML('1234567890').then(console.log);
