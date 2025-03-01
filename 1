@@ -1,34 +1,26 @@
-# Use Red Hat UBI 8.10
-FROM redhat/ubi8:8.10
-
-# Update system
-RUN yum -y update && yum clean all
-
-# Install required dependencies
-RUN yum install -y \
-    glibc libX11 libXcomposite libXcursor libXdamage libXext libXi \
-    libXtst cups-libs libXScrnSaver libXrandr alsa-lib atk \
-    at-spi2-atk gtk3 pango cairo mesa-libgbm libdrm \
-    xorg-x11-fonts-100dpi xorg-x11-fonts-75dpi xorg-x11-fonts-Type1 \
-    xorg-x11-fonts-misc xorg-x11-utils && \
-    yum clean all
-
-# Manually download Chromium
-RUN curl -L -o /tmp/chromium.rpm https://download-ib01.fedoraproject.org/pub/fedora/linux/releases/38/Everything/x86_64/os/Packages/c/chromium-123.0.6312.58-1.fc38.x86_64.rpm && \
-    yum localinstall -y /tmp/chromium.rpm && \
-    rm -f /tmp/chromium.rpm
-
-# Set Puppeteer to use system Chromium
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-
-# Install Node.js
-RUN dnf install -y nodejs
-
-# Install dependencies
-RUN PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install --legacy-peer-deps
-
-# Expose port
-EXPOSE 4000
-
-# Start the application
-CMD ["node", "server.js"]
+console.log('hey');
+        const browser =await puppeteer.launch(options);
+ 
+        try {
+            const page = await browser.newPage();
+            await page.setDefaultNavigationTimeout(60000);
+ 
+            page.setRequestInterception(true);
+            page.goto(`https://www.confirmtkt.com/pnr-status/${pnr}`).then(s=>{console.log(s);});
+ 
+            console.log('wtf');
+            console.log('scanning ... ');
+            page.on("response", async (response) => {
+                let url = 'ctpro/mweb/'+pnr;
+                if (response.url().includes(url)) {
+                    console.log('scanning success ... ', response.url());
+                    try {
+                        console.log(response);
+                        const jsonResponse = await response.json();
+                        console.log(jsonResponse);
+                        await browser.close();
+                    } catch (err) {
+                        console.error("Error parsing response:", err);
+                    }
+                }
+            });
