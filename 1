@@ -1,42 +1,103 @@
-code is just for refernce from one another function , use only ip logic from below , then hit with that ip monitor that all logic is your think
+const puppeteer = require('puppeteer');
+const axios = require('axios');
+const NodeCache = require("node-cache");
+const randomUseragent = require('random-useragent');
 
-myCache.del("ip_list");
-proxy_ips = myCache.get( "ip_list" );
-            if (proxy_ips==undefined){
-                logger.log({
-                    level: 'info',
-                       message: `Finding IP List from Oxylabs url using creds.`,
-                        label: "OxyLabs"
-                });
-                proxy_ips = await getOxyLabsIps();
-                proxy_ips = proxy_ips.split("\n")
-                success = myCache.set( "ip_list", proxy_ips, 3600 );
+const myCache = new NodeCache();
+const config = {
+    OxyLabsCreds: {
+        username: 'your_oxylabs_username',
+        password: 'your_oxylabs_password'
+    }
+};
+
+// Function to get fresh Oxylabs IP list
+async function getOxyLabsIps() {
+    try {
+        console.log("Fetching fresh proxy IPs from Oxylabs...");
+        // Replace this with the actual Oxylabs API endpoint to fetch IPs
+        const response = await axios.get('https://proxy.oxylabs.io/api/proxies', {
+            auth: {
+                username: config.OxyLabsCreds.username,
+                password: config.OxyLabsCreds.password
             }
-            random_proxy_ip = proxy_ips[Math.floor(Math.random()*proxy_ips.length)];
-            ip_data = random_proxy_ip.split(":");
-            domain = ip_data[0];
-            port = ip_data[1];
-            user_agent = randomUseragent.getRandom();
-            logger.log({
-                level: 'info',
-                message: `Proxy IP hit by OxyLabs: ${ip_data}`,
-                label: "OxyLabs"
-            });
-            result = await axios({
-                method:'get',
-                url: `https://www.confirmtkt.com/pnr-status/${pnr}?`,
-                headers: {
-                    'User-Agent': String(user_agent)
-                },
-                proxy:{
-                    protocol: 'http',
-                    host: String(domain),
-                    port: port,
-                    auth: {
-                        username: config.OxyLabsCreds.username,
-                        password: config.OxyLabsCreds.password
-                    }
+        });
+
+        return response.data; // Adjust based on the actual API response format
+    } catch (err) {
+        console.error("Error fetching Oxylabs IPs:", err);
+        return "";
+    }
+}
+
+// Function to get a random proxy from the cache
+async function getRandomProxy() {
+    let proxy_ips = myCache.get("ip_list");
+
+    if (!proxy_ips) {
+        console.log("Fetching new IP list from Oxylabs...");
+        proxy_ips = await getOxyLabsIps();
+        proxy_ips = proxy_ips.split("\n"); // Assuming response is newline-separated
+        myCache.set("ip_list", proxy_ips, 3600);
+    }
+
+    const random_proxy_ip = proxy_ips[Math.floor(Math.random() * proxy_ips.length)];
+    const [domain, port] = random_proxy_ip.split(":");
+    const user_agent = randomUseragent.getRandom();
+
+    console.log(`Using Proxy: ${domain}:${port}`);
+
+    return { domain, port, user_agent };
+}
+
+// Function to scrape PNR status with a new IP for every request
+async function scrapePnrStatus(pnr) {
+    console.log(`\nStarting new request for PNR: ${pnr}`);
+
+    const { domain, port, user_agent } = await getRandomProxy();
+
+    // Launch a new browser instance for each request with a different proxy
+    const browser = await puppeteer.launch({
+        headless: true,
+        args: [`--proxy-server=http://${domain}:${port}`]
+    });
+
+    try {
+        const page = await browser.newPage();
+        await page.setUserAgent(user_agent);
+        await page.setDefaultNavigationTimeout(60000);
+
+        console.log('Scanning ...');
+
+        page.on("response", async (response) => {
+            let urlPattern = `ctpro/mweb/${pnr}`;
+            if (response.url().includes(urlPattern)) {
+                console.log('Scanning success ... ', response.url());
+                try {
+                    const jsonResponse = await response.json();
+                    console.log(jsonResponse);
+                } catch (err) {
+                    console.error("Error parsing response:", err);
                 }
-            })
+            }
+        });
 
+        // Visit the page with a different IP each time
+        await page.goto(`https://www.confirmtkt.com/pnr-status/${pnr}`, { waitUntil: 'networkidle2' });
 
+        await new Promise(resolve => setTimeout(resolve, 5000)); // Allow responses to load
+
+    } catch (err) {
+        console.error("Error:", err);
+    } finally {
+        await browser.close();
+    }
+}
+
+// Example usage with multiple hits (each hit will have a different IP)
+(async () => {
+    const pnrNumbers = ["1234567890", "2345678901", "3456789012"]; // Example PNR numbers
+    for (let pnr of pnrNumbers) {
+        await scrapePnrStatus(pnr);
+    }
+})();
