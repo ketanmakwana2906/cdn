@@ -1,46 +1,33 @@
-below is my one old code where we implemented , please analyze thoughly and give new as minimum modification and minimum code change
+const puppeteer = require('puppeteer');
 
-result = await axios(`https://www.confirmtkt.com/pnr-status/${pnr}?`)
-             myCache.del("ip_list");
-            
-		
-	    proxy_ips = myCache.get( "ip_list" );
-            if (proxy_ips==undefined){
-                logger.log({
-                    level: 'info',
-                       message: `Finding IP List from Oxylabs url using creds.`,
-                        label: "OxyLabs"
-                });
-                proxy_ips = await getOxyLabsIps();
-                proxy_ips = proxy_ips.split("\n")
-                success = myCache.set( "ip_list", proxy_ips, 3600 );
-            }
-            random_proxy_ip = proxy_ips[Math.floor(Math.random()*proxy_ips.length)];
-            ip_data = random_proxy_ip.split(":");
-            domain = ip_data[0];
-            port = ip_data[1];
-            user_agent = randomUseragent.getRandom();
-            logger.log({
-                level: 'info',
-                message: `Proxy IP hit by OxyLabs: ${ip_data}`,
-                label: "OxyLabs"
-            });
-            result = await axios({
-                method:'get',
-                url: `https://www.confirmtkt.com/pnr-status/${pnr}?`,
-                headers: {
-                    'User-Agent': String(user_agent)
-                },
-                proxy:{
-                    protocol: 'http',
-                    host: String(domain),
-                    port: port,
-                    auth: {
-                        username: config.OxyLabsCreds.username,
-                        password: config.OxyLabsCreds.password
-                    }
-                }
-            })
+async function testProxy() {
+    const proxy = {
+        protocol: "http",       // Change to "socks5" if needed
+        host: "123.456.789.000", // Replace with a real proxy IP
+        port: "8080",           // Proxy port
+        auth: { username: "testuser", password: "testpass" } // Proxy authentication
+    };
 
-            htmlData = result.data.replace(/(\r)/gm,"")
-            return {'html':htmlData}
+    const browser = await puppeteer.launch({
+        headless: true,
+        args: [`--proxy-server=${proxy.protocol}://${proxy.host}:${proxy.port}`]
+    });
+
+    const page = await browser.newPage();
+
+    // Authenticate Proxy
+    await page.authenticate({
+        username: proxy.auth.username,
+        password: proxy.auth.password
+    });
+
+    // Open IP checker site to verify IP change
+    await page.goto("https://api64.ipify.org?format=json", { waitUntil: "domcontentloaded" });
+
+    const ip = await page.evaluate(() => document.body.innerText);
+    console.log("Current IP:", ip);
+
+    await browser.close();
+}
+
+testProxy().catch(console.error);
