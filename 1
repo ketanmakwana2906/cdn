@@ -1,65 +1,83 @@
-Got it! Since you can't install third-party apps directly, but you have **Docker**, we can set up a clipboard history manager inside a container and access it via a keyboard shortcut.  
+Great! Now that we have **Ubuntu** running in Docker and `clipman` + `xclip` installed, let's set up a **multi-item clipboard history** and create shortcuts for easy access.  
 
 ---
 
-### **Solution Overview**  
-We'll use **Clipboard Manager (`clipman`)** inside a Docker container to store and retrieve multiple copied items. Then, we'll set up a **shortcut to access clipboard history and paste a selected item**.  
+# **🛠️ Step-by-Step Setup of Clipboard Manager in Docker**  
 
----
-
-## **Step 1: Run Clipboard Manager in a Docker Container**  
-First, start a container that will keep running in the background:  
+### **Step 1: Run a Persistent Clipboard Container**  
+First, **remove** any old clipboard containers to avoid conflicts:  
+```sh
+docker rm -f clipboard_manager
+```
+Now, create a new **Ubuntu-based** container:  
 ```sh
 docker run -dit --name clipboard_manager \
   -e DISPLAY=$DISPLAY \
   -v /tmp/.X11-unix:/tmp/.X11-unix \
-  alpine sh
+  ubuntu sh
 ```
-Then, install the required clipboard tool inside the container:  
+This will keep running in the background.
+
+---
+
+### **Step 2: Install Clipboard Tools Inside the Container**  
+Run this to install `clipman` and `xclip` inside the container:  
 ```sh
-docker exec -it clipboard_manager sh -c "apk add clipman xclip"
+docker exec -it clipboard_manager sh -c "apt update && apt install -y clipman xclip"
 ```
 
 ---
 
-## **Step 2: Create Scripts for Clipboard Access**  
+### **Step 3: Create Scripts for Clipboard Management**  
 
-### **Script to Store Copied Items (`store_clipboard.sh`)**  
-This will save every copied item to the clipboard history.  
+### **🔹 Script to Store Copied Text (`store_clipboard.sh`)**  
+This will **store every copied item** in the clipboard history.  
 
 ```sh
+echo '#!/bin/bash
 docker exec -i clipboard_manager sh -c "xclip -selection clipboard -o | clipman store"
-```
-Make it executable:  
-```sh
+' > store_clipboard.sh
 chmod +x store_clipboard.sh
 ```
+Every time you **copy (⌘ + C)**, this script will save it in history.
 
 ---
 
-### **Script to Select and Paste an Item (`select_clipboard.sh`)**  
-This will open a selection menu to pick a previously copied item and paste it.  
+### **🔹 Script to Select and Paste a Copied Item (`select_clipboard.sh`)**  
+This will **show a list of copied items** and let you pick one to paste.  
 
 ```sh
+echo '#!/bin/bash
 docker exec -it clipboard_manager sh -c "clipman pick | xclip -selection clipboard"
-```
-Make it executable:  
-```sh
+' > select_clipboard.sh
 chmod +x select_clipboard.sh
 ```
+When you run this, it will show **previously copied items** and allow you to choose one.
 
 ---
 
-## **Step 3: Assign Keyboard Shortcuts**  
-1. Open **System Settings** → **Keyboard** → **Keyboard Shortcuts**  
-2. Add new shortcuts:  
-   - **For storing copied text:** Assign `⌘ + C` to `store_clipboard.sh`  
-   - **For selecting and pasting:** Assign `⌘ + Shift + V` to `select_clipboard.sh`  
+### **Step 4: Assign Keyboard Shortcuts on macOS**  
+
+#### **1️⃣ Open Keyboard Shortcut Settings**  
+- Go to **System Settings** → **Keyboard** → **Keyboard Shortcuts**  
+- Click **"Add Shortcut"**  
+
+#### **2️⃣ Assign Shortcuts for Clipboard Manager**  
+| Action            | Command                 | Shortcut Suggestion |
+|-------------------|------------------------|----------------------|
+| **Store Copied Text** | `/path/to/store_clipboard.sh` | `⌘ + C` (Override default) |
+| **Pick and Paste** | `/path/to/select_clipboard.sh` | `⌘ + Shift + V` |
+
+📌 **Tip:** Replace `/path/to/` with the actual path where you saved the scripts.
 
 ---
 
-## **Step 4: Usage**  
-- Copy multiple items normally (`⌘ + C` will store them).  
-- Press **`⌘ + Shift + V`** to **select a previously copied item** and paste it.  
+### **Step 5: Test the Multi-Item Clipboard**  
+1️⃣ **Copy multiple items** as usual using **`⌘ + C`**  
+2️⃣ Press **`⌘ + Shift + V`** → A **menu** will pop up with **previously copied items**  
+3️⃣ Select an item → It gets **pasted automatically**  
 
-Now, you have **Windows-like clipboard history** using Docker! Let me know if you need refinements.
+---
+
+### **✅ Done! You Now Have a Multi-Item Clipboard on macOS via Docker**  
+Now, your clipboard history works just like **Windows + V** but inside Docker! 🎉 Let me know if you need any tweaks.
