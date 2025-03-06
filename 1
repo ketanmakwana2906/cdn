@@ -1,83 +1,42 @@
-Great! Now that we have **Ubuntu** running in Docker and `clipman` + `xclip` installed, let's set up a **multi-item clipboard history** and create shortcuts for easy access.  
+from django.contrib import admin
+from Schedule.models import Train, TrainStation, TrainSchedule, City, TrainStationName
 
----
 
-# **🛠️ Step-by-Step Setup of Clipboard Manager in Docker**  
+class TrainAdmin(admin.ModelAdmin):
+    raw_id_fields = ('origin', 'dest')
+    list_display = ['code', 'name', 'train_type', 'origin', 'dest']
+    search_fields = ['code']
+    list_filter = ['train_type']
+    raw_id_fields = ['origin', 'dest']
 
-### **Step 1: Run a Persistent Clipboard Container**  
-First, **remove** any old clipboard containers to avoid conflicts:  
-```sh
-docker rm -f clipboard_manager
-```
-Now, create a new **Ubuntu-based** container:  
-```sh
-docker run -dit --name clipboard_manager \
-  -e DISPLAY=$DISPLAY \
-  -v /tmp/.X11-unix:/tmp/.X11-unix \
-  ubuntu sh
-```
-This will keep running in the background.
 
----
+class TrainScheduleAdmin(admin.ModelAdmin):
+    raw_id_fields = ('train', 'train_station')
+    list_display = ['train', 'train_station', 'day', 'arrive_time', 'depart_time']
+    search_fields = ['train.code']
+    list_filter = ['stops']
+    raw_id_fields = ['train', 'train_station']
 
-### **Step 2: Install Clipboard Tools Inside the Container**  
-Run this to install `clipman` and `xclip` inside the container:  
-```sh
-docker exec -it clipboard_manager sh -c "apt update && apt install -y clipman xclip"
-```
 
----
+class TrainStationAdmin(admin.ModelAdmin):
+    raw_id_fields = ('city',)
+    list_display = ('id', 'name', 'code', 'city_id', 'trains_originating', 'trains_passing', 'is_primary')
+    search_fields = ('code', 'name', 'id', 'city_id')
 
-### **Step 3: Create Scripts for Clipboard Management**  
 
-### **🔹 Script to Store Copied Text (`store_clipboard.sh`)**  
-This will **store every copied item** in the clipboard history.  
+class CityAdmin(admin.ModelAdmin):
+    list_display = ['name', 'state', 'country', 'country_code', 'station_count']
+    search_fields = ['name']
 
-```sh
-echo '#!/bin/bash
-docker exec -i clipboard_manager sh -c "xclip -selection clipboard -o | clipman store"
-' > store_clipboard.sh
-chmod +x store_clipboard.sh
-```
-Every time you **copy (⌘ + C)**, this script will save it in history.
 
----
+class TrainStationNameAdmin(admin.ModelAdmin):
+    list_display = ['custom_name', 'station_code']
+    search_fields = ['custom_name', 'station_code']
+    actions = ['update_stations']
 
-### **🔹 Script to Select and Paste a Copied Item (`select_clipboard.sh`)**  
-This will **show a list of copied items** and let you pick one to paste.  
 
-```sh
-echo '#!/bin/bash
-docker exec -it clipboard_manager sh -c "clipman pick | xclip -selection clipboard"
-' > select_clipboard.sh
-chmod +x select_clipboard.sh
-```
-When you run this, it will show **previously copied items** and allow you to choose one.
-
----
-
-### **Step 4: Assign Keyboard Shortcuts on macOS**  
-
-#### **1️⃣ Open Keyboard Shortcut Settings**  
-- Go to **System Settings** → **Keyboard** → **Keyboard Shortcuts**  
-- Click **"Add Shortcut"**  
-
-#### **2️⃣ Assign Shortcuts for Clipboard Manager**  
-| Action            | Command                 | Shortcut Suggestion |
-|-------------------|------------------------|----------------------|
-| **Store Copied Text** | `/path/to/store_clipboard.sh` | `⌘ + C` (Override default) |
-| **Pick and Paste** | `/path/to/select_clipboard.sh` | `⌘ + Shift + V` |
-
-📌 **Tip:** Replace `/path/to/` with the actual path where you saved the scripts.
-
----
-
-### **Step 5: Test the Multi-Item Clipboard**  
-1️⃣ **Copy multiple items** as usual using **`⌘ + C`**  
-2️⃣ Press **`⌘ + Shift + V`** → A **menu** will pop up with **previously copied items**  
-3️⃣ Select an item → It gets **pasted automatically**  
-
----
-
-### **✅ Done! You Now Have a Multi-Item Clipboard on macOS via Docker**  
-Now, your clipboard history works just like **Windows + V** but inside Docker! 🎉 Let me know if you need any tweaks.
+admin.site.register(Train, TrainAdmin)
+admin.site.register(TrainSchedule, TrainScheduleAdmin)
+admin.site.register(TrainStation, TrainStationAdmin)
+admin.site.register(City, CityAdmin)
+admin.site.register(TrainStationName, TrainStationNameAdmin)
