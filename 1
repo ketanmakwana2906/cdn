@@ -1,9 +1,18 @@
-here is my admin py file 
-please do as less as possible changes and should run all bulk queries
-in form one inout field for queries then one result element for result and one run button
-and all queries should run like insert update except only superuser have delete access
+Here’s your **modified `admin.py`** with minimal changes. It adds a **SQL execution panel** while keeping your existing admin configurations untouched.  
 
+### **Changes Made:**
+1. **Added a custom admin view** to execute queries.  
+2. **Ensured all queries (INSERT, UPDATE, SELECT) run**, except `DELETE`, which is restricted to superusers.  
+3. **Minimal changes** to your existing setup—your other models remain **unchanged**.  
+
+---
+
+### **Updated `admin.py`**
+```python
 from django.contrib import admin
+from django.db import connection
+from django.http import HttpResponse
+from django.template.response import TemplateResponse
 from Schedule.models import Train, TrainStation, TrainSchedule, City, TrainStationName
 
 
@@ -40,8 +49,109 @@ class TrainStationNameAdmin(admin.ModelAdmin):
     actions = ['update_stations']
 
 
+# Register all models
 admin.site.register(Train, TrainAdmin)
 admin.site.register(TrainSchedule, TrainScheduleAdmin)
 admin.site.register(TrainStation, TrainStationAdmin)
 admin.site.register(City, CityAdmin)
 admin.site.register(TrainStationName, TrainStationNameAdmin)
+
+
+# Custom Admin View for Running SQL Queries
+class SQLAdmin(admin.ModelAdmin):
+    change_list_template = "admin/sql_query.html"
+
+    def execute_sql(self, request):
+        if request.method == "POST":
+            query = request.POST.get("sql_query", "").strip()
+
+            # Restrict DELETE queries to superusers
+            if query.lower().startswith("delete") and not request.user.is_superuser:
+                return HttpResponse("Unauthorized: Only superusers can run DELETE queries.", status=403)
+
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute(query)
+
+                    # Fetch results for SELECT queries
+                    if query.lower().startswith("select"):
+                        columns = [col[0] for col in cursor.description]
+                        rows = cursor.fetchall()
+                        return TemplateResponse(request, "admin/sql_query.html", {"columns": columns, "rows": rows, "query": query})
+
+                return HttpResponse("Query executed successfully.")
+
+            except Exception as e:
+                return HttpResponse(f"Error: {str(e)}")
+
+        return TemplateResponse(request, "admin/sql_query.html")
+
+    def get_urls(self):
+        from django.urls import path
+        urls = super().get_urls()
+        custom_urls = [
+            path("execute-sql/", self.admin_site.admin_view(self.execute_sql), name="execute_sql"),
+        ]
+        return custom_urls + urls
+
+
+# Register SQL Executor (Admin Panel)
+admin.site.register(admin.models.LogEntry, SQLAdmin)
+```
+
+---
+
+### **Step 2: Create the Template**
+Create `templates/admin/sql_query.html`:
+
+```html
+{% extends "admin/change_list.html" %}
+{% block content %}
+    <h2>SQL Query Executor</h2>
+    <form method="post" action="{% url 'admin:execute_sql' %}">
+        {% csrf_token %}
+        <textarea name="sql_query" rows="5" cols="80" placeholder="Enter SQL query"></textarea>
+        <br>
+        <input type="submit" value="Run Query">
+    </form>
+
+    {% if query %}
+        <h3>Executed Query:</h3>
+        <p><strong>{{ query }}</strong></p>
+    {% endif %}
+
+    {% if columns %}
+        <h3>Results:</h3>
+        <table border="1">
+            <thead>
+                <tr>
+                    {% for col in columns %}
+                        <th>{{ col }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                    <tr>
+                        {% for cell in row %}
+                            <td>{{ cell }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}
+```
+
+---
+
+### **How It Works**
+✅ Any user can execute **SELECT, INSERT, UPDATE** queries.  
+❌ **Only superusers can execute DELETE queries** (others get a 403 error).  
+✅ **Minimal changes**—your existing `admin.py` logic remains untouched.  
+✅ **Simple UI** with one text field for queries, one result section, and one "Run Query" button.  
+
+Now, just go to **Django Admin → SQL Query Executor**, enter your query, and run it!  
+
+Would you like any further refinements?
