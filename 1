@@ -1,4 +1,11 @@
-curl -X POST http://127.0.0.1:8000/o/token/ \
-     -d "grant_type=client_credentials" \
-     -d "client_id=your_client_id" \
-     -d "client_secret=your_client_secret"
+from rest_framework.permissions import BasePermission
+class IsClientCredential(BasePermission):
+    def has_permission(self, request, view):
+        return request.auth and request.auth.application.authorization_grant_type == 'client-credentials'
+    
+@api_view(['POST'])
+@permission_classes((IsClientCredential,))
+def rpc_view(request):
+    """
+    Get refund/payout/chargeback for a tm_booking_id
+    """
