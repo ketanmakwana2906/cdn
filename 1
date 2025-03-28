@@ -1,42 +1,4 @@
-from django.contrib import admin
-from Schedule.models import Train, TrainStation, TrainSchedule, City, TrainStationName
-
-
-class TrainAdmin(admin.ModelAdmin):
-    raw_id_fields = ('origin', 'dest')
-    list_display = ['code', 'name', 'train_type', 'origin', 'dest']
-    search_fields = ['code']
-    list_filter = ['train_type']
-    raw_id_fields = ['origin', 'dest']
-
-
-class TrainScheduleAdmin(admin.ModelAdmin):
-    raw_id_fields = ('train', 'train_station')
-    list_display = ['train', 'train_station', 'day', 'arrive_time', 'depart_time']
-    search_fields = ['train.code']
-    list_filter = ['stops']
-    raw_id_fields = ['train', 'train_station']
-
-
-class TrainStationAdmin(admin.ModelAdmin):
-    raw_id_fields = ('city',)
-    list_display = ('id', 'name', 'code', 'city_id', 'trains_originating', 'trains_passing', 'is_primary')
-    search_fields = ('code', 'name', 'id', 'city_id')
-
-
-class CityAdmin(admin.ModelAdmin):
-    list_display = ['name', 'state', 'country', 'country_code', 'station_count']
-    search_fields = ['name']
-
-
-class TrainStationNameAdmin(admin.ModelAdmin):
-    list_display = ['custom_name', 'station_code']
-    search_fields = ['custom_name', 'station_code']
-    actions = ['update_stations']
-
-
-admin.site.register(Train, TrainAdmin)
-admin.site.register(TrainSchedule, TrainScheduleAdmin)
-admin.site.register(TrainStation, TrainStationAdmin)
-admin.site.register(City, CityAdmin)
-admin.site.register(TrainStationName, TrainStationNameAdmin)
+curl -X POST http://127.0.0.1:8000/o/token/ \
+     -d "grant_type=client_credentials" \
+     -d "client_id=your_client_id" \
+     -d "client_secret=your_client_secret"
