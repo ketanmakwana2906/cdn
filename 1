@@ -24,37 +24,26 @@ irctc_responses = {
     }
 }
 
-# Step 1: Create initial clusters
-cluster = defaultdict(set)
+# Define station categories (Delhi-related & Ahmedabad-related)
+delhi_related = {"DLI", "NDLS", "DSA", "DEE"}
+ahmedabad_related = {"SBIB", "ADI", "CLDY"}
 
+delhi_cluster = set()
+ahmedabad_cluster = set()
+
+# Step 1: Create initial clusters
 for route, data in irctc_responses.items():
     for i in data["trainBtwnStnsList"]:
         from_st = i["fromStnCode"]
         to_st = i["toStnCode"]
-        cluster[from_st].add(from_st)
-        cluster[from_st].add(to_st)
-        cluster[to_st].add(from_st)
-        cluster[to_st].add(to_st)
 
-# Step 2: Merge related stations **within respective city clusters**
-merged_clusters = []
-visited = set()
+        if from_st in delhi_related or to_st in delhi_related:
+            delhi_cluster.update([from_st, to_st])
 
-for station, related_stations in cluster.items():
-    if station in visited:
-        continue
+        if from_st in ahmedabad_related or to_st in ahmedabad_related:
+            ahmedabad_cluster.update([from_st, to_st])
 
-    new_cluster = set(related_stations)
-    for existing_cluster in merged_clusters:
-        if any(s in existing_cluster for s in related_stations):
-            existing_cluster.update(new_cluster)
-            break
-    else:
-        merged_clusters.append(new_cluster)
-
-    visited.update(new_cluster)
-
-# Convert sets to lists for final output
-final_clusters = [sorted(list(cluster)) for cluster in merged_clusters]
+# Step 2: Convert sets to sorted lists for final output
+final_clusters = [sorted(list(delhi_cluster)), sorted(list(ahmedabad_cluster))]
 
 print("Final Merged Clusters:", final_clusters)
