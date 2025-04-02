@@ -1,5 +1,3 @@
-from collections import defaultdict
-
 # Sample API response with multiple routes
 irctc_responses = {
     "NDLS-SBIB": {
@@ -24,26 +22,16 @@ irctc_responses = {
     }
 }
 
-# Define station categories (Delhi-related & Ahmedabad-related)
-delhi_related = {"DLI", "NDLS", "DSA", "DEE"}
-ahmedabad_related = {"SBIB", "ADI", "CLDY"}
+# Step 1: Find all "from" and "to" stations
+from_stations = set()
+to_stations = set()
 
-delhi_cluster = set()
-ahmedabad_cluster = set()
-
-# Step 1: Create initial clusters
 for route, data in irctc_responses.items():
-    for i in data["trainBtwnStnsList"]:
-        from_st = i["fromStnCode"]
-        to_st = i["toStnCode"]
+    for train in data["trainBtwnStnsList"]:
+        from_stations.add(train["fromStnCode"])
+        to_stations.add(train["toStnCode"])
 
-        if from_st in delhi_related or to_st in delhi_related:
-            delhi_cluster.update([from_st, to_st])
-
-        if from_st in ahmedabad_related or to_st in ahmedabad_related:
-            ahmedabad_cluster.update([from_st, to_st])
-
-# Step 2: Convert sets to sorted lists for final output
-final_clusters = [sorted(list(delhi_cluster)), sorted(list(ahmedabad_cluster))]
+# Step 2: Convert sets to lists
+final_clusters = [sorted(list(from_stations)), sorted(list(to_stations))]
 
 print("Final Merged Clusters:", final_clusters)
