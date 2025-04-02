@@ -6,7 +6,6 @@ irctc_responses = {
         "trainBtwnStnsList": [
             {"fromStnCode": "DLI", "toStnCode": "SBIB"},
             {"fromStnCode": "NDLS", "toStnCode": "SBIB"},
-            {"fromStnCode": "DLI", "toStnCode": "SBIB"},
             {"fromStnCode": "DSA", "toStnCode": "SBIB"},
             {"fromStnCode": "DLI", "toStnCode": "CLDY"},
             {"fromStnCode": "DEE", "toStnCode": "ADI"},
@@ -17,35 +16,45 @@ irctc_responses = {
         "trainBtwnStnsList": [
             {"fromStnCode": "DLI", "toStnCode": "SBIB"},
             {"fromStnCode": "NDLS", "toStnCode": "SBIB"},
-            {"fromStnCode": "DLI", "toStnCode": "SBIB"},
             {"fromStnCode": "DSA", "toStnCode": "SBIB"},
             {"fromStnCode": "DLI", "toStnCode": "CLDY"},
             {"fromStnCode": "DEE", "toStnCode": "ADI"},
             {"fromStnCode": "DLI", "toStnCode": "CLDY"}
         ]
-    },
-    # Add more responses here...
+    }
 }
-cluster = {}
-for route , data in irctc_responses.items():
-    print("data is",data)
-    from_and_to = route.split('-')
-    all_from = []
-    all_to = []
+
+# Step 1: Create initial clusters
+cluster = defaultdict(set)
+
+for route, data in irctc_responses.items():
     for i in data["trainBtwnStnsList"]:
         from_st = i["fromStnCode"]
         to_st = i["toStnCode"]
-        if from_st not in all_from:
-            all_from.append(i["fromStnCode"])
-        if to_st not in all_to:
-            all_to.append(i["toStnCode"])
-    cluster[from_and_to[0]] = all_from
-    cluster[from_and_to[1]] = all_to
+        cluster[from_st].add(from_st)
+        cluster[from_st].add(to_st)
+        cluster[to_st].add(from_st)
+        cluster[to_st].add(to_st)
 
-print(cluster)
+# Step 2: Merge related stations **within respective city clusters**
+merged_clusters = []
+visited = set()
 
-in above we get clusters like
-{'NDLS': ['DLI', 'NDLS', 'DSA', 'DEE'], 'SBIB': ['SBIB', 'CLDY', 'ADI'], 'ADI': ['SBIB', 'CLDY', 'ADI']}
+for station, related_stations in cluster.items():
+    if station in visited:
+        continue
 
-now want to merge for efficient 
-like ADI already exist in one of list like in SBIB so put all ADI in that SBIB
+    new_cluster = set(related_stations)
+    for existing_cluster in merged_clusters:
+        if any(s in existing_cluster for s in related_stations):
+            existing_cluster.update(new_cluster)
+            break
+    else:
+        merged_clusters.append(new_cluster)
+
+    visited.update(new_cluster)
+
+# Convert sets to lists for final output
+final_clusters = [sorted(list(cluster)) for cluster in merged_clusters]
+
+print("Final Merged Clusters:", final_clusters)
