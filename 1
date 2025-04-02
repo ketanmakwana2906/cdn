@@ -13,43 +13,39 @@ irctc_responses = {
             {"fromStnCode": "DLI", "toStnCode": "CLDY"}
         ]
     },
+    "NDLS-ADI": {
+        "trainBtwnStnsList": [
+            {"fromStnCode": "DLI", "toStnCode": "SBIB"},
+            {"fromStnCode": "NDLS", "toStnCode": "SBIB"},
+            {"fromStnCode": "DLI", "toStnCode": "SBIB"},
+            {"fromStnCode": "DSA", "toStnCode": "SBIB"},
+            {"fromStnCode": "DLI", "toStnCode": "CLDY"},
+            {"fromStnCode": "DEE", "toStnCode": "ADI"},
+            {"fromStnCode": "DLI", "toStnCode": "CLDY"}
+        ]
+    },
     # Add more responses here...
 }
+cluster = {}
+for route , data in irctc_responses.items():
+    print("data is",data)
+    from_and_to = route.split('-')
+    all_from = []
+    all_to = []
+    for i in data["trainBtwnStnsList"]:
+        from_st = i["fromStnCode"]
+        to_st = i["toStnCode"]
+        if from_st not in all_from:
+            all_from.append(i["fromStnCode"])
+        if to_st not in all_to:
+            all_to.append(i["toStnCode"])
+    cluster[from_and_to[0]] = all_from
+    cluster[from_and_to[1]] = all_to
 
-# Dictionary to store station clusters
-station_groups = []
+print(cluster)
 
-# Dictionary to map stations to their group
-station_to_group = {}
+in above we get clusters like
+{'NDLS': ['DLI', 'NDLS', 'DSA', 'DEE'], 'SBIB': ['SBIB', 'CLDY', 'ADI'], 'ADI': ['SBIB', 'CLDY', 'ADI']}
 
-# Process each route's train data
-for route, data in irctc_responses.items():
-    if "trainBtwnStnsList" in data:
-        # Extract all stations appearing in this route's response
-        related_stations = set()
-        for train in data["trainBtwnStnsList"]:
-            related_stations.add(train["fromStnCode"])
-            related_stations.add(train["toStnCode"])
-
-        # Check if any station in this response is already in a cluster
-        merged_group = None
-        for station in related_stations:
-            if station in station_to_group:
-                merged_group = station_to_group[station]
-                break  # Found an existing group, merge into it
-
-        # If no existing group, create a new one
-        if merged_group is None:
-            merged_group = len(station_groups)
-            station_groups.append(set())
-
-        # Add all stations to the identified/created group
-        for station in related_stations:
-            station_groups[merged_group].add(station)
-            station_to_group[station] = merged_group  # Map station to its group
-
-# Convert to list format
-final_clusters = [list(group) for group in station_groups]
-
-# Print the final cluster output
-print(final_clusters)
+now want to merge for efficient 
+like ADI already exist in one of list like in SBIB so put all ADI in that SBIB
