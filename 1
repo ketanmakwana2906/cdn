@@ -1,120 +1,34 @@
-    [[
-        "DDR",
-        "BDTS",
-        "KYN",
-        "MMCT",
-        "PNVL",
-        "BVI",
-        "BSR",
-        "LTT",
-        "CSMT",
-        "DR",
-        "TNA",
-        "DIVA"
-    ],
-    [
-        "ADI",
-        "VTA",
-        "SBIB",
-        "CLDY",
-        "GG",
-        "GNC",
-        "ABD",
-        "ASV",
-        "MAN",
-        "SEJ"
-    ],
-    [
-        "TNM"
-    ],
-    [
-        "VM"
-    ],
-    [
-        "ANVT",
-        "DLI",
-        "NDLS",
-        "SZM",
-        "DEC",
-        "NZM",
-        "ANDI",
-        "DSJ",
-        "DEE",
-        "ANVR",
-        "DSA"
-    ],
-    [
-        "BGP"
-    ],
-    [
-        "LKU"
-    ],
-    [
-        "SHE"
-    ],
-    [
-        "HWH",
-        "SDAH",
-        "KOAA",
-        "SRC",
-        "SHM"
-    ],
-    [
-        "RHA"
-    ],
-    [
-        "LGL"
-    ],
-    [
-        "TVCN",
-        "TVC"
-    ],
-    [
-        "INDB",
-        "LMNR"
-    ],
-    [
-        "KLBG"
-    ],
-    [
-        "BIDR"
-    ],
-    [
-        "NKE"
-    ],
-    [
-        "MFP"
-    ],
-    [
-        "DLCR"
-    ],
-    [
-        "BPB"
-    ],
-    [
-        "JYG"
-    ],
-    [
-        "DBG"
-    ],
-    [
-        "VR",
-        "BDTS",
-        "KYN",
-        "MMCT",
-        "DDR",
-        "PNVL",
-        "BSR",
-        "LTT",
-        "CSMT",
-        "BVI",
-        "DR",
-        "TNA",
-        "DIVA"
-    ]]
+import json
 
-    above is data.json file content
-    now in want if lists have common element then combine that lists into one
-    like for example here multiple list contains MMCT and other value
-    then merge them into one
-    give python code
+def merge_lists_with_common_elements(lists):
+    merged = []
+    
+    while lists:
+        first, *rest = lists
+        merged_list = set(first)
+        
+        while True:
+            for other in rest:
+                if merged_list & set(other):  # Check for common elements
+                    merged_list.update(other)
+                    rest.remove(other)
+                    break
+            else:
+                break
+        
+        merged.append(list(merged_list))
+        lists = rest
+    
+    return merged
+
+# Load data from JSON file
+with open("data.json", "r") as file:
+    data = json.load(file)
+
+merged_data = merge_lists_with_common_elements(data)
+
+# Save merged data back to JSON file
+with open("merged_data.json", "w") as file:
+    json.dump(merged_data, file, indent=4)
+
+print("Merged data saved to merged_data.json")
