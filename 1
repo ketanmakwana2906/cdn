@@ -1,8 +1,56 @@
+from django.contrib import admin
+from django.conf.urls import url
+from .models import RefundRequest
+
+@admin.register(RefundRequest)
+class RefundRequestAdmin(admin.ModelAdmin):
+    change_form_template = "admin/refund_change_form.html"
+
+    def get_urls(self):
+        urls = super(RefundRequestAdmin, self).get_urls()
+        custom_urls = [
+            url(
+                r'^(?P<object_id>.+)/say-hello/$',
+                self.admin_site.admin_view(self.changeform_with_extra_context),
+                name='refund-say-hello',
+            ),
+        ]
+        return custom_urls + urls
+
+    def get_extra_booking_refund_data(self, obj):
+        # Replace with real logic
+        return {
+            "booking_id": f"BK-{obj.id}",
+            "refund_reason": "Train cancelled",
+            "external_status": "Pending with Razorpay"
+        }
+
+    def changeform_with_extra_context(self, request, object_id, form_url='', extra_context=None):
+        obj = RefundRequest.objects.get(pk=object_id)
+        extra = {
+            "extra_info": self.get_extra_booking_refund_data(obj),
+        }
+        return super().changeform_view(request, object_id, form_url, extra_context=extra)
+
 {% extends "admin/change_form.html" %}
 
 {% block object-tools %}
     {{ block.super }}
     <li>
-        <a class="button" href="{{ original.id }}/say-hello/">Say Hello</a>
+        <a class="button" href="{{ original.id }}/say-hello/">Fetch Booking/Refund Info</a>
     </li>
 {% endblock %}
+
+{% block after_field_sets %}
+    {% if extra_info %}
+        <div style="margin-top: 20px;">
+            <h3>External Refund Info:</h3>
+            <ul>
+                <li><strong>Booking ID:</strong> {{ extra_info.booking_id }}</li>
+                <li><strong>Refund Reason:</strong> {{ extra_info.refund_reason }}</li>
+                <li><strong>External Status:</strong> {{ extra_info.external_status }}</li>
+            </ul>
+        </div>
+    {% endif %}
+{% endblock %}
+
