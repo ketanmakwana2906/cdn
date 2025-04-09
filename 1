@@ -1,58 +1,8 @@
-# admin.py
-from django.contrib import admin
-from django.urls import include
-from django.conf.urls import url
-from django.http import HttpResponseForbidden
-from django.shortcuts import render
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
-import requests
-from django.contrib.admin import AdminSite
-from .models import PayoutPayment
+{% extends "admin/change_form.html" %}
 
-class CustomAdminSite(AdminSite):
-    def get_urls(self):
-        urls = super(CustomAdminSite, self).get_urls()
-        custom_urls = [
-            url(r'^payout-dashboard/$', self.admin_view(self.payout_dashboard))
-        ]
-        return custom_urls + urls
-
-    @method_decorator(csrf_exempt)
-    def payout_dashboard(self, request):
-        user = request.user
-        if not user.has_perm('yourapp.view_payoutpayment') or not user.has_perm('yourapp.change_payoutpayment'):
-            return HttpResponseForbidden("You do not have access to this dashboard.")
-
-        tm_booking_id = request.POST.get('tm_booking_id')
-        context = {}
-        if tm_booking_id:
-            response = requests.post('http://your-api-url.com/rpc-view/', json={'tm_booking_id': tm_booking_id})
-            data = response.json()
-            context['data'] = data.get('data', {})
-
-        return render(request, 'admin/payout_dashboard.html', context)
-
-# Register your custom site
-custom_admin_site = CustomAdminSite(name='custom_admin')
-custom_admin_site.register(PayoutPayment)
-
-
-{% extends "admin/base_site.html" %}
-{% block content %}
-  <h2>Payout Dashboard</h2>
-  <form method="POST">
-    {% csrf_token %}
-    <input type="text" name="tm_booking_id" placeholder="Enter TM Booking ID" required />
-    <button type="submit">Get Details</button>
-  </form>
-
-  {% if data %}
-    <h3>Booking Details</h3>
-    <pre>{{ data.booking_details|safe }}</pre>
-
-    <h3>Refund Details</h3>
-    <pre>{{ data.refund_details|safe }}</pre>
-  {% endif %}
+{% block object-tools %}
+    {{ block.super }}
+    <li>
+        <a class="button" href="{{ original.id }}/say-hello/">Say Hello</a>
+    </li>
 {% endblock %}
-
