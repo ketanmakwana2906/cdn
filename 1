@@ -1,159 +1,105 @@
-perfect
-now external function gives very big data like below
+in below for update its working perfectly but now when add object in admin by http://localhost:8000/admin/irctc/refundrequest/add/
+server 500 error in add , my insert or any other dashboard should not affetcted 
+please check
 
-show booking details , irctc gateway refunds , ta refund , payout refunds in data instead of just External Refund Info:
-Booking ID: BK-1
-Refund Reason: Train cancelled
-External Status: Pending with Razorpay
+class RefundRequestAdmin(admin.ModelAdmin):
+    change_form_template = 'admin/refund_change_form.html'
 
-{
-    "success": true,
-    "data": {
-        "booking_details": {
-            "id": 1005231,
-            "ta_obj": {
-                "ta_opted": false,
-                "ta_upgraded": false,
-                "tm_refunded": false,
-                "ta_note_msg": ""
-            },
-            "fcs_obj": {
-                "fcs_opted": false,
-                "fcs_mode": "Standard"
-            },
-            "error_flag": null,
-            "tm_booking_id": "TM23051005231",
-            "user_id": 54143870,
-            "reservation_id": "210000066928308",
-            "pnr_number": "2212375606",
-            "train_number": "22918",
-            "origin": "NZM",
-            "dest": "BDTS",
-            "date": "2024-05-23",
-            "boarding_date": "2024-05-23",
-            "departure_time": "22:15",
-            "arrival_date": "2024-05-24",
-            "arrival_time": "16:50",
-            "travel_class": "3A",
-            "quota": "GN",
-            "amount": 2387.4,
-            "prediction": null,
-            "total_amount": 2443.74,
-            "amount_refunded": null,
-            "tm_cash_used": 50.0,
-            "commission": 40.0,
-            "coupon": null,
-            "tag": null,
-            "discount": 0.0,
-            "boarding": "NZM",
-            "adult_count": 0,
-            "child_count": 0,
-            "infant_count": 0,
-            "availability": "GNWL2/WL1",
-            "status": "Cancelled",
-            "irctc_username": "MohitG",
-            "version_code": "7.0.4",
-            "platform": "ios",
-            "email": "neeraj@trainman.in",
-            "phone": "8447494001",
-            "address": "address",
-            "error": null,
-            "gst_opted": false,
-            "tdr_filed": false,
-            "can_retry": false,
-            "masterid": "WTRNMN00000",
-            "retry_for": null,
-            "retry_cancelled": false,
-            "retry_till": "2024-05-18T04:27:04.935571Z",
-            "qr_code_string": "PNR No.: 2212375606,\nTXN ID: 210000066928308,\nPassenger Name: asd, Gender: M, Age: 34, Status: CAN,\nQuota: General (GN),\nTrain No.: 22918,\nTrain Name: HW BDTS SF EXP,\nScheduled Departure: 2024-05-23 22:15,\n\nDate of Journey: 2024-05-23,\nBoarding Station: Delhi H Nizamuddin - NZM,\nClass: Third AC (3A),\nFrom: Delhi H Nizamuddin - NZM,\nTo: Mumbai Bandra Terminus - BDTS,\nTicket Fare: 1610.00,\nIRCTC SC: Rs.35.40+ PG Charges Extra.",
-            "created_at": "2024-05-17T16:25:42.543827Z",
-            "updated_at": "2025-04-05T04:39:48.360656Z",
-            "origin_name": "Delhi H Nizamuddin",
-            "dest_name": "Mumbai Bandra Terminus",
-            "boarding_name": "Delhi H Nizamuddin",
-            "train_name": "HW BDTS SF EXP",
-            "gateway_id": 2
-        },
-        "refund_details": {
-            "success": true,
-            "irctc_gateway_refunds": [
-                {
-                    "gateway_id": 2,
-                    "booking_id": 1005231,
-                    "payment_id": "19869",
-                    "cancellation_id": 107037,
-                    "gateway_refund_id": "rfnd_OBcyMW6z2u6ZRy",
-                    "amount_refunded": 154500,
-                    "amount_to_be_refunded": 154500,
-                    "status": "processed",
-                    "response_code": null,
-                    "error": null,
-                    "arn": "10000000000000",
-                    "rrn": null,
-                    "speed_requested": "optimum",
-                    "speed_processed": "normal",
-                    "gateway_created_at": "1715963468",
-                    "created_at": "2024-05-17T16:31:07.239000Z",
-                    "updated_at": "2025-04-08T07:32:59.244000Z",
-                    "payment_mode": "netbanking (Razorpay)",
-                    "estimated_refund_time": "2024-05-31T22:01:07.239Z"
-                }
-            ],
-            "ta_refunds": [
-                {
-                    "id": 21,
-                    "ac_number": "******7890",
-                    "ifsc_code": "ABCD0123456",
-                    "ac_holder_name": "Neeraj",
-                    "upi_id": "",
-                    "phone": "******4001",
-                    "note": [
-                        "<b>2x refund</b> of Rs7.0 with PAYOUT1715154635354ZYdPVaaIzxQ has been processed to your account.",
-                        "It can take up to 7 working days for the amount to reflect in your bank account.",
-                        "For any other query please email us booking@trainman.in with the ID number."
-                    ],
-                    "sub_note": "Note: IRCTC Convenience fee, payment gateway charges, commission charges & IRCTC cancellation charges are non refundable.",
-                    "user_id": 54143870,
-                    "merchant_ref": "6f1cdcc6-a-TM24041004553-54185720",
-                    "batch_ref": null,
-                    "tm_booking_id": "TM23051005231",
-                    "refund_mode": "Bank Account",
-                    "pnr_number": "4909204766",
-                    "retry": false,
-                    "initiated": true,
-                    "refunded": true,
-                    "amount_refunded": null,
-                    "wa_send": true,
-                    "created_at": "2024-05-17T17:08:18.784998Z",
-                    "updated_at": "2024-05-18T07:40:58.100831Z"
-                }
-            ],
-            "payout_refunds": [
-                {
-                    "id": 1,
-                    "tm_booking_id": "TM23051005231",
-                    "user_id": 54208903,
-                    "payout_id": "675836B8",
-                    "refund_amount": "100.00",
-                    "error_code": "",
-                    "error_message": "",
-                    "remarks": "sample payout",
-                    "initiated_by": "test",
-                    "refund_reason": "cancel older than 6 month",
-                    "status": "success",
-                    "source": "payu",
-                    "created_on": "2025-04-04T07:06:25Z",
-                    "updated_on": "2025-04-04T09:36:11Z"
-                }
-            ],
-            "fcs_summary_per_cancellation": [],
-            "refund_fare_breakup": {
-                "total_irctc_cancellation_charges": 0,
-                "total_irctc_refund_amount": 0,
-                "fcs_charge_refunded": 0,
-                "fcs_mode": null
-            },
-            "refund_amount": 1545.0
+    def get_extra_booking_refund_data(self, obj):
+        # Replace with real logic
+        return {
+            "booking_id": f"BK-{obj.id}",
+            "refund_reason": "Train cancelled",
+            "external_status": "Pending with Razorpay"
         }
-    }
-}
+    
+    def get_urls(self):
+        urls = super(RefundRequestAdmin, self).get_urls()
+        try:
+            custom_urls = [
+            url(r'^(?P<object_id>\d+)/say-hello/$',self.admin_site.admin_view(self.changeform_with_extra_context),name='refund-say-hello'),
+            ]
+        except Exception as e:
+            print("exception under urls",e)
+        return custom_urls + urls
+    
+    def changeform_with_extra_context(self, request, object_id, form_url='', extra_context=None):
+        try:
+            print(type(object_id))
+            obj = RefundRequest.objects.get(pk=object_id)
+            from irctc.booking_api import fetch_refund_and_booking_details
+            extra = {
+            "extra_info": fetch_refund_and_booking_details(obj.tm_booking_id),
+            }
+            print(extra)
+            return super().changeform_view(request, object_id, form_url, extra_context=extra)
+        except Exception as e:
+            print(e)
+    actions = ['approve_refund', 'reject_refund']
+    
+    def get_actions(self, request):
+        """
+        Customize available actions based on user permissions.
+        """
+        actions = super().get_actions(request)
+        # Only allow actions for superusers
+        if not request.user.is_superuser:
+            print("under not super user")
+            if 'approve_refund' in actions:
+                del actions['approve_refund']
+            if 'reject_refund' in actions:
+                del actions['reject_refund']
+        return actions
+
+    def approve_refund(self, request, queryset):
+        """
+        Approve refunds only if status is 'approval pending'.
+        """
+        for refund in queryset:
+            if refund.status == 'approval pending':
+                refund.status = 'approved'
+                refund.save()
+                self.message_user(request, f"Refund for Booking ID {refund.tm_booking_id} has been approved.")
+            else:
+                self.message_user(request, f"Cannot approve Booking ID {refund.tm_booking_id}. Status is not 'approval pending'.")
+
+    def reject_refund(self, request, queryset):
+        """
+        Reject refunds only if status is 'approval pending'.
+        """
+        for refund in queryset:
+            if refund.status == 'approval pending':
+                refund.status = 'rejected'
+                refund.save()
+                self.message_user(request, f"Refund for Booking ID {refund.tm_booking_id} has been rejected.")
+            else:
+                self.message_user(request, f"Cannot reject Booking ID {refund.tm_booking_id}. Status is not 'approval pending'.")
+
+    approve_refund.short_description = "Approve Selected Refunds"
+    reject_refund.short_description = "Reject Selected Refunds"
+
+
+{% extends "admin/change_form.html" %}
+
+{% block object-tools %}
+    {{ block.super }}
+    <li>
+        <a class="button" href="{% url 'admin:refund-say-hello' original.pk %}">Fetch Booking/Refund Info</a>
+    </li>
+{% endblock %}
+
+{% block after_field_sets %}
+    {% if extra_info %}
+        <div style="margin-top: 20px;">
+            <h3>Booking Data</h3>
+            <h3>Booking Details</h3>
+            {% for key, value in extra_info.data.items %}
+            <li><strong>{{ key|title }}:</strong> {{ value }}</li>
+            {% endfor %}
+            <h3>Refund Details</h3>
+            {% for key, value in extra_info.data.refund_details.items %}
+            <li><strong>{{ key|title }}:</strong> {{ value }}</li>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}
