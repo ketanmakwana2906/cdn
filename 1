@@ -1,162 +1,60 @@
-below is API response , want to create dashboard of this, please give a to z code for django admin,
-and check if user have access of PayoutPayment model access of read , write then only can access this django admin dashboard of API
+# admin.py
+from django.contrib import admin
+from django.urls import path
+from django.http import JsonResponse, HttpResponseForbidden
+from django.template.response import TemplateResponse
+from django.utils.html import format_html
+from django.contrib.auth.decorators import permission_required
+from django.utils.decorators import method_decorator
 
-def rpc_view(request):
-    """
-    Get refund/payout/chargeback for a tm_booking_id
-    """
-    tm_booking_id = request.data.get('tm_booking_id', None)
-    if not tm_booking_id:
-        return JsonResponse({'success': False, 'error': 'Missing tm_booking_id'})
-    booking_refunds = {}
-    booking_details = booking_det(request)
-    refund_details = refund_det(request, tm_booking_id)
-    booking_refunds['booking_details'] = booking_details
-    booking_refunds['refund_details'] = refund_details
+from .models import PayoutPayment
 
-    return JsonResponse({'success': True, 'data': booking_refunds})
+class PayoutDashboardAdminView(admin.ModelAdmin):
+    change_list_template = "admin/payout_dashboard.html"
 
-{
-    "success": true,
-    "data": {
-        "booking_details": {
-            "id": 1005231,
-            "ta_obj": {
-                "ta_opted": false,
-                "ta_upgraded": false,
-                "tm_refunded": false,
-                "ta_note_msg": ""
-            },
-            "fcs_obj": {
-                "fcs_opted": false,
-                "fcs_mode": "Standard"
-            },
-            "error_flag": null,
-            "tm_booking_id": "TM23051005231",
-            "user_id": 54143870,
-            "reservation_id": "210000066928308",
-            "pnr_number": "2212375606",
-            "train_number": "22918",
-            "origin": "NZM",
-            "dest": "BDTS",
-            "date": "2024-05-23",
-            "boarding_date": "2024-05-23",
-            "departure_time": "22:15",
-            "arrival_date": "2024-05-24",
-            "arrival_time": "16:50",
-            "travel_class": "3A",
-            "quota": "GN",
-            "amount": 2387.4,
-            "prediction": null,
-            "total_amount": 2443.74,
-            "amount_refunded": null,
-            "tm_cash_used": 50.0,
-            "commission": 40.0,
-            "coupon": null,
-            "tag": null,
-            "discount": 0.0,
-            "boarding": "NZM",
-            "adult_count": 0,
-            "child_count": 0,
-            "infant_count": 0,
-            "availability": "GNWL2/WL1",
-            "status": "Cancelled",
-            "irctc_username": "MohitG",
-            "version_code": "7.0.4",
-            "platform": "ios",
-            "email": "neeraj@trainman.in",
-            "phone": "8447494001",
-            "address": "address",
-            "error": null,
-            "gst_opted": false,
-            "tdr_filed": false,
-            "can_retry": false,
-            "masterid": "WTRNMN00000",
-            "retry_for": null,
-            "retry_cancelled": false,
-            "retry_till": "2024-05-18T04:27:04.935571Z",
-            "qr_code_string": "PNR No.: 2212375606,\nTXN ID: 210000066928308,\nPassenger Name: asd, Gender: M, Age: 34, Status: CAN,\nQuota: General (GN),\nTrain No.: 22918,\nTrain Name: HW BDTS SF EXP,\nScheduled Departure: 2024-05-23 22:15,\n\nDate of Journey: 2024-05-23,\nBoarding Station: Delhi H Nizamuddin - NZM,\nClass: Third AC (3A),\nFrom: Delhi H Nizamuddin - NZM,\nTo: Mumbai Bandra Terminus - BDTS,\nTicket Fare: 1610.00,\nIRCTC SC: Rs.35.40+ PG Charges Extra.",
-            "created_at": "2024-05-17T16:25:42.543827Z",
-            "updated_at": "2025-04-05T04:39:48.360656Z",
-            "origin_name": "Delhi H Nizamuddin",
-            "dest_name": "Mumbai Bandra Terminus",
-            "boarding_name": "Delhi H Nizamuddin",
-            "train_name": "HW BDTS SF EXP",
-            "gateway_id": 2
-        },
-        "refund_details": {
-            "success": true,
-            "irctc_gateway_refunds": [
-                {
-                    "gateway_id": 2,
-                    "booking_id": 1005231,
-                    "payment_id": "19869",
-                    "cancellation_id": 107037,
-                    "gateway_refund_id": "rfnd_OBcyMW6z2u6ZRy",
-                    "amount_refunded": 154500,
-                    "amount_to_be_refunded": 154500,
-                    "status": "processed",
-                    "response_code": null,
-                    "error": null,
-                    "arn": "10000000000000",
-                    "rrn": null,
-                    "speed_requested": "optimum",
-                    "speed_processed": "normal",
-                    "gateway_created_at": "1715963468",
-                    "created_at": "2024-05-17T16:31:07.239000Z",
-                    "updated_at": "2025-04-05T04:39:49.521000Z",
-                    "payment_mode": "netbanking (Razorpay)",
-                    "estimated_refund_time": "2024-05-31T22:01:07.239Z"
-                }
-            ],
-            "ta_refunds": [
-                {
-                    "id": 21,
-                    "ac_number": "******7890",
-                    "ifsc_code": "ABCD0123456",
-                    "ac_holder_name": "Neeraj",
-                    "upi_id": "",
-                    "phone": "******4001",
-                    "note": [
-                        "<b>2x refund</b> of Rs7.0 with PAYOUT1715154635354ZYdPVaaIzxQ has been processed to your account.",
-                        "It can take up to 7 working days for the amount to reflect in your bank account.",
-                        "For any other query please email us booking@trainman.in with the ID number."
-                    ],
-                    "sub_note": "Note: IRCTC Convenience fee, payment gateway charges, commission charges & IRCTC cancellation charges are non refundable.",
-                    "user_id": 54143870,
-                    "merchant_ref": "6f1cdcc6-a-TM24041004553-54185720",
-                    "batch_ref": null,
-                    "tm_booking_id": "TM23051005231",
-                    "refund_mode": "Bank Account",
-                    "pnr_number": "4909204766",
-                    "retry": false,
-                    "initiated": true,
-                    "refunded": true,
-                    "amount_refunded": null,
-                    "wa_send": true,
-                    "created_at": "2024-05-17T17:08:18.784998Z",
-                    "updated_at": "2024-05-18T07:40:58.100831Z"
-                }
-            ],
-            "payout_refunds": [],
-            "fcs_summary_per_cancellation": [
-                {
-                    "fcs_charge_refunded": 0,
-                    "name": [
-                        "asd"
-                    ],
-                    "cancelledDate": "2024-05-17T22:00:51.000",
-                    "irctc_refund": 1545.0,
-                    "irctc_cancellation_fee": 65.0
-                }
-            ],
-            "refund_fare_breakup": {
-                "total_irctc_cancellation_charges": 65.0,
-                "total_irctc_refund_amount": 1545.0,
-                "fcs_charge_refunded": 0,
-                "fcs_mode": null
-            },
-            "refund_amount": 1545.0
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path("dashboard/", self.admin_site.admin_view(self.dashboard_view), name="payout-dashboard"),
+        ]
+        return custom_urls + urls
+
+    def dashboard_view(self, request):
+        if not request.user.has_perms(["yourapp.view_payoutpayment", "yourapp.change_payoutpayment"]):
+            return HttpResponseForbidden("You do not have permission to view this dashboard")
+
+        # Fake function to simulate API hit, replace with your real API calls
+        def booking_det(request):
+            return {"pnr_number": "1234567890", "train_number": "12345", "amount": 2500.50}
+
+        def refund_det(request, tm_booking_id):
+            return {"refund_amount": 1500.00, "status": "processed"}
+
+        tm_booking_id = request.GET.get('tm_booking_id')
+        if not tm_booking_id:
+            return TemplateResponse(request, "admin/payout_dashboard.html", {"error": "Missing tm_booking_id"})
+
+        data = {
+            "booking_details": booking_det(request),
+            "refund_details": refund_det(request, tm_booking_id),
         }
-    }
-}
+
+        return TemplateResponse(request, "admin/payout_dashboard.html", {"data": data})
+
+
+admin.site.register(PayoutPayment, PayoutDashboardAdminView)
+
+# admin/payout_dashboard.html (create this template)
+# ---------------------------------------------
+# {% extends "admin/base_site.html" %}
+# {% block content %}
+# <h2>Payout Dashboard</h2>
+# {% if error %}
+#     <p style="color: red">{{ error }}</p>
+# {% else %}
+#     <h3>Booking Details</h3>
+#     <pre>{{ data.booking_details|safe }}</pre>
+#     <h3>Refund Details</h3>
+#     <pre>{{ data.refund_details|safe }}</pre>
+# {% endif %}
+# {% endblock %}
