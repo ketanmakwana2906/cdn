@@ -1,60 +1,58 @@
 # admin.py
 from django.contrib import admin
-from django.urls import path
-from django.http import JsonResponse, HttpResponseForbidden
-from django.template.response import TemplateResponse
-from django.utils.html import format_html
-from django.contrib.auth.decorators import permission_required
+from django.urls import include
+from django.conf.urls import url
+from django.http import HttpResponseForbidden
+from django.shortcuts import render
 from django.utils.decorators import method_decorator
-
+from django.views.decorators.csrf import csrf_exempt
+import requests
+from django.contrib.admin import AdminSite
 from .models import PayoutPayment
 
-class PayoutDashboardAdminView(admin.ModelAdmin):
-    change_list_template = "admin/payout_dashboard.html"
-
+class CustomAdminSite(AdminSite):
     def get_urls(self):
-        urls = super().get_urls()
+        urls = super(CustomAdminSite, self).get_urls()
         custom_urls = [
-            path("dashboard/", self.admin_site.admin_view(self.dashboard_view), name="payout-dashboard"),
+            url(r'^payout-dashboard/$', self.admin_view(self.payout_dashboard))
         ]
         return custom_urls + urls
 
-    def dashboard_view(self, request):
-        if not request.user.has_perms(["yourapp.view_payoutpayment", "yourapp.change_payoutpayment"]):
-            return HttpResponseForbidden("You do not have permission to view this dashboard")
+    @method_decorator(csrf_exempt)
+    def payout_dashboard(self, request):
+        user = request.user
+        if not user.has_perm('yourapp.view_payoutpayment') or not user.has_perm('yourapp.change_payoutpayment'):
+            return HttpResponseForbidden("You do not have access to this dashboard.")
 
-        # Fake function to simulate API hit, replace with your real API calls
-        def booking_det(request):
-            return {"pnr_number": "1234567890", "train_number": "12345", "amount": 2500.50}
+        tm_booking_id = request.POST.get('tm_booking_id')
+        context = {}
+        if tm_booking_id:
+            response = requests.post('http://your-api-url.com/rpc-view/', json={'tm_booking_id': tm_booking_id})
+            data = response.json()
+            context['data'] = data.get('data', {})
 
-        def refund_det(request, tm_booking_id):
-            return {"refund_amount": 1500.00, "status": "processed"}
+        return render(request, 'admin/payout_dashboard.html', context)
 
-        tm_booking_id = request.GET.get('tm_booking_id')
-        if not tm_booking_id:
-            return TemplateResponse(request, "admin/payout_dashboard.html", {"error": "Missing tm_booking_id"})
-
-        data = {
-            "booking_details": booking_det(request),
-            "refund_details": refund_det(request, tm_booking_id),
-        }
-
-        return TemplateResponse(request, "admin/payout_dashboard.html", {"data": data})
+# Register your custom site
+custom_admin_site = CustomAdminSite(name='custom_admin')
+custom_admin_site.register(PayoutPayment)
 
 
-admin.site.register(PayoutPayment, PayoutDashboardAdminView)
+{% extends "admin/base_site.html" %}
+{% block content %}
+  <h2>Payout Dashboard</h2>
+  <form method="POST">
+    {% csrf_token %}
+    <input type="text" name="tm_booking_id" placeholder="Enter TM Booking ID" required />
+    <button type="submit">Get Details</button>
+  </form>
 
-# admin/payout_dashboard.html (create this template)
-# ---------------------------------------------
-# {% extends "admin/base_site.html" %}
-# {% block content %}
-# <h2>Payout Dashboard</h2>
-# {% if error %}
-#     <p style="color: red">{{ error }}</p>
-# {% else %}
-#     <h3>Booking Details</h3>
-#     <pre>{{ data.booking_details|safe }}</pre>
-#     <h3>Refund Details</h3>
-#     <pre>{{ data.refund_details|safe }}</pre>
-# {% endif %}
-# {% endblock %}
+  {% if data %}
+    <h3>Booking Details</h3>
+    <pre>{{ data.booking_details|safe }}</pre>
+
+    <h3>Refund Details</h3>
+    <pre>{{ data.refund_details|safe }}</pre>
+  {% endif %}
+{% endblock %}
+
