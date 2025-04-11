@@ -1,105 +1,73 @@
-in below for update its working perfectly but now when add object in admin by http://localhost:8000/admin/irctc/refundrequest/add/
-server 500 error in add , my insert or any other dashboard should not affetcted 
-please check
+# adminutils/forms.py
+from django import forms
 
-class RefundRequestAdmin(admin.ModelAdmin):
-    change_form_template = 'admin/refund_change_form.html'
+class SQLRunForm(forms.Form):
+    query = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 10, 'cols': 100}),
+        label="Enter SQL Query (you can paste multiple separated by semicolon)",
+    )
 
-    def get_extra_booking_refund_data(self, obj):
-        # Replace with real logic
-        return {
-            "booking_id": f"BK-{obj.id}",
-            "refund_reason": "Train cancelled",
-            "external_status": "Pending with Razorpay"
-        }
-    
+# adminutils/admin.py
+from django.contrib import admin
+from django.urls import path
+from django.shortcuts import render
+from django.db import connection
+from django.contrib.admin.views.decorators import staff_member_required
+from .forms import SQLRunForm
+
+@staff_member_required
+def run_sql_view(request):
+    result_html = ""
+    if request.method == 'POST':
+        form = SQLRunForm(request.POST)
+        if form.is_valid():
+            queries = form.cleaned_data['query']
+            queries_list = [q.strip() for q in queries.split(';') if q.strip()]
+            try:
+                with connection.cursor() as cursor:
+                    for q in queries_list:
+                        cursor.execute(q)
+                    if cursor.description:
+                        columns = [col[0] for col in cursor.description]
+                        rows = cursor.fetchall()
+                        result_html += "<table border='1'><tr>{}</tr>".format(
+                            ''.join(f'<th>{c}</th>' for c in columns)
+                        )
+                        for row in rows:
+                            result_html += "<tr>{}</tr>".format(
+                                ''.join(f'<td>{v}</td>' for v in row)
+                            )
+                        result_html += "</table>"
+                    else:
+                        result_html += "<p>All queries executed successfully.</p>"
+            except Exception as e:
+                result_html = f"<p style='color:red;'>Error: {e}</p>"
+    else:
+        form = SQLRunForm()
+
+    return render(request, 'admin/run_sql.html', {
+        'form': form,
+        'result': result_html
+    })
+
+# Register the view in admin
+class CustomAdminSite(admin.AdminSite):
     def get_urls(self):
-        urls = super(RefundRequestAdmin, self).get_urls()
-        try:
-            custom_urls = [
-            url(r'^(?P<object_id>\d+)/say-hello/$',self.admin_site.admin_view(self.changeform_with_extra_context),name='refund-say-hello'),
-            ]
-        except Exception as e:
-            print("exception under urls",e)
+        urls = super().get_urls()
+        custom_urls = [
+            path('run-sql/', self.admin_view(run_sql_view), name='run-sql'),
+        ]
         return custom_urls + urls
-    
-    def changeform_with_extra_context(self, request, object_id, form_url='', extra_context=None):
-        try:
-            print(type(object_id))
-            obj = RefundRequest.objects.get(pk=object_id)
-            from irctc.booking_api import fetch_refund_and_booking_details
-            extra = {
-            "extra_info": fetch_refund_and_booking_details(obj.tm_booking_id),
-            }
-            print(extra)
-            return super().changeform_view(request, object_id, form_url, extra_context=extra)
-        except Exception as e:
-            print(e)
-    actions = ['approve_refund', 'reject_refund']
-    
-    def get_actions(self, request):
-        """
-        Customize available actions based on user permissions.
-        """
-        actions = super().get_actions(request)
-        # Only allow actions for superusers
-        if not request.user.is_superuser:
-            print("under not super user")
-            if 'approve_refund' in actions:
-                del actions['approve_refund']
-            if 'reject_refund' in actions:
-                del actions['reject_refund']
-        return actions
 
-    def approve_refund(self, request, queryset):
-        """
-        Approve refunds only if status is 'approval pending'.
-        """
-        for refund in queryset:
-            if refund.status == 'approval pending':
-                refund.status = 'approved'
-                refund.save()
-                self.message_user(request, f"Refund for Booking ID {refund.tm_booking_id} has been approved.")
-            else:
-                self.message_user(request, f"Cannot approve Booking ID {refund.tm_booking_id}. Status is not 'approval pending'.")
+admin.site = CustomAdminSite()
 
-    def reject_refund(self, request, queryset):
-        """
-        Reject refunds only if status is 'approval pending'.
-        """
-        for refund in queryset:
-            if refund.status == 'approval pending':
-                refund.status = 'rejected'
-                refund.save()
-                self.message_user(request, f"Refund for Booking ID {refund.tm_booking_id} has been rejected.")
-            else:
-                self.message_user(request, f"Cannot reject Booking ID {refund.tm_booking_id}. Status is not 'approval pending'.")
-
-    approve_refund.short_description = "Approve Selected Refunds"
-    reject_refund.short_description = "Reject Selected Refunds"
-
-
-{% extends "admin/change_form.html" %}
-
-{% block object-tools %}
-    {{ block.super }}
-    <li>
-        <a class="button" href="{% url 'admin:refund-say-hello' original.pk %}">Fetch Booking/Refund Info</a>
-    </li>
-{% endblock %}
-
-{% block after_field_sets %}
-    {% if extra_info %}
-        <div style="margin-top: 20px;">
-            <h3>Booking Data</h3>
-            <h3>Booking Details</h3>
-            {% for key, value in extra_info.data.items %}
-            <li><strong>{{ key|title }}:</strong> {{ value }}</li>
-            {% endfor %}
-            <h3>Refund Details</h3>
-            {% for key, value in extra_info.data.refund_details.items %}
-            <li><strong>{{ key|title }}:</strong> {{ value }}</li>
-            {% endfor %}
-        </div>
-    {% endif %}
+{% extends "admin/base_site.html" %}
+{% block content %}
+  <h2>Run Raw SQL</h2>
+  <form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="default">Run</button>
+  </form>
+  <br/>
+  {{ result|safe }}
 {% endblock %}
