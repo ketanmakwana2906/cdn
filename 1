@@ -1,15 +1,6 @@
-# adminutils/forms.py
-from django import forms
-
-class SQLRunForm(forms.Form):
-    query = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 10, 'cols': 100}),
-        label="Enter SQL Query (you can paste multiple separated by semicolon)",
-    )
-
 # adminutils/admin.py
 from django.contrib import admin
-from django.urls import path
+from django.conf.urls import url
 from django.shortcuts import render
 from django.db import connection
 from django.contrib.admin.views.decorators import staff_member_required
@@ -50,20 +41,19 @@ def run_sql_view(request):
         'result': result_html
     })
 
-# Register the view in admin
-class CustomAdminSite(admin.AdminSite):
-    def get_urls(self):
-        urls = super().get_urls()
-        custom_urls = [
-            path('run-sql/', self.admin_view(run_sql_view), name='run-sql'),
-        ]
-        return custom_urls + urls
+# Add custom URL without replacing admin.site
+def custom_admin_urls(original_urls):
+    custom_urls = [
+        url(r'^run-sql/$', admin.site.admin_view(run_sql_view), name='run_sql'),
+    ]
+    return custom_urls + original_urls
 
-admin.site = CustomAdminSite()
+admin.site.get_urls = lambda: custom_admin_urls(admin.site.get_urls())
+
 
 {% extends "admin/base_site.html" %}
 {% block content %}
-  <h2>Run Raw SQL</h2>
+  <h2>Run Raw SQL Queries</h2>
   <form method="post">{% csrf_token %}
     {{ form.as_p }}
     <button type="submit" class="default">Run</button>
