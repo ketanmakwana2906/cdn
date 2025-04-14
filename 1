@@ -1,22 +1,21 @@
-i created django admin dashboard for run raw sql queries, but form not opening only below is coming
-Django administration
-Home › Run SQL Queries
-Run SQL Queries
-
-
-
-
+from django.template import Template, Context
+from django.utils.safestring import mark_safe
+from django import forms
+from django.contrib.admin.views.decorators import staff_member_required
+from django.shortcuts import render
+from django.db import connection
 
 class SQLRunForm(forms.Form):
     query = forms.CharField(
         widget=forms.Textarea(attrs={'rows': 10, 'cols': 100}),
-        label="You can Enter Multiple SQL queries separated by a semicolon (;)",
+        label="Enter multiple SQL queries separated by a semicolon (;)"
     )
 
 @staff_member_required
 def run_sql_view(request):
     result_html = ""
-    form = SQLRunForm()  # Initialize the form
+    form = SQLRunForm()
+
     if request.method == 'POST':
         form = SQLRunForm(request.POST)
         if form.is_valid():
@@ -29,25 +28,37 @@ def run_sql_view(request):
                             result_html = "<p style='color:red;'>Error: Only super admins can execute DELETE queries.</p>"
                             break
                         cursor.execute(q)
-                    result_html += "<p>All queries executed successfully.</p>"
+                    else:
+                        result_html += "<p style='color:green;'>All queries executed successfully.</p>"
             except Exception as e:
                 result_html = f"<p style='color:red;'>Error: {e}</p>"
+
+    inline_template = Template("""
+        {% load static %}
+        {% load crispy_forms_tags %}
+        <div class="content">
+            <h1>Run SQL Queries</h1>
+            <form method="post" style="margin-top:20px;">{% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" class="default" value="Run">
+            </form>
+            <br>
+            {{ result|safe }}
+        </div>
+    """)
+
+    content_html = inline_template.render(Context({
+        'form': form,
+        'result': mark_safe(result_html),
+        'request': request
+    }))
+
     return render(
         request,
-        'admin/base_site.html',  # Use default admin template
+        'admin/base_site.html',
         {
-            'form': form,
-            'result': result_html,
-            'title': 'Run SQL Queries'  # Title for the admin page
+            'title': 'Run SQL Queries',
+            'content': mark_safe(content_html),  # This renders the form inside admin
         }
     )
-
-original_get_urls = admin.site.get_urls
-
-def custom_admin_urls(original_urls):
-    custom_urls = [
-        url(r'^Schedule/runsql/$', admin.site.admin_view(run_sql_view), name='run_sql'),
-    ]
-    return custom_urls + original_urls()
-
-admin.site.get_urls = lambda: custom_admin_urls(original_get_urls)
+    
