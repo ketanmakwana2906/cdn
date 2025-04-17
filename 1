@@ -1,1 +1,35 @@
-import requests from twilio.rest import Client import urllib3 def send_msg(str, twilio_account_sid, twilio_auth_token, from_number, to_number): client_twilio = Client(twilio_account_sid, twilio_auth_token) message = client_twilio.messages.create( from_=from_number, body=str, to=to_number ) return message.sid urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) try: print(send_msg("hello", "AC2b72b9d974267f404e9b72065ef32687", "fe294e7afc4e0178cc5529b83fc434a3", "+14155238886", "+916354888981")) except Exception as e: print(e) HTTPSConnectionPool(host='api.twilio.com', port=443): Max retries exceeded with url: /2010-04-01/Accounts/AC2b72b9d974267f404e9b72065ef32687/Messages.json (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate in certificate chain (_ssl.c:1018)')))
+import urllib3
+from twilio.rest import Client
+from twilio.http.http_client import TwilioHttpClient
+
+# Disable SSL warnings (not recommended for production)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# Function to send SMS using Twilio
+def send_msg(body, sid, token, from_number, to_number):
+    # Custom HTTP client with SSL verification disabled
+    proxy_client = TwilioHttpClient()
+    proxy_client.session.verify = False
+
+    # Twilio client using custom HTTP client
+    client = Client(sid, token, http_client=proxy_client)
+
+    # Send the message
+    message = client.messages.create(
+        from_=from_number,
+        body=body,
+        to=to_number
+    )
+    return message.sid
+
+# Example usage
+try:
+    print(send_msg(
+        "hello from local SSL disabled",
+        "AC2b72b9d974267f404e9b72065ef32687",
+        "fe294e7afc4e0178cc5529b83fc434a3",
+        "+14155238886",
+        "+916354888981"
+    ))
+except Exception as e:
+    print("Error:", e)
