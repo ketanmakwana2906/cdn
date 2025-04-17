@@ -1,64 +1,12 @@
-from django.template import Template, Context
-from django.utils.safestring import mark_safe
-from django import forms
-from django.contrib.admin.views.decorators import staff_member_required
-from django.shortcuts import render
-from django.db import connection
+SELECT *
+FROM train
+WHERE is_active = 1
+  AND (
+    metadata_updated_on IS NULL
+    OR metadata_updated_on <= CURDATE() - INTERVAL 28 DAY
+  )
+ORDER BY metadata_updated_on ASC
+LIMIT 200;
 
-class SQLRunForm(forms.Form):
-    query = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 10, 'cols': 100}),
-        label="Enter multiple SQL queries separated by a semicolon (;)"
-    )
-
-@staff_member_required
-def run_sql_view(request):
-    result_html = ""
-    form = SQLRunForm()
-
-    if request.method == 'POST':
-        form = SQLRunForm(request.POST)
-        if form.is_valid():
-            queries = form.cleaned_data['query']
-            queries_list = [q.strip() for q in queries.split(';') if q.strip()]
-            try:
-                with connection.cursor() as cursor:
-                    for q in queries_list:
-                        if q.lower().startswith("delete") and not request.user.is_superuser:
-                            result_html = "<p style='color:red;'>Error: Only super admins can execute DELETE queries.</p>"
-                            break
-                        cursor.execute(q)
-                    else:
-                        result_html += "<p style='color:green;'>All queries executed successfully.</p>"
-            except Exception as e:
-                result_html = f"<p style='color:red;'>Error: {e}</p>"
-
-    inline_template = Template("""
-        {% load static %}
-        {% load crispy_forms_tags %}
-        <div class="content">
-            <h1>Run SQL Queries</h1>
-            <form method="post" style="margin-top:20px;">{% csrf_token %}
-                {{ form.as_p }}
-                <input type="submit" class="default" value="Run">
-            </form>
-            <br>
-            {{ result|safe }}
-        </div>
-    """)
-
-    content_html = inline_template.render(Context({
-        'form': form,
-        'result': mark_safe(result_html),
-        'request': request
-    }))
-
-    return render(
-        request,
-        'admin/base_site.html',
-        {
-            'title': 'Run SQL Queries',
-            'content': mark_safe(content_html),  # This renders the form inside admin
-        }
-    )
-    
+ALTER TABLE train
+ADD COLUMN metadata_updated_on DATE NULL;
