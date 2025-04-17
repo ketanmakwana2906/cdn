@@ -1,12 +1,1 @@
-SELECT *
-FROM train
-WHERE is_active = 1
-  AND (
-    metadata_updated_on IS NULL
-    OR metadata_updated_on <= CURDATE() - INTERVAL 28 DAY
-  )
-ORDER BY metadata_updated_on ASC
-LIMIT 200;
-
-ALTER TABLE train
-ADD COLUMN metadata_updated_on DATE NULL;
+import requests from twilio.rest import Client import urllib3 def send_msg(str, twilio_account_sid, twilio_auth_token, from_number, to_number): client_twilio = Client(twilio_account_sid, twilio_auth_token) message = client_twilio.messages.create( from_=from_number, body=str, to=to_number ) return message.sid urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) try: print(send_msg("hello", "AC2b72b9d974267f404e9b72065ef32687", "fe294e7afc4e0178cc5529b83fc434a3", "+14155238886", "+916354888981")) except Exception as e: print(e) HTTPSConnectionPool(host='api.twilio.com', port=443): Max retries exceeded with url: /2010-04-01/Accounts/AC2b72b9d974267f404e9b72065ef32687/Messages.json (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate in certificate chain (_ssl.c:1018)')))
