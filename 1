@@ -1,35 +1,40 @@
+import requests
+from requests.auth import HTTPBasicAuth
 import urllib3
-from twilio.rest import Client
-from twilio.http.http_client import TwilioHttpClient
 
-# Disable SSL warnings (not recommended for production)
+# Disable SSL warning (for local only)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# Function to send SMS using Twilio
-def send_msg(body, sid, token, from_number, to_number):
-    # Custom HTTP client with SSL verification disabled
-    proxy_client = TwilioHttpClient()
-    proxy_client.session.verify = False
+# Twilio credentials
+account_sid = "AC2b72b9d974267f404e9b72065ef32687"
+auth_token = "fe294e7afc4e0178cc5529b83fc434a3"
 
-    # Twilio client using custom HTTP client
-    client = Client(sid, token, http_client=proxy_client)
+# Message data
+from_number = "+14155238886"  # Twilio number
+to_number = "+916354888981"   # Your verified number
+body = "Hello from direct API call!"
 
-    # Send the message
-    message = client.messages.create(
-        from_=from_number,
-        body=body,
-        to=to_number
-    )
-    return message.sid
+# Twilio API URL
+url = f"https://api.twilio.com/2010-04-01/Accounts/{account_sid}/Messages.json"
 
-# Example usage
-try:
-    print(send_msg(
-        "hello from local SSL disabled",
-        "AC2b72b9d974267f404e9b72065ef32687",
-        "fe294e7afc4e0178cc5529b83fc434a3",
-        "+14155238886",
-        "+916354888981"
-    ))
-except Exception as e:
-    print("Error:", e)
+# Payload
+data = {
+    "From": from_number,
+    "To": to_number,
+    "Body": body
+}
+
+# Make the request with SSL verification disabled
+response = requests.post(
+    url,
+    data=data,
+    auth=HTTPBasicAuth(account_sid, auth_token),
+    verify=False  # <- Disables SSL verification
+)
+
+# Print response
+if response.status_code == 201:
+    print("Message sent successfully! SID:", response.json()["sid"])
+else:
+    print("Failed:", response.status_code, response.text)
+    
