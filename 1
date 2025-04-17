@@ -1,40 +1,27 @@
-import requests
-from requests.auth import HTTPBasicAuth
+from date_time import *
+from gcp_cost import *
+from msg_twilio import *
+import os
 import urllib3
+import json
 
-# Disable SSL warning (for local only)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+with open("gcp_project/service-account.json") as f:
+  creds_json = f.read()
+  os.environ["COST_PARAM"] = creds_json
+cf_confluence = json.loads(os.environ.get("COST_PARAM"))
+twilio_account_sid = cf_confluence["TWILIO_ACCOUNT_SID"]
+twilio_auth_token = cf_confluence["TWILIO_AUTH_TOKEN"]
+from_number = cf_confluence["FROM_NUMBER"]
+to_number = cf_confluence["TO_NUMBER"]
 
-# Twilio credentials
-account_sid = "AC2b72b9d974267f404e9b72065ef32687"
-auth_token = "fe294e7afc4e0178cc5529b83fc434a3"
+def main(request):
+    past_time = date_time(2)
+    gcp_str = gcp_cost(past_time)
+    print(gcp_str)
+    past_date = f"""{past_time}"""
+    str = gcp_str
+    send_msg(str,twilio_account_sid, twilio_auth_token,from_number,to_number)
+    return "Cost update sent!!"
 
-# Message data
-from_number = "+14155238886"  # Twilio number
-to_number = "+916354888981"   # Your verified number
-body = "Hello from direct API call!"
-
-# Twilio API URL
-url = f"https://api.twilio.com/2010-04-01/Accounts/{account_sid}/Messages.json"
-
-# Payload
-data = {
-    "From": from_number,
-    "To": to_number,
-    "Body": body
-}
-
-# Make the request with SSL verification disabled
-response = requests.post(
-    url,
-    data=data,
-    auth=HTTPBasicAuth(account_sid, auth_token),
-    verify=False  # <- Disables SSL verification
-)
-
-# Print response
-if response.status_code == 201:
-    print("Message sent successfully! SID:", response.json()["sid"])
-else:
-    print("Failed:", response.status_code, response.text)
-    
+main(request="")
