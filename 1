@@ -1,27 +1,21 @@
-from date_time import *
-from gcp_cost import *
-from msg_twilio import *
-import os
-import urllib3
-import json
-
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-with open("gcp_project/service-account.json") as f:
-  creds_json = f.read()
-  os.environ["COST_PARAM"] = creds_json
-cf_confluence = json.loads(os.environ.get("COST_PARAM"))
-twilio_account_sid = cf_confluence["TWILIO_ACCOUNT_SID"]
-twilio_auth_token = cf_confluence["TWILIO_AUTH_TOKEN"]
-from_number = cf_confluence["FROM_NUMBER"]
-to_number = cf_confluence["TO_NUMBER"]
-
-def main(request):
-    past_time = date_time(2)
-    gcp_str = gcp_cost(past_time)
-    print(gcp_str)
-    past_date = f"""{past_time}"""
-    str = gcp_str
-    send_msg(str,twilio_account_sid, twilio_auth_token,from_number,to_number)
-    return "Cost update sent!!"
-
-main(request="")
+Red Hat Update for gcc (RHSA-2025:1301)
+Red Hat Update for libxml2 (RHSA-2025:1517)
+Red Hat Update for bzip2 (RHSA-2024:8922)
+Red Hat Update for bzip2 (RHSA-2025:0733)
+Red Hat Update for expat (RHSA-2024:6989)
+Red Hat Update for curl (RHSA-2024:5654)
+Red Hat Update for emacs (RHSA-2025:1917)
+Red Hat Update for pam (RHSA-2024:10379)
+Red Hat Update for expat (RHSA-2024:9502)
+Red Hat Update for python-setuptools (RHSA-2024:5530)
+Red Hat Update for python-urllib3 (RHSA-2024:5309)
+Red Hat Update for krb5 (RHSA-2024:5312)
+Red Hat Update for python-requests (RHSA-2025:0012)
+Red Hat Update for binutils (RHSA-2024:9689)
+Red Hat Update for python3 (RHSA-2024:6975)
+Red Hat Update for Open Secure Sockets Layer (OpenSSL) (RHSA-2024:7848)
+Red Hat Update for krb5 (RHSA-2024:8860)
+Red Hat Update for libxml2 (RHSA-2025:2686)
+Red Hat Update for emacs (RHSA-2024:6987)
+Red Hat Update for glibc (RHSA-2025:3828)
+Red Hat Update for krb5 (RHSA-2025:2722)
