@@ -1,8 +1,9 @@
-curl -X POST "https://proxy.oxylabs.io/all" \
-  -u "USERNAME:PASSWORD" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "url": "https://example.com",
-    "render": true,
-    "geo_location": "US"
-  }'
+docker run -d -p 3000:3000 \
+  -e MB_DB_TYPE=mysql \
+  -e MB_DB_DBNAME=metabase \
+  -e MB_DB_PORT=3306 \
+  -e MB_DB_USER=root \
+  -e MB_DB_PASS=yourpassword \
+  -e MB_DB_HOST=host.docker.internal \
+  --name metabase-old \
+  metabase/metabase:v0.48.x
