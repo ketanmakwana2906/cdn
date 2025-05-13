@@ -1,99 +1,97 @@
-Tables_in_trainmanmeta_prod
-
-'action'
-'activity'
-'api_key'
-'application_permissions_revision'
-'audit_log'
-'bookmark_ordering'
-'cache_config'
-'card_bookmark'
-'card_label'
-'cloud_migration'
-'collection'
-'collection_bookmark'
-'collection_permission_graph_revision'
-'computation_job'
-'computation_job_result'
-'connection_impersonations'
-'core_session'
-'core_user'
-'dashboard_bookmark'
-'dashboard_favorite'
-'dashboard_tab'
-'dashboardcard_series'
-'data_migrations'
-'data_permissions'
-'databasechangelog'
-'databasechangeloglock'
-'dependency'
-'dimension'
-'field_usage'
-'http_action'
-'implicit_action'
-'label'
-'login_history'
-'metabase_database'
-'metabase_field'
-'metabase_fieldvalues'
-'metabase_table'
-'metric'
-'metric_important_field'
-'model_index'
-'model_index_value'
-'moderation_review'
-'native_query_snippet'
-'parameter_card'
-'permissions'
-'permissions_group'
-'permissions_group_membership'
-'permissions_revision'
-'persisted_info'
-'pulse'
-'pulse_card'
-'pulse_channel'
-'pulse_channel_recipient'
-'qrtz_blob_triggers'
-'qrtz_calendars'
-'qrtz_cron_triggers'
-'qrtz_fired_triggers'
-'qrtz_job_details'
-'qrtz_locks'
-'qrtz_paused_trigger_grps'
-'qrtz_scheduler_state'
-'qrtz_simple_triggers'
-'qrtz_simprop_triggers'
-'qrtz_triggers'
-'query'
-'query_action'
-'query_cache'
-'query_execution'
-'query_field'
-'recent_views'
-'report_card'
-'report_cardfavorite'
-'report_dashboard'
-'report_dashboardcard'
-'revision'
-'sandboxes'
-'secret'
-'segment'
-'setting'
-'table_privileges'
-'task_history'
-'timeline'
-'timeline_event'
-'user_parameter_value'
-'v_alerts'
-'v_audit_log'
-'v_content'
-'v_dashboardcard'
-'v_fields'
-'v_group_members'
-'v_query_log'
-'v_subscriptions'
-'v_tables'
-'v_tasks'
-'v_users'
-'v_view_log'
-'view_log'
+RENAME TABLE `action` TO `ACTION`;
+RENAME TABLE `activity` TO `ACTIVITY`;
+RENAME TABLE `api_key` TO `API_KEY`;
+RENAME TABLE `application_permissions_revision` TO `APPLICATION_PERMISSIONS_REVISION`;
+RENAME TABLE `audit_log` TO `AUDIT_LOG`;
+RENAME TABLE `bookmark_ordering` TO `BOOKMARK_ORDERING`;
+RENAME TABLE `cache_config` TO `CACHE_CONFIG`;
+RENAME TABLE `card_bookmark` TO `CARD_BOOKMARK`;
+RENAME TABLE `card_label` TO `CARD_LABEL`;
+RENAME TABLE `cloud_migration` TO `CLOUD_MIGRATION`;
+RENAME TABLE `collection` TO `COLLECTION`;
+RENAME TABLE `collection_bookmark` TO `COLLECTION_BOOKMARK`;
+RENAME TABLE `collection_permission_graph_revision` TO `COLLECTION_PERMISSION_GRAPH_REVISION`;
+RENAME TABLE `computation_job` TO `COMPUTATION_JOB`;
+RENAME TABLE `computation_job_result` TO `COMPUTATION_JOB_RESULT`;
+RENAME TABLE `connection_impersonations` TO `CONNECTION_IMPERSONATIONS`;
+RENAME TABLE `core_session` TO `CORE_SESSION`;
+RENAME TABLE `core_user` TO `CORE_USER`;
+RENAME TABLE `dashboard_bookmark` TO `DASHBOARD_BOOKMARK`;
+RENAME TABLE `dashboard_favorite` TO `DASHBOARD_FAVORITE`;
+RENAME TABLE `dashboard_tab` TO `DASHBOARD_TAB`;
+RENAME TABLE `dashboardcard_series` TO `DASHBOARDCARD_SERIES`;
+RENAME TABLE `data_migrations` TO `DATA_MIGRATIONS`;
+RENAME TABLE `data_permissions` TO `DATA_PERMISSIONS`;
+RENAME TABLE `databasechangelog` TO `DATABASECHANGELOG`;
+RENAME TABLE `databasechangeloglock` TO `DATABASECHANGELOGLOCK`;
+RENAME TABLE `dependency` TO `DEPENDENCY`;
+RENAME TABLE `dimension` TO `DIMENSION`;
+RENAME TABLE `field_usage` TO `FIELD_USAGE`;
+RENAME TABLE `http_action` TO `HTTP_ACTION`;
+RENAME TABLE `implicit_action` TO `IMPLICIT_ACTION`;
+RENAME TABLE `label` TO `LABEL`;
+RENAME TABLE `login_history` TO `LOGIN_HISTORY`;
+RENAME TABLE `metabase_database` TO `METABASE_DATABASE`;
+RENAME TABLE `metabase_field` TO `METABASE_FIELD`;
+RENAME TABLE `metabase_fieldvalues` TO `METABASE_FIELDVALUES`;
+RENAME TABLE `metabase_table` TO `METABASE_TABLE`;
+RENAME TABLE `metric` TO `METRIC`;
+RENAME TABLE `metric_important_field` TO `METRIC_IMPORTANT_FIELD`;
+RENAME TABLE `model_index` TO `MODEL_INDEX`;
+RENAME TABLE `model_index_value` TO `MODEL_INDEX_VALUE`;
+RENAME TABLE `moderation_review` TO `MODERATION_REVIEW`;
+RENAME TABLE `native_query_snippet` TO `NATIVE_QUERY_SNIPPET`;
+RENAME TABLE `parameter_card` TO `PARAMETER_CARD`;
+RENAME TABLE `permissions` TO `PERMISSIONS`;
+RENAME TABLE `permissions_group` TO `PERMISSIONS_GROUP`;
+RENAME TABLE `permissions_group_membership` TO `PERMISSIONS_GROUP_MEMBERSHIP`;
+RENAME TABLE `permissions_revision` TO `PERMISSIONS_REVISION`;
+RENAME TABLE `persisted_info` TO `PERSISTED_INFO`;
+RENAME TABLE `pulse` TO `PULSE`;
+RENAME TABLE `pulse_card` TO `PULSE_CARD`;
+RENAME TABLE `pulse_channel` TO `PULSE_CHANNEL`;
+RENAME TABLE `pulse_channel_recipient` TO `PULSE_CHANNEL_RECIPIENT`;
+RENAME TABLE `qrtz_blob_triggers` TO `QRTZ_BLOB_TRIGGERS`;
+RENAME TABLE `qrtz_calendars` TO `QRTZ_CALENDARS`;
+RENAME TABLE `qrtz_cron_triggers` TO `QRTZ_CRON_TRIGGERS`;
+RENAME TABLE `qrtz_fired_triggers` TO `QRTZ_FIRED_TRIGGERS`;
+RENAME TABLE `qrtz_job_details` TO `QRTZ_JOB_DETAILS`;
+RENAME TABLE `qrtz_locks` TO `QRTZ_LOCKS`;
+RENAME TABLE `qrtz_paused_trigger_grps` TO `QRTZ_PAUSED_TRIGGER_GRPS`;
+RENAME TABLE `qrtz_scheduler_state` TO `QRTZ_SCHEDULER_STATE`;
+RENAME TABLE `qrtz_simple_triggers` TO `QRTZ_SIMPLE_TRIGGERS`;
+RENAME TABLE `qrtz_simprop_triggers` TO `QRTZ_SIMPROP_TRIGGERS`;
+RENAME TABLE `qrtz_triggers` TO `QRTZ_TRIGGERS`;
+RENAME TABLE `query` TO `QUERY`;
+RENAME TABLE `query_action` TO `QUERY_ACTION`;
+RENAME TABLE `query_cache` TO `QUERY_CACHE`;
+RENAME TABLE `query_execution` TO `QUERY_EXECUTION`;
+RENAME TABLE `query_field` TO `QUERY_FIELD`;
+RENAME TABLE `recent_views` TO `RECENT_VIEWS`;
+RENAME TABLE `report_card` TO `REPORT_CARD`;
+RENAME TABLE `report_cardfavorite` TO `REPORT_CARDFAVORITE`;
+RENAME TABLE `report_dashboard` TO `REPORT_DASHBOARD`;
+RENAME TABLE `report_dashboardcard` TO `REPORT_DASHBOARDCARD`;
+RENAME TABLE `revision` TO `REVISION`;
+RENAME TABLE `sandboxes` TO `SANDBOXES`;
+RENAME TABLE `secret` TO `SECRET`;
+RENAME TABLE `segment` TO `SEGMENT`;
+RENAME TABLE `setting` TO `SETTING`;
+RENAME TABLE `table_privileges` TO `TABLE_PRIVILEGES`;
+RENAME TABLE `task_history` TO `TASK_HISTORY`;
+RENAME TABLE `timeline` TO `TIMELINE`;
+RENAME TABLE `timeline_event` TO `TIMELINE_EVENT`;
+RENAME TABLE `user_parameter_value` TO `USER_PARAMETER_VALUE`;
+RENAME TABLE `v_alerts` TO `V_ALERTS`;
+RENAME TABLE `v_audit_log` TO `V_AUDIT_LOG`;
+RENAME TABLE `v_content` TO `V_CONTENT`;
+RENAME TABLE `v_dashboardcard` TO `V_DASHBOARDCARD`;
+RENAME TABLE `v_fields` TO `V_FIELDS`;
+RENAME TABLE `v_group_members` TO `V_GROUP_MEMBERS`;
+RENAME TABLE `v_query_log` TO `V_QUERY_LOG`;
+RENAME TABLE `v_subscriptions` TO `V_SUBSCRIPTIONS`;
+RENAME TABLE `v_tables` TO `V_TABLES`;
+RENAME TABLE `v_tasks` TO `V_TASKS`;
+RENAME TABLE `v_users` TO `V_USERS`;
+RENAME TABLE `v_view_log` TO `V_VIEW_LOG`;
+RENAME TABLE `view_log` TO `VIEW_LOG`;
