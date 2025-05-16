@@ -1,97 +1,159 @@
-RENAME TABLE `action` TO `ACTION`;
-RENAME TABLE `activity` TO `ACTIVITY`;
-RENAME TABLE `api_key` TO `API_KEY`;
-RENAME TABLE `application_permissions_revision` TO `APPLICATION_PERMISSIONS_REVISION`;
-RENAME TABLE `audit_log` TO `AUDIT_LOG`;
-RENAME TABLE `bookmark_ordering` TO `BOOKMARK_ORDERING`;
-RENAME TABLE `cache_config` TO `CACHE_CONFIG`;
-RENAME TABLE `card_bookmark` TO `CARD_BOOKMARK`;
-RENAME TABLE `card_label` TO `CARD_LABEL`;
-RENAME TABLE `cloud_migration` TO `CLOUD_MIGRATION`;
-RENAME TABLE `collection` TO `COLLECTION`;
-RENAME TABLE `collection_bookmark` TO `COLLECTION_BOOKMARK`;
-RENAME TABLE `collection_permission_graph_revision` TO `COLLECTION_PERMISSION_GRAPH_REVISION`;
-RENAME TABLE `computation_job` TO `COMPUTATION_JOB`;
-RENAME TABLE `computation_job_result` TO `COMPUTATION_JOB_RESULT`;
-RENAME TABLE `connection_impersonations` TO `CONNECTION_IMPERSONATIONS`;
-RENAME TABLE `core_session` TO `CORE_SESSION`;
-RENAME TABLE `core_user` TO `CORE_USER`;
-RENAME TABLE `dashboard_bookmark` TO `DASHBOARD_BOOKMARK`;
-RENAME TABLE `dashboard_favorite` TO `DASHBOARD_FAVORITE`;
-RENAME TABLE `dashboard_tab` TO `DASHBOARD_TAB`;
-RENAME TABLE `dashboardcard_series` TO `DASHBOARDCARD_SERIES`;
-RENAME TABLE `data_migrations` TO `DATA_MIGRATIONS`;
-RENAME TABLE `data_permissions` TO `DATA_PERMISSIONS`;
-RENAME TABLE `databasechangelog` TO `DATABASECHANGELOG`;
-RENAME TABLE `databasechangeloglock` TO `DATABASECHANGELOGLOCK`;
-RENAME TABLE `dependency` TO `DEPENDENCY`;
-RENAME TABLE `dimension` TO `DIMENSION`;
-RENAME TABLE `field_usage` TO `FIELD_USAGE`;
-RENAME TABLE `http_action` TO `HTTP_ACTION`;
-RENAME TABLE `implicit_action` TO `IMPLICIT_ACTION`;
-RENAME TABLE `label` TO `LABEL`;
-RENAME TABLE `login_history` TO `LOGIN_HISTORY`;
-RENAME TABLE `metabase_database` TO `METABASE_DATABASE`;
-RENAME TABLE `metabase_field` TO `METABASE_FIELD`;
-RENAME TABLE `metabase_fieldvalues` TO `METABASE_FIELDVALUES`;
-RENAME TABLE `metabase_table` TO `METABASE_TABLE`;
-RENAME TABLE `metric` TO `METRIC`;
-RENAME TABLE `metric_important_field` TO `METRIC_IMPORTANT_FIELD`;
-RENAME TABLE `model_index` TO `MODEL_INDEX`;
-RENAME TABLE `model_index_value` TO `MODEL_INDEX_VALUE`;
-RENAME TABLE `moderation_review` TO `MODERATION_REVIEW`;
-RENAME TABLE `native_query_snippet` TO `NATIVE_QUERY_SNIPPET`;
-RENAME TABLE `parameter_card` TO `PARAMETER_CARD`;
-RENAME TABLE `permissions` TO `PERMISSIONS`;
-RENAME TABLE `permissions_group` TO `PERMISSIONS_GROUP`;
-RENAME TABLE `permissions_group_membership` TO `PERMISSIONS_GROUP_MEMBERSHIP`;
-RENAME TABLE `permissions_revision` TO `PERMISSIONS_REVISION`;
-RENAME TABLE `persisted_info` TO `PERSISTED_INFO`;
-RENAME TABLE `pulse` TO `PULSE`;
-RENAME TABLE `pulse_card` TO `PULSE_CARD`;
-RENAME TABLE `pulse_channel` TO `PULSE_CHANNEL`;
-RENAME TABLE `pulse_channel_recipient` TO `PULSE_CHANNEL_RECIPIENT`;
-RENAME TABLE `qrtz_blob_triggers` TO `QRTZ_BLOB_TRIGGERS`;
-RENAME TABLE `qrtz_calendars` TO `QRTZ_CALENDARS`;
-RENAME TABLE `qrtz_cron_triggers` TO `QRTZ_CRON_TRIGGERS`;
-RENAME TABLE `qrtz_fired_triggers` TO `QRTZ_FIRED_TRIGGERS`;
-RENAME TABLE `qrtz_job_details` TO `QRTZ_JOB_DETAILS`;
-RENAME TABLE `qrtz_locks` TO `QRTZ_LOCKS`;
-RENAME TABLE `qrtz_paused_trigger_grps` TO `QRTZ_PAUSED_TRIGGER_GRPS`;
-RENAME TABLE `qrtz_scheduler_state` TO `QRTZ_SCHEDULER_STATE`;
-RENAME TABLE `qrtz_simple_triggers` TO `QRTZ_SIMPLE_TRIGGERS`;
-RENAME TABLE `qrtz_simprop_triggers` TO `QRTZ_SIMPROP_TRIGGERS`;
-RENAME TABLE `qrtz_triggers` TO `QRTZ_TRIGGERS`;
-RENAME TABLE `query` TO `QUERY`;
-RENAME TABLE `query_action` TO `QUERY_ACTION`;
-RENAME TABLE `query_cache` TO `QUERY_CACHE`;
-RENAME TABLE `query_execution` TO `QUERY_EXECUTION`;
-RENAME TABLE `query_field` TO `QUERY_FIELD`;
-RENAME TABLE `recent_views` TO `RECENT_VIEWS`;
-RENAME TABLE `report_card` TO `REPORT_CARD`;
-RENAME TABLE `report_cardfavorite` TO `REPORT_CARDFAVORITE`;
-RENAME TABLE `report_dashboard` TO `REPORT_DASHBOARD`;
-RENAME TABLE `report_dashboardcard` TO `REPORT_DASHBOARDCARD`;
-RENAME TABLE `revision` TO `REVISION`;
-RENAME TABLE `sandboxes` TO `SANDBOXES`;
-RENAME TABLE `secret` TO `SECRET`;
-RENAME TABLE `segment` TO `SEGMENT`;
-RENAME TABLE `setting` TO `SETTING`;
-RENAME TABLE `table_privileges` TO `TABLE_PRIVILEGES`;
-RENAME TABLE `task_history` TO `TASK_HISTORY`;
-RENAME TABLE `timeline` TO `TIMELINE`;
-RENAME TABLE `timeline_event` TO `TIMELINE_EVENT`;
-RENAME TABLE `user_parameter_value` TO `USER_PARAMETER_VALUE`;
-RENAME TABLE `v_alerts` TO `V_ALERTS`;
-RENAME TABLE `v_audit_log` TO `V_AUDIT_LOG`;
-RENAME TABLE `v_content` TO `V_CONTENT`;
-RENAME TABLE `v_dashboardcard` TO `V_DASHBOARDCARD`;
-RENAME TABLE `v_fields` TO `V_FIELDS`;
-RENAME TABLE `v_group_members` TO `V_GROUP_MEMBERS`;
-RENAME TABLE `v_query_log` TO `V_QUERY_LOG`;
-RENAME TABLE `v_subscriptions` TO `V_SUBSCRIPTIONS`;
-RENAME TABLE `v_tables` TO `V_TABLES`;
-RENAME TABLE `v_tasks` TO `V_TASKS`;
-RENAME TABLE `v_users` TO `V_USERS`;
-RENAME TABLE `v_view_log` TO `V_VIEW_LOG`;
-RENAME TABLE `view_log` TO `VIEW_LOG`;
+perfect
+now external function gives very big data like below
+
+show booking details , irctc gateway refunds , ta refund , payout refunds in data instead of just External Refund Info:
+Booking ID: BK-1
+Refund Reason: Train cancelled
+External Status: Pending with Razorpay
+
+{
+"success": true,
+"data": {
+"booking\_details": {
+"id": 1005231,
+"ta\_obj": {
+"ta\_opted": false,
+"ta\_upgraded": false,
+"tm\_refunded": false,
+"ta\_note\_msg": ""
+},
+"fcs\_obj": {
+"fcs\_opted": false,
+"fcs\_mode": "Standard"
+},
+"error\_flag": null,
+"tm\_booking\_id": "TM23051005231",
+"user\_id": 54143870,
+"reservation\_id": "210000066928308",
+"pnr\_number": "2212375606",
+"train\_number": "22918",
+"origin": "NZM",
+"dest": "BDTS",
+"date": "2024-05-23",
+"boarding\_date": "2024-05-23",
+"departure\_time": "22:15",
+"arrival\_date": "2024-05-24",
+"arrival\_time": "16:50",
+"travel\_class": "3A",
+"quota": "GN",
+"amount": 2387.4,
+"prediction": null,
+"total\_amount": 2443.74,
+"amount\_refunded": null,
+"tm\_cash\_used": 50.0,
+"commission": 40.0,
+"coupon": null,
+"tag": null,
+"discount": 0.0,
+"boarding": "NZM",
+"adult\_count": 0,
+"child\_count": 0,
+"infant\_count": 0,
+"availability": "GNWL2/WL1",
+"status": "Cancelled",
+"irctc\_username": "MohitG",
+"version\_code": "7.0.4",
+"platform": "ios",
+"email": "[neeraj@trainman.in](mailto:neeraj@trainman.in)",
+"phone": "8447494001",
+"address": "address",
+"error": null,
+"gst\_opted": false,
+"tdr\_filed": false,
+"can\_retry": false,
+"masterid": "WTRNMN00000",
+"retry\_for": null,
+"retry\_cancelled": false,
+"retry\_till": "2024-05-18T04:27:04.935571Z",
+"qr\_code\_string": "PNR No.: 2212375606,\nTXN ID: 210000066928308,\nPassenger Name: asd, Gender: M, Age: 34, Status: CAN,\nQuota: General (GN),\nTrain No.: 22918,\nTrain Name: HW BDTS SF EXP,\nScheduled Departure: 2024-05-23 22:15,\n\nDate of Journey: 2024-05-23,\nBoarding Station: Delhi H Nizamuddin - NZM,\nClass: Third AC (3A),\nFrom: Delhi H Nizamuddin - NZM,\nTo: Mumbai Bandra Terminus - BDTS,\nTicket Fare: 1610.00,\nIRCTC SC: Rs.35.40+ PG Charges Extra.",
+"created\_at": "2024-05-17T16:25:42.543827Z",
+"updated\_at": "2025-04-05T04:39:48.360656Z",
+"origin\_name": "Delhi H Nizamuddin",
+"dest\_name": "Mumbai Bandra Terminus",
+"boarding\_name": "Delhi H Nizamuddin",
+"train\_name": "HW BDTS SF EXP",
+"gateway\_id": 2
+},
+"refund\_details": {
+"success": true,
+"irctc\_gateway\_refunds": \[
+{
+"gateway\_id": 2,
+"booking\_id": 1005231,
+"payment\_id": "19869",
+"cancellation\_id": 107037,
+"gateway\_refund\_id": "rfnd\_OBcyMW6z2u6ZRy",
+"amount\_refunded": 154500,
+"amount\_to\_be\_refunded": 154500,
+"status": "processed",
+"response\_code": null,
+"error": null,
+"arn": "10000000000000",
+"rrn": null,
+"speed\_requested": "optimum",
+"speed\_processed": "normal",
+"gateway\_created\_at": "1715963468",
+"created\_at": "2024-05-17T16:31:07.239000Z",
+"updated\_at": "2025-04-08T07:32:59.244000Z",
+"payment\_mode": "netbanking (Razorpay)",
+"estimated\_refund\_time": "2024-05-31T22:01:07.239Z"
+}
+],
+"ta\_refunds": \[
+{
+"id": 21,
+"ac\_number": "\*\*\*\*\*\*7890",
+"ifsc\_code": "ABCD0123456",
+"ac\_holder\_name": "Neeraj",
+"upi\_id": "",
+"phone": "\*\*\*\*\*\*4001",
+"note": \[
+"<b>2x refund</b> of Rs7.0 with PAYOUT1715154635354ZYdPVaaIzxQ has been processed to your account.",
+"It can take up to 7 working days for the amount to reflect in your bank account.",
+"For any other query please email us [booking@trainman.in](mailto:booking@trainman.in) with the ID number."
+],
+"sub\_note": "Note: IRCTC Convenience fee, payment gateway charges, commission charges & IRCTC cancellation charges are non refundable.",
+"user\_id": 54143870,
+"merchant\_ref": "6f1cdcc6-a-TM24041004553-54185720",
+"batch\_ref": null,
+"tm\_booking\_id": "TM23051005231",
+"refund\_mode": "Bank Account",
+"pnr\_number": "4909204766",
+"retry": false,
+"initiated": true,
+"refunded": true,
+"amount\_refunded": null,
+"wa\_send": true,
+"created\_at": "2024-05-17T17:08:18.784998Z",
+"updated\_at": "2024-05-18T07:40:58.100831Z"
+}
+],
+"payout\_refunds": \[
+{
+"id": 1,
+"tm\_booking\_id": "TM23051005231",
+"user\_id": 54208903,
+"payout\_id": "675836B8",
+"refund\_amount": "100.00",
+"error\_code": "",
+"error\_message": "",
+"remarks": "sample payout",
+"initiated\_by": "test",
+"refund\_reason": "cancel older than 6 month",
+"status": "success",
+"source": "payu",
+"created\_on": "2025-04-04T07:06:25Z",
+"updated\_on": "2025-04-04T09:36:11Z"
+}
+],
+"fcs\_summary\_per\_cancellation": \[],
+"refund\_fare\_breakup": {
+"total\_irctc\_cancellation\_charges": 0,
+"total\_irctc\_refund\_amount": 0,
+"fcs\_charge\_refunded": 0,
+"fcs\_mode": null
+},
+"refund\_amount": 1545.0
+}
+}
+}
