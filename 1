@@ -1,4 +1,1 @@
-docker run --rm -v my-models:/models alpine sh -c "\
-  apk add --no-cache git && \
-  git clone https://username:token@bitbucket.org/your-org/repo.git /models && \
-  rm -rf /models/.git"
+docker run --rm -v my-models:/models alpine/git sh -c "git clone https://username:token@bitbucket.org/your-org/repo.git /models && rm -rf /models/.git"
