@@ -1,5 +1,1 @@
-docker run --rm -v my-models:/models ubuntu sh -c "\
-  apt update && \
-  apt install -y git && \
-  git clone https://username:token@bitbucket.org/your-org/repo.git /models && \
-  rm -rf /models/.git"
+curl -k -o model2state.zip "https://adltmcoreprediction.blob.core.windows.net/tm-core-prediction/model2state.zip?si=models2state&spr=https&sv=2024-11-04&sr=c&sig=maz2kISgg14sxMUBTEKmyza6g5jJmBYLmmKD8rP8%2B18%3D"
