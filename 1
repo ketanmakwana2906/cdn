@@ -1,1 +1,37 @@
-curl -k -o model2state.zip "https://adltmcoreprediction.blob.core.windows.net/tm-core-prediction/model2state.zip?si=models2state&spr=https&sv=2024-11-04&sr=c&sig=maz2kISgg14sxMUBTEKmyza6g5jJmBYLmmKD8rP8%2B18%3D"
+
+import os
+import ssl
+from celery import Celery
+from django.conf import settings
+from db_config import CELERY_REDIS_PASSWORD, CELERY_BROKER_HOST, CELERY_BROKER_PORT, CELERY_REDIS_DB
+
+
+
+CELERY_BROKER_URL = "redis://:{}@{}:{}/{}".format(CELERY_REDIS_PASSWORD, CELERY_BROKER_HOST, CELERY_BROKER_PORT, CELERY_REDIS_DB)
+BROKER_USE_SSL = {
+    'ssl_cert_reqs': ssl.CERT_NONE,
+}
+REDIS_BACKEND_USE_SSL = {
+    'ssl_cert_reqs': ssl.CERT_NONE,
+}
+# set the default Django settings module for the 'celery' program.
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Trainman.settings')
+app = Celery('Trainman',
+             broker=CELERY_BROKER_URL,
+            #  broker_use_ssl=BROKER_USE_SSL,
+            #  redis_backend_use_ssl=REDIS_BACKEND_USE_SSL
+             ) # type: ignore
+
+app.conf.task_serializer = 'json'
+app.conf.accept_content = ['application/json']
+app.conf.result_serializer = 'json'
+
+# Using a string here means the worker will not have to
+# pickle the object when using Windows.
+app.config_from_object('django.conf:settings')
+app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
+
+
+@app.task(bind=True)
+def debug_task(self):
+    print(('Request: {0!r}'.format(self.request)))
