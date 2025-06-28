@@ -1,17 +1,17 @@
-package routes
+package main
 
 import (
     "github.com/gin-gonic/gin"
-    "gin-crud/controllers"
+    "gin-crud/config"
+    "gin-crud/models"
+    "gin-crud/routes"
 )
 
-func UserRoutes(router *gin.Engine) {
-    users := router.Group("/users")
-    {
-        users.POST("/", controllers.CreateUser)
-        users.GET("/", controllers.GetUsers)
-        users.GET("/:id", controllers.GetUserByID)
-        users.PUT("/:id", controllers.UpdateUser)
-        users.DELETE("/:id", controllers.DeleteUser)
-    }
+func main() {
+    config.Connect()
+    config.DB.AutoMigrate(&models.User{})
+
+    r := gin.Default()
+    routes.UserRoutes(r)
+    r.Run(":8080")
 }
