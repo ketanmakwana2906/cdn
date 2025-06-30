@@ -1,17 +1,26 @@
-package main
+when i added queue in celery and try to run celery with multiple queue like below
+logs is no more showing , it seems tasks is succesfully being executed but logs  not showing
 
-import (
-    "github.com/gin-gonic/gin"
-    "gin-crud/config"
-    "gin-crud/models"
-    "gin-crud/routes"
+app.conf.task_queues = (
+    Queue('user_communications_tasks', Exchange('user', type='direct'), routing_key='user'),
+    Queue('backend_tasks', Exchange('backend', type='direct'), routing_key='backend'),
+    Queue('celery', Exchange('celery'), routing_key='celery'),  # 👈 add this
 )
 
-func main() {
-    config.Connect()
-    config.DB.AutoMigrate(&models.User{})
-
-    r := gin.Default()
-    routes.UserRoutes(r)
-    r.Run(":8080")
+app.conf.task_routes = {
+    'log-core-feature': {'queue': 'backend_tasks', 'routing_key': 'backend'},
+    'process_alternate_options': {'queue': 'backend_tasks', 'routing_key': 'backend'},
+    'hit_n_call_after_y_call_to_update_cache': {'queue': 'backend_tasks', 'routing_key': 'backend'},
+    'delete_redis_pattern': {'queue': 'backend_tasks', 'routing_key': 'backend'},
+    '*': {'queue': 'user_communications_tasks', 'routing_key': 'user'}
 }
+
+start by 
+
+celery -A Trainman worker -c 3 -Q backend_tasks -l info &
+
+celery -A Trainman worker -c 2 -Q user_communications_tasks -l info
+
+when i remove queue and run project by 
+celery -A Trainman worker -l info -c 4
+logs working properly
