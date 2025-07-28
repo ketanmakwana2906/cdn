@@ -1,26 +1,4 @@
-when i added queue in celery and try to run celery with multiple queue like below
-logs is no more showing , it seems tasks is succesfully being executed but logs  not showing
-
-app.conf.task_queues = (
-    Queue('user_communications_tasks', Exchange('user', type='direct'), routing_key='user'),
-    Queue('backend_tasks', Exchange('backend', type='direct'), routing_key='backend'),
-    Queue('celery', Exchange('celery'), routing_key='celery'),  # 👈 add this
-)
-
-app.conf.task_routes = {
-    'log-core-feature': {'queue': 'backend_tasks', 'routing_key': 'backend'},
-    'process_alternate_options': {'queue': 'backend_tasks', 'routing_key': 'backend'},
-    'hit_n_call_after_y_call_to_update_cache': {'queue': 'backend_tasks', 'routing_key': 'backend'},
-    'delete_redis_pattern': {'queue': 'backend_tasks', 'routing_key': 'backend'},
-    '*': {'queue': 'user_communications_tasks', 'routing_key': 'user'}
-}
-
-start by 
-
-celery -A Trainman worker -c 3 -Q backend_tasks -l info &
-
-celery -A Trainman worker -c 2 -Q user_communications_tasks -l info
-
-when i remove queue and run project by 
-celery -A Trainman worker -l info -c 4
-logs working properly
+30140541@LT-270141C8MD6M Downloads % openssl x509 -in microsoft_rsa_root_2017.pem -noout -fingerprint -sha1 -serial
+SHA1 Fingerprint=73:A5:E6:4A:3B:FF:83:16:FF:0E:DC:CC:61:8A:90:6E:4E:AE:4D:74
+serial=1ED397095FD8B4B347701EAABE7F45B3
+30140541@LT-270141C8MD6M Downloads % 
