@@ -1,14 +1,16 @@
- SELECT
+SELECT
   SUM(b.total_amount) AS total_booking_amount_collected,
-  SUM(r.amount_refunded / 100) AS total_refund_amount_given
+  SUM(r.amount_refunded) / 100 AS total_refund_amount_given,
+  ROUND(
+    (SUM(r.amount_refunded) / NULLIF(SUM(b.total_amount * 100), 0)) * 100,
+    2
+  ) AS refund_percentage
 FROM irctc_booking b
 LEFT JOIN (
   SELECT booking_id, SUM(amount_refunded) AS amount_refunded
   FROM irctc_gateway_refund
+  WHERE amount_refunded IS NOT NULL
   GROUP BY booking_id
 ) r ON r.booking_id = b.id
 WHERE b.created_at BETWEEN DATE '2025-08-01' AND DATE '2025-08-30'
   AND b.status IN ('cancelled', 'partially_cancelled');
-
-
-
