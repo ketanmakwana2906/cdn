@@ -1,0 +1,7 @@
+plz go ahead, previous response was incomplete due to token expiration
+plz now full check, and resolution of images may be worsen due to save as image from excel
+now i given direct file that contains many samples including old samples and output of old samples
+please refer different sheets for data
+and generate comprehensive script now with near 100% accuracy
+please keep all things in mind like all images are highly dynamic 
+
