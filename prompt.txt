@@ -4,4 +4,7 @@ now i given direct file that contains many samples including old samples and out
 please refer different sheets for data
 and generate comprehensive script now with near 100% accuracy
 please keep all things in mind like all images are highly dynamic 
+and also generate one excel file in that put all images that you processed with cross on every points from where you read value so i can verify result by single excel
+also generate output excel, final code file(maximum accuracy), and comparison of accuracy wherever human readings available
+
 
